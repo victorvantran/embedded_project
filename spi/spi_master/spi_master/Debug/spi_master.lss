@@ -1,0 +1,202 @@
+
+spi_master.elf:     file format elf32-avr
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .text         000000d0  00000000  00000000  00000054  2**1
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  1 .data         00000000  00800060  00800060  00000124  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  2 .comment      00000030  00000000  00000000  00000124  2**0
+                  CONTENTS, READONLY
+  3 .note.gnu.avr.deviceinfo 0000003c  00000000  00000000  00000154  2**2
+                  CONTENTS, READONLY
+  4 .debug_aranges 00000058  00000000  00000000  00000190  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  5 .debug_info   000006e3  00000000  00000000  000001e8  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  6 .debug_abbrev 000005f5  00000000  00000000  000008cb  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  7 .debug_line   000002d2  00000000  00000000  00000ec0  2**0
+                  CONTENTS, READONLY, DEBUGGING
+  8 .debug_frame  00000078  00000000  00000000  00001194  2**2
+                  CONTENTS, READONLY, DEBUGGING
+  9 .debug_str    00000330  00000000  00000000  0000120c  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 10 .debug_loc    00000049  00000000  00000000  0000153c  2**0
+                  CONTENTS, READONLY, DEBUGGING
+ 11 .debug_ranges 00000038  00000000  00000000  00001585  2**0
+                  CONTENTS, READONLY, DEBUGGING
+
+Disassembly of section .text:
+
+00000000 <__vectors>:
+   0:	0c 94 2a 00 	jmp	0x54	; 0x54 <__ctors_end>
+   4:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   8:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+   c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  10:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  14:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  18:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  1c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  20:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  24:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  28:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  2c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  30:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  34:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  38:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  3c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  40:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  44:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  48:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  4c:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+  50:	0c 94 34 00 	jmp	0x68	; 0x68 <__bad_interrupt>
+
+00000054 <__ctors_end>:
+  54:	11 24       	eor	r1, r1
+  56:	1f be       	out	0x3f, r1	; 63
+  58:	cf e5       	ldi	r28, 0x5F	; 95
+  5a:	d8 e0       	ldi	r29, 0x08	; 8
+  5c:	de bf       	out	0x3e, r29	; 62
+  5e:	cd bf       	out	0x3d, r28	; 61
+  60:	0e 94 60 00 	call	0xc0	; 0xc0 <main>
+  64:	0c 94 66 00 	jmp	0xcc	; 0xcc <_exit>
+
+00000068 <__bad_interrupt>:
+  68:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
+
+0000006c <avr_wait>:
+#include "avr.h"
+
+
+
+void avr_wait(unsigned short msec)
+{
+  6c:	9c 01       	movw	r18, r24
+	// Set prescalar of the clock to 64
+	TCCR0 = (1 << CS01) | (1 << CS00); // 3
+  6e:	83 e0       	ldi	r24, 0x03	; 3
+  70:	83 bf       	out	0x33, r24	; 51
+	while (msec--) {
+		// Seed the timer/counter register
+		TCNT0 = (unsigned char)(256 - (XTAL_FRQ / 64) * 0.001);
+  72:	83 e8       	ldi	r24, 0x83	; 131
+
+void avr_wait(unsigned short msec)
+{
+	// Set prescalar of the clock to 64
+	TCCR0 = (1 << CS01) | (1 << CS00); // 3
+	while (msec--) {
+  74:	07 c0       	rjmp	.+14     	; 0x84 <avr_wait+0x18>
+		// Seed the timer/counter register
+		TCNT0 = (unsigned char)(256 - (XTAL_FRQ / 64) * 0.001);
+  76:	82 bf       	out	0x32, r24	; 50
+		// Set the timer/counter interrupt flag
+		SET_BIT(TIFR, TOV0);
+  78:	98 b7       	in	r25, 0x38	; 56
+  7a:	91 60       	ori	r25, 0x01	; 1
+  7c:	98 bf       	out	0x38, r25	; 56
+		// Wait for the timer/counter interrupt flag to toggle low
+		while (!GET_BIT(TIFR, TOV0));
+  7e:	08 b6       	in	r0, 0x38	; 56
+  80:	00 fe       	sbrs	r0, 0
+  82:	fd cf       	rjmp	.-6      	; 0x7e <avr_wait+0x12>
+
+void avr_wait(unsigned short msec)
+{
+	// Set prescalar of the clock to 64
+	TCCR0 = (1 << CS01) | (1 << CS00); // 3
+	while (msec--) {
+  84:	21 50       	subi	r18, 0x01	; 1
+  86:	31 09       	sbc	r19, r1
+  88:	b0 f7       	brcc	.-20     	; 0x76 <avr_wait+0xa>
+		SET_BIT(TIFR, TOV0);
+		// Wait for the timer/counter interrupt flag to toggle low
+		while (!GET_BIT(TIFR, TOV0));
+	}
+	// Set prescalar to no prescale
+	TCCR0 = 0;
+  8a:	13 be       	out	0x33, r1	; 51
+  8c:	08 95       	ret
+
+0000008e <testBlink>:
+
+void testBlink(void)
+{
+	// Wiggle LEDs
+	const int lightPin = 7;
+	CLR_BIT(PORTD, lightPin);
+  8e:	97 98       	cbi	0x12, 7	; 18
+	avr_wait(500);
+  90:	84 ef       	ldi	r24, 0xF4	; 244
+  92:	91 e0       	ldi	r25, 0x01	; 1
+  94:	0e 94 36 00 	call	0x6c	; 0x6c <avr_wait>
+	SET_BIT(PORTD, lightPin);
+  98:	97 9a       	sbi	0x12, 7	; 18
+	avr_wait(500);
+  9a:	84 ef       	ldi	r24, 0xF4	; 244
+  9c:	91 e0       	ldi	r25, 0x01	; 1
+  9e:	0e 94 36 00 	call	0x6c	; 0x6c <avr_wait>
+  a2:	08 95       	ret
+
+000000a4 <initSPIMaster>:
+void initSPIMaster(void)
+{
+	// Before transferring data, make sure the master and slave have the proper settings
+	
+	// Set MOSI, SCK, and SS as output lines
+	DDR_SPI = (1<<SCK) | (0<<MISO) | (1<<MOSI) | (1<<SS);
+  a4:	80 eb       	ldi	r24, 0xB0	; 176
+  a6:	87 bb       	out	0x17, r24	; 23
+	// Enable master SPI, Master, at clock rate of fck/16 on the SPI Control Register (SPCR)
+	SPCR = (1<<SPE) | (1<<MSTR) | (1<<SPR0);
+  a8:	81 e5       	ldi	r24, 0x51	; 81
+  aa:	8d b9       	out	0x0d, r24	; 13
+	// Set SS to high (high indicates deactivated SPI)
+	SET_BIT(PORT_SPI, SS);
+  ac:	c4 9a       	sbi	0x18, 4	; 24
+  ae:	08 95       	ret
+
+000000b0 <transmitSPIMaster>:
+
+
+void transmitSPIMaster(char data)
+{
+	// Set SS to low (enable communication)
+	CLR_BIT(PORT_SPI, SS);
+  b0:	c4 98       	cbi	0x18, 4	; 24
+	// Set/Write to SP Data Register (SPDR)
+	SPDR = data;
+  b2:	8f b9       	out	0x0f, r24	; 15
+	testBlink();
+  b4:	0e 94 47 00 	call	0x8e	; 0x8e <testBlink>
+	// Wait for transmission to complete (as indicated by the SP Transmission Interrupt Flag)
+	while (!(SPSR & (1<<SPIF)));
+  b8:	77 9b       	sbis	0x0e, 7	; 14
+  ba:	fe cf       	rjmp	.-4      	; 0xb8 <transmitSPIMaster+0x8>
+	// Set SS to high (disable communication)
+	SET_BIT(PORT_SPI, SS);
+  bc:	c4 9a       	sbi	0x18, 4	; 24
+  be:	08 95       	ret
+
+000000c0 <main>:
+
+
+
+int main(void)
+{
+	initSPIMaster();
+  c0:	0e 94 52 00 	call	0xa4	; 0xa4 <initSPIMaster>
+	while (1)
+	{
+		transmitSPIMaster(0b10011101);
+  c4:	8d e9       	ldi	r24, 0x9D	; 157
+  c6:	0e 94 58 00 	call	0xb0	; 0xb0 <transmitSPIMaster>
+  ca:	fc cf       	rjmp	.-8      	; 0xc4 <main+0x4>
+
+000000cc <_exit>:
+  cc:	f8 94       	cli
+
+000000ce <__stop_program>:
+  ce:	ff cf       	rjmp	.-2      	; 0xce <__stop_program>
