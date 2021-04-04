@@ -29,6 +29,12 @@
 
 
 
+void initDebug(void)
+{
+	DDRD = 0b11111111;
+}
+
+
 void testBlink(void)
 {
 	// Wiggle LEDs
@@ -42,7 +48,7 @@ void testBlink(void)
 
 void initSPIMaster(void)
 {
-	// Before transferring data, make sure the master and slave have the proper settings
+	// Before transferring data, make sure the master and slave have the proper settings in the Serial Peripheral Control Register (SPCR)
 	
 	// Set MOSI, SCK, and SS as output lines
 	DDR_SPI = (1<<SCK) | (0<<MISO) | (1<<MOSI) | (1<<SS);
@@ -60,16 +66,31 @@ void transmitSPIMaster(char data)
 	// Set/Write to SP Data Register (SPDR)
 	SPDR = data;
 	testBlink();
-	// Wait for transmission to complete (as indicated by the SP Transmission Interrupt Flag)
+	// Wait for transmission to complete (as indicated by the SP Transmission Interrupt Flag not yet being set)
 	while (!(SPSR & (1<<SPIF)));
+	// Reading the SPSR and accessing SPDR will clear the SPIF by hardware 
+	char rData = SPDR;
+
+	const int debugPin = 6;
+	if (rData == 0b10111111)
+	{
+		SET_BIT(PORTD, debugPin);
+	}
+	else
+	{
+		CLR_BIT(PORTD, debugPin);
+	}
+	
 	// Set SS to high (disable communication)
 	SET_BIT(PORT_SPI, SS);
 }
 
 
 
+
 int main(void)
 {
+	initDebug();
 	initSPIMaster();
 	while (1)
 	{

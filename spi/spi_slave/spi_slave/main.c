@@ -29,6 +29,12 @@
 
 
 
+void initDebug(void)
+{
+	DDRD = 0b11111111;
+}
+
+
 void testBlink(void)
 {
 	// Wiggle LEDs
@@ -53,17 +59,21 @@ void initSPISlave(void)
 
 char recieveSPISlave(void)
 {
+	// Set/Write to SP Data Register
+	SPDR = 0b10111111;
 	// Wait for reception to complete (as indicated by the SP Transmission Interrupt Flag)
 	while (!(SPSR & (1<<SPIF)));
 	// Return the data register
-	return SPDR;
+	char rData = SPDR;
+	
+	return rData;
 }
 
 
 
 int main(void)
 {
-	
+	initDebug();
 	initSPISlave();
 	while (1)
 	{
