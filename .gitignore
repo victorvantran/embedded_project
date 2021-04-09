@@ -1,2 +1,6 @@
 /mplab/build/
 /mplab/dist/
+/mplab/UART.X/dist/
+/mplab/UART.X/build/
+/mplab/uart/echo.X/build/
+/mplab/uart/echo.X/dist/
