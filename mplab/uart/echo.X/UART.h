@@ -23,7 +23,7 @@ extern "C" {
 #define BAUD_PRESCALAR (uint16_t)(((F_CPU / (USART_BITRATE * 16UL))) - 1)
 
     
-static volatile unsigned char v_character = 0b00000000;
+static volatile unsigned char v_dataframe = 0b00000000;
 
 
 void init_UART(unsigned long USART_BITRATE)
@@ -49,9 +49,9 @@ ISR(USART_RXC_vect)
 {
     // Receive the character by reading the UDR and put the
     // value in a non-volatile receive character variable
-    char nv_r_character;
-    nv_r_character = UDR;
-    v_character = nv_r_character;
+    char nv_r_dataframe;
+    nv_r_dataframe = UDR;
+    v_dataframe = nv_r_dataframe;
 }
 
 

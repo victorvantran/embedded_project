@@ -47,20 +47,20 @@ int main(void)
     setup(); 
     
     char lcd_row[16];
-    char nv_character;
+    char nv_dataframe;
     
     for (;;)
     {
         // Save the volatile variable to a non-volatile variable
-        nv_character = v_character;
+        nv_dataframe = v_dataframe;
         
         // Send the character to the transmit buffer (parallel in)
-        UDR = nv_character;
+        UDR = nv_dataframe;
         // No need need to wait for TXC because RXC complete on other end implies TXC
         
         // Display character to LCD
         LCD_Command (0x01);    
-        LCD_Byte(nv_character, lcd_row);
+        LCD_Byte(nv_dataframe, lcd_row);
         
         // Toggle bit for logic probing
         FLIP_BIT(PORTA, PINA1);
