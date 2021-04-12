@@ -13,13 +13,12 @@
 #include <stdlib.h>
 #include <avr/interrupt.h>
 #include "UART.h"
-#include "LCD_16x2.h"
 
 
-#define SET_BIT(p,i)  (p |= _BV(i))
-#define CLR_BIT(p,i)  (p &= ~_BV(i))
-#define GET_BIT(p,i)  (p & _BV(i))
-#define FLIP_BIT(p,i) (p ^= _BV(i))
+#define SET_BIT(p,i)  ((p) |= (_BV(i)))
+#define CLR_BIT(p,i)  ((p) &= ~(_BV(i)))
+#define GET_BIT(p,i)  ((p) & (_BV(i)))
+#define FLIP_BIT(p,i) ((p) ^= (_BV(i)))
 
 
 
@@ -35,7 +34,6 @@ void setup(void)
     cli();
     
     init_debug();
-    LCD_Init();
     init_UART(DEFAULT_USART_BITRATE);
     
     sei();
@@ -46,24 +44,39 @@ int main(void)
 {
     setup(); 
     
-    char lcd_row[16];
-    char nv_dataframe;
-    
     for (;;)
-    {
-        // Save the volatile variable to a non-volatile variable
-        nv_dataframe = v_dataframe;
+    {        
+        writeTransmitter("With one look!\r\n");
+        writeTransmitter("To my people in the dark...\r\n");
+        writeTransmitter("Still out there in the dark...\r\n");
         
-        // Send the character to the transmit buffer (parallel in)
-        UDR = nv_dataframe;
-        // No need need to wait for TXC because RXC complete on other end implies TXC
+        /*
+        char c = getChar();
+        if (c == '0')
+        {
+            CLR_BIT(PORTA, PINA1);
+        }
+        else if (c == '1')
+        {
+            SET_BIT(PORTA, PINA1);
+        }
+        */
         
-        // Display character to LCD
-        LCD_Command (0x01);    
-        LCD_Byte(nv_dataframe, lcd_row);
         
-        // Toggle bit for logic probing
-        FLIP_BIT(PORTA, PINA1);
+        char* string = getString();
+     
+        if (strcmp(string, "on") == 0)
+        {
+            SET_BIT(PORTA, PINA1);
+        }
+        else if (strcmp(string, "off") == 0)
+        {
+            CLR_BIT(PORTA, PINA1);
+        }
+        
+        free(string);
+                
+        FLIP_BIT(PORTA, PINA0);
         _delay_ms(1000);
 
     }
