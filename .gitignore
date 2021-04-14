@@ -4,3 +4,5 @@
 /mplab/UART.X/build/
 /mplab/uart/echo.X/build/
 /mplab/uart/echo.X/dist/
+/mplab/adc.X/build/
+/mplab/adc.X/dist/
