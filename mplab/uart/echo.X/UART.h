@@ -18,11 +18,13 @@ extern "C" {
 #include <avr/interrupt.h>
 #include <string.h>
     
-#define DEFAULT_USART_BITRATE 9600UL
+//#define DEFAULT_USART_BITRATE 9600UL
+#define DEFAULT_USART_BITRATE 38400UL
+
 #define BAUD_PRESCALAR (uint16_t)(((F_CPU / (USART_BITRATE * 16UL))) - 1UL)
 #define SERIAL_BUFFER_SIZE 256
-    
 
+    
     
 static struct 
 {
@@ -30,8 +32,10 @@ static struct
     uint8_t readIndex;
     uint8_t writeIndex;
 } 
-transmitter = {.buffer = {0}, .readIndex = 0, .writeIndex = 0},
-receiver = {.buffer = {0}, .readIndex = 0, .writeIndex = 0};
+transmitter = {.readIndex = 0, .writeIndex = 0},
+receiver = {.readIndex = 0, .writeIndex = 0};
+
+char string_buffer[SERIAL_BUFFER_SIZE];
 
 
 
@@ -53,9 +57,11 @@ void init_UART(unsigned long USART_BITRATE)
 }    
 
 
-// Receive
-char getChar(void)
+
+// Receiver
+char receive_char(void)
 {
+    // Receive a character to our circular transmitter buffer
     char character = '\0';
     
     if (receiver.readIndex != receiver.writeIndex)
@@ -74,27 +80,26 @@ char getChar(void)
 }
 
 
-
-char* getString(void)
+char* receive_string(void)
 {
+    // Receive a string, which is a nullchar-terminated array of char
     char character;
-    char* string = calloc(SERIAL_BUFFER_SIZE, sizeof(char));
     for (uint16_t i = 0; i < SERIAL_BUFFER_SIZE - 1; i++)
     {
-        character = getChar();
-        string[i] = character;
-        if (character == '\0') return string; // "string^@" (yes + Ctrl + @) to send null char
+        character = receive_char();
+        string_buffer[i] = character;           
+        if (character == '\0') return string_buffer;
     }
     
-    string[SERIAL_BUFFER_SIZE - 1] = '\0';
- 
-    return string;
+    return string_buffer;
 }
-
 
 
 ISR(USART_RXC_vect)
 {
+    // If the serial received is greater than the SERIAL_BUFFER_LENGTH,
+    // then we will choose the latest characters abcd...[latest characters]
+    // as the buffer will wrap and the earliest characters are overwritten
     receiver.buffer[receiver.writeIndex] = UDR;
     receiver.writeIndex++;
     
@@ -106,9 +111,10 @@ ISR(USART_RXC_vect)
 
 
 
-// Transmit
-void appendTransmitter(char character)
+// Transmitter
+void transmit_char(char character)
 {
+    // Transmit a character to our circular transmitter buffer
     transmitter.buffer[transmitter.writeIndex] = character;
     transmitter.writeIndex++;
     
@@ -119,15 +125,15 @@ void appendTransmitter(char character)
 }
 
 
-void writeTransmitter(char* string)
+void transmit_string(char* string)
 {
-    for (uint16_t i = 0; i < strlen(string); i++)
+    // Transmit a string, which is a nullchar-terminated array of char
+    for (uint16_t i = 0; i < SERIAL_BUFFER_SIZE; i++)
     {
-        appendTransmitter(string[i]);
+        transmit_char(string[i]);
+        if (string[i] == '\0') break;
     }
-    
-    appendTransmitter(0);
-    
+        
     if (UCSRA & (_BV(UDRE)))
     {
         UDR = 0;
@@ -138,6 +144,9 @@ void writeTransmitter(char* string)
 
 ISR(USART_TXC_vect)
 {
+    // If the serial transmit is greater than the SERIAL_BUFFER_LENGTH,
+    // then we will choose the latest characters abcd...[latest characters]
+    // as the buffer will wrap and the earliest characters are overwritten
     if (transmitter.readIndex != transmitter.writeIndex)
     {
         UDR = transmitter.buffer[transmitter.readIndex];

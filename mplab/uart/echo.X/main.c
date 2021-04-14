@@ -44,41 +44,19 @@ int main(void)
 {
     setup(); 
     
+    char* echo = string_buffer;
+  
     for (;;)
-    {        
-        writeTransmitter("With one look!\r\n");
-        writeTransmitter("To my people in the dark...\r\n");
-        writeTransmitter("Still out there in the dark...\r\n");
-        
-        /*
-        char c = getChar();
-        if (c == '0')
-        {
-            CLR_BIT(PORTA, PINA1);
-        }
-        else if (c == '1')
-        {
-            SET_BIT(PORTA, PINA1);
-        }
-        */
-        
-        
-        char* string = getString();
+    {         
+        receive_string();
      
-        if (strcmp(string, "on") == 0)
+        if (echo[0] != '\0')
         {
-            SET_BIT(PORTA, PINA1);
+            transmit_string(echo);
         }
-        else if (strcmp(string, "off") == 0)
-        {
-            CLR_BIT(PORTA, PINA1);
-        }
-        
-        free(string);
-                
+      
         FLIP_BIT(PORTA, PINA0);
-        _delay_ms(1000);
-
+        _delay_ms(100);
     }
 }
 
