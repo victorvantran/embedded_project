@@ -36,6 +36,7 @@ void setup(void)
     init_debug();
     init_UART(DEFAULT_USART_BITRATE);
     init_ADC();
+    
     sei();
 }
 
@@ -48,8 +49,13 @@ int main(void)
     
     for (;;)
     {   
-        int digital_output = read_ADC(0);
-
+        read_ADC(0);
+        
+        uint16_t do_low = adc_low;
+        uint16_t do_high = adc_high;
+        
+        uint16_t digital_output = (do_high << 8) + do_low;
+        
         itoa(digital_output, voltage_reading, 10);        
         transmit_string(voltage_reading);     
         transmit_string("\n\r\0");

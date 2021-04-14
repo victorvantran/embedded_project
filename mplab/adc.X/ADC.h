@@ -17,36 +17,50 @@ extern "C" {
 
 
 
+volatile uint8_t adc_low;
+volatile uint8_t adc_high;
+    
+    
 void init_ADC(void)
 {
     // Set port direction
     DDRA  = 0b00000000;
     PORTA = 0b11111111;
     
-    // Enable ADC with a prescalar of 64 giving 125KHz.
-    ADCSRA |= _BV(ADEN) | _BV(ADPS2) | _BV(ADPS1);
+    // Enable ADC with a prescalar of 64 giving 125KHz
+    ADCSRA |= _BV(ADEN) | _BV(ADIE) | _BV(ADPS2);
+            
+    // Enable ADC_complete interrupt
+    ADCSRA |= _BV(ADPS1);
+    
+    // Enable Auto-Trigger (default free-running)
+    ADCSRA |= _BV(ADATE);
     
     // ADC reference voltage set to AVCC pin
     ADMUX |= _BV(REFS0);   
 }
 
 
-int read_ADC(char channel)
-{
-    int a_in, a_in_low;
-    
+
+void read_ADC(char channel)
+{    
+    // Select channel/analog input pin
     ADMUX |= (channel & 0x0f);
     
-    ADCSRA |= (1 << ADSC);
-    
-    while ((ADCSRA & (_BV(ADIF))) == 0);
-    _delay_us(10);
-    
-    a_in_low = (int)ADCL;
-    a_in = ((int)ADCH << 8) + a_in_low;
-    return a_in;
+    // Start conversion
+    ADCSRA |= _BV(ADSC);
 }
+
    
+
+ISR(ADC_vect)
+{
+    // Set volatile variables to adc_low and adc_high
+    adc_low = ADCL;
+    adc_high = ADCH;
+}
+
+
 
 #ifdef	__cplusplus
 }
