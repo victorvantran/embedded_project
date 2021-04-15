@@ -6,3 +6,5 @@
 /mplab/uart/echo.X/dist/
 /mplab/adc.X/build/
 /mplab/adc.X/dist/
+/mplab/timer/blink.X/build/
+/mplab/timer/blink.X/dist/

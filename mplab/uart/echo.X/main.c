@@ -1,6 +1,6 @@
  /* 
  * File:   main.c
- * Author: victor
+ * Author: Victor Tran (github.com/victorvantran)
  *
  * Created on April 7, 2021, 3:21 PM
  */

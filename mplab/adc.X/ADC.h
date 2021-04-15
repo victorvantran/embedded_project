@@ -27,14 +27,17 @@ void init_ADC(void)
     DDRA  = 0b00000000;
     PORTA = 0b11111111;
     
-    // Enable ADC with a prescalar of 64 giving 125KHz
-    ADCSRA |= _BV(ADEN) | _BV(ADIE) | _BV(ADPS2);
+    // Enable ADC
+    ADCSRA |= _BV(ADEN);
             
     // Enable ADC_complete interrupt
     ADCSRA |= _BV(ADPS1);
     
     // Enable Auto-Trigger (default free-running)
     ADCSRA |= _BV(ADATE);
+    
+    // set prescalar of 64 giving 125KHz on a 8MHz oscillator
+    ADCSRA |= _BV(ADIE) | _BV(ADPS2);
     
     // ADC reference voltage set to AVCC pin
     ADMUX |= _BV(REFS0);   

@@ -26,6 +26,7 @@ extern "C" {
     
 static struct 
 {
+    // Circular buffer implementation
     uint8_t buffer[SERIAL_BUFFER_SIZE];
     uint8_t readIndex;
     uint8_t writeIndex;
@@ -34,7 +35,6 @@ transmitter = {.readIndex = 0, .writeIndex = 0},
 receiver = {.readIndex = 0, .writeIndex = 0};
 
 char string_buffer[SERIAL_BUFFER_SIZE];
-
 
 
 void init_UART(unsigned long USART_BITRATE)
@@ -82,7 +82,7 @@ char* receive_string(void)
 {
     // Receive a string, which is a nullchar-terminated array of char
     char character;
-    for (uint16_t i = 0; i < SERIAL_BUFFER_SIZE - 1; i++)
+    for (uint16_t i = 0; i < SERIAL_BUFFER_SIZE; i++)
     {
         character = receive_char();
         string_buffer[i] = character;           
@@ -127,17 +127,17 @@ void transmit_string(char* string)
 {
     // Transmit a string, which is a nullchar-terminated array of char
     for (uint16_t i = 0; i < SERIAL_BUFFER_SIZE; i++)
-    {
+    {        
         transmit_char(string[i]);
         if (string[i] == '\0') break;
     }
-        
+    
+    // Restart the transmission by sending a dummy null-terminated character
     if (UCSRA & (_BV(UDRE)))
     {
         UDR = 0;
     }
 }
-
 
 
 ISR(USART_TXC_vect)
