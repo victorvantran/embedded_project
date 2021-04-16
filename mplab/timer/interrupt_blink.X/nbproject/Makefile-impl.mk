@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=blink.X
+PROJECTNAME=interrupt_blink.X
 
 # Active Configuration
 DEFAULTCONF=default

@@ -1,9 +1,9 @@
-/*
- * main.c
+/* 
+ * File:   main.c
+ * Author: Victor Tran (github.com/victorvantran)
  *
- * Created: 4/6/2021 11:18:16 PM
- * Author : Victor
- */ 
+ * Created on April 6, 2021, 11:18 PM
+ */
 
 
 #define F_CPU 8000000UL

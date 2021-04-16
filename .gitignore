@@ -8,3 +8,7 @@
 /mplab/adc.X/dist/
 /mplab/timer/blink.X/build/
 /mplab/timer/blink.X/dist/
+/mplab/timer/icm.X/dist/
+/mplab/timer/icm.X/build/
+/mplab/timer/icm_ultrasonic_sensor.X/dist/
+/mplab/timer/icm_ultrasonic_sensor.X/build/
