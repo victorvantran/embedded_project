@@ -12,3 +12,5 @@
 /mplab/timer/icm.X/build/
 /mplab/timer/icm_ultrasonic_sensor.X/dist/
 /mplab/timer/icm_ultrasonic_sensor.X/build/
+/mplab/timer/output_compare_match.X/dist/
+/mplab/timer/output_compare_match.X/build/

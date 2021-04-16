@@ -2,7 +2,7 @@
  * File:   main.c
  * Author: Victor Tran (github.com/victorvantran)
  *
- * Created on April 14, 2021, 10:26 PM
+ * Created on April 15, 2021, 10:03 PM
  */
 
 
@@ -12,22 +12,14 @@
 #include <util/delay.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
 
 #define SET_BIT(p,i) ((p) |= (_BV(i)))
 #define CLR_BIT(p,i) ((p) &= ~(_BV(i)))
 #define FLIP_BIT(p,i) ((p) ^= (_BV(i)))
 #define GET_BIT(p,i) (((p) & (_BV(i))) >> i)
 
-#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
-#define BYTE_TO_BINARY(byte) \
-    (byte & (0x80) ? '1' : '0'), \
-    (byte & (0x40) ? '1' : '0'), \
-    (byte & (0x20) ? '1' : '0'), \
-    (byte & (0x10) ? '1' : '0'), \
-    (byte & (0x08) ? '1' : '0'), \
-    (byte & (0x04) ? '1' : '0'), \
-    (byte & (0x02) ? '1' : '0'), \
-    (byte & (0x01) ? '1' : '0')
 
 
 
@@ -56,13 +48,13 @@ static FILE uart_io = FDEV_SETUP_STREAM(uart_putchar, uart_getchar, _FDEV_SETUP_
 void init_UART(unsigned long bit_rate)
 {
     // Calculate baud pre-scaler
-    uint16_t baud_prescaler = (uint16_t)(((F_CPU / (bit_rate * 16UL))) - 1UL);
+    uint16_t baud_prescalar = (uint16_t)(((F_CPU / (bit_rate * 16UL))) - 1UL);
     
     // Set the baud rate pre-scaler. 
     // Set the UBBRH to the higher 8-bits
     // Set the UBBRL to the lower 8-bits
-    UBRRH = (baud_prescaler >> 8); 
-    UBRRL = baud_prescaler;
+    UBRRH = (baud_prescalar >> 8); 
+    UBRRL = baud_prescalar;
     
     // Enable receive, transmission
     UCSRB |= _BV(RXEN) | _BV(TXEN);
@@ -87,52 +79,38 @@ void init_probe(void)
 
 
 
-volatile long v_count = 0;
-
-void init_icm(void)
+void init_ocm_normal(void)
 {
-    // Initiate icm flags for capturing on falling edge
-    DDRD &= ~PIND6;
-    PORTD |= PIND6; // pull-up
+    // Normal mode: the timer resets on overflow
+    // Set PINB3/OC0 to output
+    DDRB |= _BV(PINB3);
     
-    TCCR1A = 0x00;
+    // Set output compare register
+    OCR0 = 128;
     
-    // Enable input capture edge select with pre-scaler 1024
-    TCCR1B = _BV(ICES1) | _BV(CS12) | _BV(CS10);
-    
-    // Enable input capture interrupt
-    TIMSK |= _BV(TICIE1);
+    // Set Compare Output Mode to toggle on compare match,
+    // and Start the timer with no pre-scaler.
+    TCCR0 |= _BV(COM00) | _BV(CS00);
 }
 
 
-void poll_width(void)
+void init_ocm_ctc(void)
 {
-    TIMSK &= ~_BV(TICIE1);
+    // Clear timer on compare mode: the timer resets on output compare match
     
-    // Have another microcontroller do fast pwm and measure the clock period (or output compare timer with OCR = n)
-    uint16_t t;
+    // Set PINB3/OC0 to output
+    DDRB |= _BV(PINB3);
     
-    TIFR = _BV(ICF1);
-    while (!(TIFR & (_BV(ICF1))));
-    t = ICR1;
+    // Set output compare register
+    OCR0 = 200;
     
-    TIFR = _BV(ICF1);
-    while (!(TIFR & (_BV(ICF1))));
-    t = ICR1 - t;
+    // Set Timer mode to Clear Timer on Compare Match
+    TCCR0 |= _BV(WGM01);
     
-    printf("Width: "BYTE_TO_BINARY_PATTERN"\r", BYTE_TO_BINARY(t));
-    
-    TIMSK |= _BV(TICIE1);
+    // Set Compare Output Mode to toggle on compare match,
+    // and Start the timer with pre-scalar 1024.
+    TCCR0 |= _BV(COM00) | _BV(CS02) | _BV(CS00);
 }
-
-
-ISR(TIMER1_CAPT_vect)
-{
-    // Capture width of a cycle
-    v_count = ICR1;
-    TCNT1 = 0;
-}
-
 
 
 void setup(void)
@@ -141,7 +119,7 @@ void setup(void)
     
     init_UART(9600);
     init_probe();
-    init_icm();
+    init_ocm_ctc();
     
     sei();
 }
@@ -151,13 +129,11 @@ void setup(void)
 int main(void)
 {
     setup();
-    long count = 0;
+
     for (;;)
-    {
-        //poll_width();
-        count = v_count;
-        printf("%ld\r", count);
-        _delay_ms(1000);
+    {   
+        
+        _delay_ms(100);
     }
 }
 
