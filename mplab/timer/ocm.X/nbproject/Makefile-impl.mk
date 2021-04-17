@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=output_compare_match.X
+PROJECTNAME=ocm.X
 
 # Active Configuration
 DEFAULTCONF=default

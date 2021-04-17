@@ -14,3 +14,9 @@
 /mplab/timer/icm_ultrasonic_sensor.X/build/
 /mplab/timer/output_compare_match.X/dist/
 /mplab/timer/output_compare_match.X/build/
+/mplab/pwm/variable_brightness_led.X/build/
+/mplab/pwm/variable_brightness_led.X/dist/
+/mplab/pwm/stepper_motor.X/dist/
+/mplab/pwm/stepper_motor.X/build/
+/mplab/timer/ocm.X/build/
+/mplab/timer/ocm.X/dist/

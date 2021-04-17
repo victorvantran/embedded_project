@@ -3,8 +3,8 @@
     <type>com.microchip.mplab.nbide.embedded.makeproject</type>
     <configuration>
         <data xmlns="http://www.netbeans.org/ns/make-project/1">
-            <name>output_compare_match</name>
-            <creation-uuid>c2700090-c1e5-4fff-b629-31cc5c175623</creation-uuid>
+            <name>variable_brightness_led</name>
+            <creation-uuid>344d496a-2374-42c5-9001-81f7e1f90c4a</creation-uuid>
             <make-project-type>0</make-project-type>
             <c-extensions>c</c-extensions>
             <cpp-extensions/>

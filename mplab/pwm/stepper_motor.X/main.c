@@ -2,7 +2,7 @@
  * File:   main.c
  * Author: Victor Tran (github.com/victorvantran)
  *
- * Created on April 15, 2021, 10:03 PM
+ * Created on April 16, 2021, 5:46 PM
  */
 
 
@@ -13,13 +13,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "stepper_motor.h"
 
 #define SET_BIT(p,i) ((p) |= (_BV(i)))
 #define CLR_BIT(p,i) ((p) &= ~(_BV(i)))
 #define FLIP_BIT(p,i) ((p) ^= (_BV(i)))
 #define GET_BIT(p,i) (((p) & (_BV(i))) >> i)
-
 
 
 
@@ -79,47 +78,13 @@ void init_probe(void)
 
 
 
-void init_ocm_normal(void)
-{
-    // Normal mode: the timer resets on overflow
-    // Set PINB3/OC0 to output
-    DDRB |= _BV(PINB3);
-    
-    // Set output compare register
-    OCR0 = 128;
-    
-    // Set Compare Output Mode to toggle on compare match,
-    // and Start the timer with no pre-scaler.
-    TCCR0 |= _BV(COM00) | _BV(CS00);
-}
-
-
-void init_ocm_ctc(void)
-{
-    // Clear timer on compare mode: the timer resets on output compare match
-    
-    // Set PINB3/OC0 to output
-    DDRB |= _BV(PINB3);
-    
-    // Set output compare register
-    OCR0 = 200;
-    
-    // Set Timer mode to Clear Timer on Compare Match
-    TCCR0 |= _BV(WGM01);
-    
-    // Set Compare Output Mode to toggle on compare match,
-    // and Start the timer with pre-scalar 1024.
-    TCCR0 |= _BV(COM00) | _BV(CS02) | _BV(CS00);
-}
-
-
 void setup(void)
 {
     cli();
     
     init_UART(9600);
     init_probe();
-    init_ocm_ctc();
+    init_pwm_stepper_motor(WGM_FAST_PWM_NI);
     
     sei();
 }
@@ -129,11 +94,9 @@ void setup(void)
 int main(void)
 {
     setup();
-
+ 
     for (;;)
     {   
-        
-        _delay_ms(100);
     }
 }
 
