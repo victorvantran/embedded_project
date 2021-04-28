@@ -20,3 +20,11 @@
 /mplab/pwm/stepper_motor.X/build/
 /mplab/timer/ocm.X/build/
 /mplab/timer/ocm.X/dist/
+/avr/atmega32/mplab/uart/echo.X/dist/
+/avr/atmega32/mplab/uart/echo.X/build/
+/avr/atmega32/mplab/i2c/hello_i2c.X/dist/
+/avr/atmega32/mplab/i2c/hello_i2c.X/build/
+/avr/atmega32/mplab/i2c/hello_i2c_slave.X/build/
+/avr/atmega32/mplab/i2c/hello_i2c_slave.X/dist/
+/avr/atmega32/mplab/i2c/hello_i2c_slave_tinker.X/build/
+/avr/atmega32/mplab/i2c/hello_i2c_slave_tinker.X/dist/

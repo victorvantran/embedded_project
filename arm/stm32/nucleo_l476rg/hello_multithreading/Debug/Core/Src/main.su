@@ -4,7 +4,7 @@ main.c:232:13:MX_USART2_UART_Init	8	static
 main.c:267:13:MX_GPIO_Init	48	static
 main.c:290:1:__io_putchar	16	static
 main.c:298:6:StartBlink2Task	16	static
-main.c:318:6:StartBlink0Task	16	static
-main.c:339:6:StartBlink1Task	16	static
-main.c:360:6:HAL_TIM_PeriodElapsedCallback	16	static
-main.c:377:6:Error_Handler	4	static,ignoring_inline_asm
+main.c:318:6:StartBlink0Task	24	static
+main.c:342:6:StartBlink1Task	24	static
+main.c:365:6:HAL_TIM_PeriodElapsedCallback	16	static
+main.c:382:6:Error_Handler	4	static,ignoring_inline_asm

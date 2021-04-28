@@ -300,9 +300,9 @@ void StartBlink2Task(void *argument)
 	for(;;)
 	{
 		HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-    printf("Blink2\r\n");
+		printf("Blink2\r\n");
     //osThreadTerminate(blink2TaskHandle); // Fails because blink2TaskHandle was not properly re-defined as Blink0Task was pre-empted
-    osThreadTerminate(osThreadGetId()); // osThreadGetId() gets the actual id
+    osThreadTerminate(osThreadGetId()); // osThreadGetId() gets the actual id of currently running thread
 	}
 }
 
@@ -318,13 +318,16 @@ void StartBlink2Task(void *argument)
 void StartBlink0Task(void *argument)
 {
   /* USER CODE BEGIN 5 */
+  uint32_t tick;
+  tick = osKernelGetTickCount();
   /* Infinite loop */
   for(;;)
   {
   	blink2TaskHandle = osThreadNew(StartBlink2Task, NULL, &blink2Task_attributes); // pre-empted before blink2TaskHandle is re-defined!
     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_2);
     printf("Blink0\r\n");
-    osDelay(1000);
+    tick += 1000U;
+    osDelayUntil(tick);
   }
   /* USER CODE END 5 */
 }
@@ -339,13 +342,15 @@ void StartBlink0Task(void *argument)
 void StartBlink1Task(void *argument)
 {
   /* USER CODE BEGIN StartBlink1Task */
+  uint32_t tick;
+  tick = osKernelGetTickCount();
   /* Infinite loop */
   for(;;)
   {
   	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_3);
     printf("Blink1\r\n");
-    osDelay(500);
-  }
+    tick += 500U;
+    osDelayUntil(tick);  }
   /* USER CODE END StartBlink1Task */
 }
 

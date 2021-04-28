@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/victor/.platformio/packages/framework-arduinoespressif32/tools/sdk/include/freertos",
+                "/home/victor/esp/esp-idf",
+                "/home/victor/esp/esp-idf/components/newlib/platform_include/**"
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu17",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}

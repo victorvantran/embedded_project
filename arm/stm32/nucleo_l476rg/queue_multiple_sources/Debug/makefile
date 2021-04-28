@@ -65,8 +65,8 @@ all: main-build
 main-build: queue_multiple_sources.elf secondary-outputs
 
 # Tool invocations
-queue_multiple_sources.elf: $(OBJS) $(USER_OBJS) C:\Users\Victor\Desktop\tinker\arm\stm32\nucleo_l476rg\queue_multiple_sources\STM32L476RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "queue_multiple_sources.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Victor\Desktop\tinker\arm\stm32\nucleo_l476rg\queue_multiple_sources\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="queue_multiple_sources.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+queue_multiple_sources.elf: $(OBJS) $(USER_OBJS) /home/victor/Desktop/git_local_repository/embedded_project/arm/stm32/nucleo_l476rg/queue_multiple_sources/STM32L476RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "queue_multiple_sources.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/victor/Desktop/git_local_repository/embedded_project/arm/stm32/nucleo_l476rg/queue_multiple_sources/STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="queue_multiple_sources.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

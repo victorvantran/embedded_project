@@ -65,8 +65,8 @@ all: main-build
 main-build: hello_multithreading.elf secondary-outputs
 
 # Tool invocations
-hello_multithreading.elf: $(OBJS) $(USER_OBJS) C:\Users\Victor\Desktop\tinker\arm\stm32\nucleo_l476rg\hello_multithreading\STM32L476RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "hello_multithreading.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"C:\Users\Victor\Desktop\tinker\arm\stm32\nucleo_l476rg\hello_multithreading\STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="hello_multithreading.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+hello_multithreading.elf: $(OBJS) $(USER_OBJS) /home/victor/Desktop/git_local_repository/embedded_project/arm/stm32/nucleo_l476rg/hello_multithreading/STM32L476RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "hello_multithreading.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/victor/Desktop/git_local_repository/embedded_project/arm/stm32/nucleo_l476rg/hello_multithreading/STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="hello_multithreading.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
