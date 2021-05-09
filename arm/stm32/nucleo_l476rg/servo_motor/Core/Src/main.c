@@ -240,7 +240,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 80 - 1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 3000 - 1;
+  htim2.Init.Period = 20000 - 1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -346,6 +346,9 @@ PUTCHAR_PROTOTYPE
 void StartServoTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
+	uint8_t mode = 0;
+
+
   /* Infinite loop */
   for(;;)
   {
@@ -364,16 +367,72 @@ void StartServoTask(void *argument)
     */
 
 
-  	if (htim2.Instance->CCR1 == 2200)
+  	/*
+  	if (htim2.Instance->CCR1 == 2500)
   	{
-  		htim2.Instance->CCR1 = 800;
+  		htim2.Instance->CCR1 = 1166;
   	}
   	else
   	{
-  		htim2.Instance->CCR1 = 2200;
+  		htim2.Instance->CCR1 = 2500;
+  	}
+  	*/
+
+
+  	// 2460, 1815, 1170
+  	// 2465, 1815, 1165
+
+  	/*
+  	if (htim2.Instance->CCR1 == 2460)
+  	{
+  	  htim2.Instance->CCR1 = 1815;
+  	}
+  	else if (htim2.Instance->CCR1 == 1815)
+  	{
+  	  htim2.Instance->CCR1 = 1170;
+  	}
+  	else
+  	{
+  	  htim2.Instance->CCR1 = 2460;
+  	}*/
+
+
+  	/*
+  	if (htim2.Instance->CCR1 == 2460)
+  	{
+  	  htim2.Instance->CCR1 = 1170;
+  	}
+  	else
+  	{
+  	  htim2.Instance->CCR1 = 2460;
+  	}
+  	 */
+
+//  	htim2.Instance->CCR1 = 1815;
+
+
+  	if (mode == 0)
+  	{
+  	  htim2.Instance->CCR1 = 2460;
+
+  	}
+  	else if (mode == 1)
+  	{
+  		htim2.Instance->CCR1 = 1815;
+  	}
+  	else if (mode == 2)
+  	{
+  		htim2.Instance->CCR1 = 1170;
+  	}
+  	else if (mode == 3)
+  	{
+    	htim2.Instance->CCR1 = 1815;
   	}
 
-    osDelay(1500);
+  	mode = (mode + 1) % 4;
+    printf("%lu\r\n", (uint32_t)htim2.Instance->CCR1);
+
+    osDelay(1000);
   }
   /* USER CODE END 5 */
 }

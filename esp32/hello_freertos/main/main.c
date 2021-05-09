@@ -112,7 +112,8 @@ void app_main(void)
 
 
 /*
-//// Example 13
+//// Example 13: One-shot and Auto-reload software timers
+
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -186,8 +187,9 @@ void app_main(void)
 }
 */
 
-//// Example 14
 
+
+//// Example 14: Software timer IDs
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -196,6 +198,8 @@ void app_main(void)
 #define mainONE_SHOT_TIMER_PERIOD (pdMS_TO_TICKS(3333))
 #define mainAUTO_RELOAD_TIMER_PERIOD (pdMS_TO_TICKS(500))
 
+
+// Perhaps can use xHandle.ID to point to the structure's address
 typedef struct
 {
     TimerHandle_t xHandle;
@@ -225,7 +229,12 @@ static void prvTimerCallback(TimerHandle_t xTimer)
     {
         printf("Auto-reload timer callback executed %u times at tick %u\r\n", ulExecutionCount, xTimeNow);
 
-        if (ulExecutionCount >= 5)
+        if (ulExecutionCount >= 5 && ulExecutionCount < 10)
+        {
+            xTimerChangePeriod(xTimer, pdMS_TO_TICKS(3000), 0);
+            // if (xTimerChangePeriod variable pass/not pass...)
+        }
+        else if (ulExecutionCount >= 10)
         {
             xTimerStop(xTimer, 0);
             // if (xTimerStop variable pass/not pass...)
