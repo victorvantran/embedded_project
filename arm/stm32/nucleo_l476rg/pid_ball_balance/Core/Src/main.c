@@ -57,10 +57,10 @@ const osThreadAttr_t usensor_input_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityAboveNormal,
 };
-/* Definitions for usensor_output */
-osThreadId_t usensor_outputHandle;
-const osThreadAttr_t usensor_output_attributes = {
-  .name = "usensor_output",
+/* Definitions for usensor_control */
+osThreadId_t usensor_controlHandle;
+const osThreadAttr_t usensor_control_attributes = {
+  .name = "usensor_control",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityAboveNormal,
 };
@@ -69,7 +69,19 @@ osThreadId_t servoHandle;
 const osThreadAttr_t servo_attributes = {
   .name = "servo",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityHigh,
+};
+/* Definitions for pidCalculate */
+osThreadId_t pidCalculateHandle;
+const osThreadAttr_t pidCalculate_attributes = {
+  .name = "pidCalculate",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityAboveNormal1,
+};
+/* Definitions for xBinarySemUSensor */
+osSemaphoreId_t xBinarySemUSensorHandle;
+const osSemaphoreAttr_t xBinarySemUSensor_attributes = {
+  .name = "xBinarySemUSensor"
 };
 /* USER CODE BEGIN PV */
 
@@ -81,9 +93,10 @@ static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_TIM1_Init(void);
 static void MX_TIM2_Init(void);
-void StartUSensorInput(void *argument);
-void StartUSensorOutput(void *argument);
-void StartServo(void *argument);
+void StartUSensorInputTask(void *argument);
+void StartUSensorControlledTask(void *argument);
+void StartServoTask(void *argument);
+void StartPIDCalculateTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -91,8 +104,10 @@ void StartServo(void *argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-#define TRIG_PORT GPIOA
-#define TRIG_PIN GPIO_PIN_11
+#define ULTRASONIC_TRIG_PORT GPIOA
+#define ULTRASONIC_INPUT_TRIG_PIN GPIO_PIN_10
+#define ULTRASONIC_CONTROLLED_TRIG_PIN GPIO_PIN_11
+
 
 typedef enum
 {
@@ -101,58 +116,107 @@ typedef enum
 } UltrasonicState_t;
 
 
-volatile uint32_t ulICValRise = 0UL;
-volatile uint32_t ulICValFall = 0UL;
-volatile uint32_t ulPulseWidthMS = 0Ul;
-volatile UltrasonicState_t eUltrasonicState = CAPTURE_RISING_EDGE;
-volatile float fDistanceCM = 0.0f;
+typedef struct
+{
+	struct
+	{
+		GPIO_TypeDef *pxPort;
+		uint16_t uPin;
+	};
+
+	uint32_t ulICValRise;
+	uint32_t ulICValFall;
+	uint32_t ulPulseWidthMS;
+	float fDistanceCM;
+	UltrasonicState_t eUltrasonicState;
+} UltrasonicSensor_t;
+
+
+// Input
+volatile UltrasonicSensor_t xUltrasonicSensorInput =
+{
+		.pxPort = GPIOA,
+		.uPin = GPIO_PIN_10,
+		.ulICValRise = 0UL,
+		.ulICValFall = 0UL,
+		.ulPulseWidthMS = 0UL,
+		.fDistanceCM = 0UL,
+		.eUltrasonicState = CAPTURE_RISING_EDGE
+};
+
+
+// Controlled variable
+volatile UltrasonicSensor_t xUltrasonicSensorControlled =
+{
+		.pxPort = GPIOA,
+		.uPin = GPIO_PIN_11,
+		.ulICValRise = 0UL,
+		.ulICValFall = 0UL,
+		.ulPulseWidthMS = 0UL,
+		.fDistanceCM = 0UL,
+		.eUltrasonicState = CAPTURE_RISING_EDGE
+};
+
+
+
+static void HCSR04_Read(volatile UltrasonicSensor_t* ultrasonicSensor)
+{
+	// NEED TO DO MUTUAL EXCLUSION
+	HAL_GPIO_WritePin(ultrasonicSensor->pxPort, ultrasonicSensor->uPin, GPIO_PIN_SET);
+	osDelay(10);
+	HAL_GPIO_WritePin(ultrasonicSensor->pxPort, ultrasonicSensor->uPin, GPIO_PIN_RESET);
+}
+
+
+
+static void updateUltrasonicSensor(volatile UltrasonicSensor_t *ultrasonicSensor, uint32_t captureVal)
+{
+	if (ultrasonicSensor->eUltrasonicState == CAPTURE_RISING_EDGE)
+	{
+		ultrasonicSensor->ulICValRise = captureVal;
+		ultrasonicSensor->eUltrasonicState = CAPTURE_FALLING_EDGE;
+	}
+	else if (ultrasonicSensor->eUltrasonicState == CAPTURE_FALLING_EDGE)
+	{
+		ultrasonicSensor->ulICValFall = captureVal;
+		if (ultrasonicSensor->ulICValFall >= ultrasonicSensor->ulICValRise)
+		{
+			ultrasonicSensor->ulPulseWidthMS = ultrasonicSensor->ulICValFall - ultrasonicSensor->ulICValRise;
+		}
+		else
+		{
+			ultrasonicSensor->ulPulseWidthMS = (0xFFFF - ultrasonicSensor->ulICValRise) + ultrasonicSensor->ulICValFall;
+		}
+		//ultrasonicSensor->fDistanceCM = (float)ultrasonicSensor->ulPulseWidthMS / 58.30875f;
+		ultrasonicSensor->eUltrasonicState = CAPTURE_RISING_EDGE;
+	}
+}
+
 
 
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 {
+	uint32_t captureVal;
 	switch((intptr_t)htim->Instance)
 	{
 	case (intptr_t)TIM1:
-		if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_1)
+		switch((uint32_t)htim->Channel)
 		{
-		}
-		else if (htim->Channel == HAL_TIM_ACTIVE_CHANNEL_2)
-		{
-			if (eUltrasonicState == CAPTURE_RISING_EDGE)
-			{
-				ulICValRise = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
-				eUltrasonicState = CAPTURE_FALLING_EDGE;
-			}
-			else if (eUltrasonicState == CAPTURE_FALLING_EDGE)
-			{
-				ulICValFall = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
-
-				__HAL_TIM_SET_COUNTER(htim, 0);
-				if (ulICValFall >= ulICValRise)
-				{
-					ulPulseWidthMS = ulICValFall - ulICValRise;
-				}
-				else
-				{
-					ulPulseWidthMS = (0xFFFF - ulICValRise) + ulICValFall;
-				}
-
-				fDistanceCM = (float)ulPulseWidthMS / 58.30875f;
-
-				eUltrasonicState = CAPTURE_RISING_EDGE;
-			}
+		case (uint32_t)HAL_TIM_ACTIVE_CHANNEL_1:
+			captureVal = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
+			updateUltrasonicSensor(&xUltrasonicSensorInput, captureVal);
+			break;
+		case (uint32_t)HAL_TIM_ACTIVE_CHANNEL_2:
+			captureVal = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
+			updateUltrasonicSensor(&xUltrasonicSensorControlled, captureVal);
+			break;
 		}
 		break;
 	}
 }
 
 
-void HCSR04_Read(void)
-{
-	HAL_GPIO_WritePin(TRIG_PORT, TRIG_PIN, GPIO_PIN_SET);
-	osDelay(10);
-	HAL_GPIO_WritePin(TRIG_PORT, TRIG_PIN, GPIO_PIN_RESET);
-}
+
 
 
 
@@ -192,13 +256,11 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
   // Start input capture in interrupt mode
-  //HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1);
+  HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_1);
   HAL_TIM_IC_Start_IT(&htim1, TIM_CHANNEL_2);
 
-  // Start PWM
+  // Start PWM for servo
   HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_1);
-  htim2.Instance->CCR1 = htim2.Init.Period/2; // Capture Compare Register Value: 50/100 is 50% duty cycle
-
 
   /* USER CODE END 2 */
 
@@ -208,6 +270,10 @@ int main(void)
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* creation of xBinarySemUSensor */
+  xBinarySemUSensorHandle = osSemaphoreNew(1, 1, &xBinarySemUSensor_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -223,13 +289,16 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of usensor_input */
-  //usensor_inputHandle = osThreadNew(StartUSensorInput, NULL, &usensor_input_attributes);
+  usensor_inputHandle = osThreadNew(StartUSensorInputTask, NULL, &usensor_input_attributes);
 
-  /* creation of usensor_output */
-  usensor_outputHandle = osThreadNew(StartUSensorOutput, NULL, &usensor_output_attributes);
+  /* creation of usensor_control */
+  usensor_controlHandle = osThreadNew(StartUSensorControlledTask, NULL, &usensor_control_attributes);
 
   /* creation of servo */
-  servoHandle = osThreadNew(StartServo, NULL, &servo_attributes);
+  servoHandle = osThreadNew(StartServoTask, NULL, &servo_attributes);
+
+  /* creation of pidCalculate */
+  pidCalculateHandle = osThreadNew(StartPIDCalculateTask, NULL, &pidCalculate_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -486,67 +555,79 @@ static void MX_GPIO_Init(void)
 /* USER CODE BEGIN 4 */
 PUTCHAR_PROTOTYPE
 {
-	HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 0xFFFF);
+	HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 10);
 	return ch;
 }
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartUSensorInput */
+/* USER CODE BEGIN Header_StartUSensorInputTask */
 /**
   * @brief  Function implementing the usensor_input thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartUSensorInput */
-void StartUSensorInput(void *argument)
+/* USER CODE END Header_StartUSensorInputTask */
+void StartUSensorInputTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+  	HCSR04_Read(&xUltrasonicSensorInput);
+		xUltrasonicSensorInput.fDistanceCM = (float)xUltrasonicSensorInput.ulPulseWidthMS / 58.30875f;
+  	float nvDistanceCM = xUltrasonicSensorInput.fDistanceCM;
+  	printf("INPUT\r\n");
+
+  	//printf("INPUT\r\n");
+  	//printf("Input: %lu\r\n", (uint32_t)nvDistanceCM);
+  	osDelay(100);
   }
   /* USER CODE END 5 */
 }
 
-/* USER CODE BEGIN Header_StartUSensorOutput */
+/* USER CODE BEGIN Header_StartUSensorControlledTask */
 /**
-* @brief Function implementing the usensor_output thread.
+* @brief Function implementing the usensor_control thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartUSensorOutput */
-void StartUSensorOutput(void *argument)
+/* USER CODE END Header_StartUSensorControlledTask */
+void StartUSensorControlledTask(void *argument)
 {
-  /* USER CODE BEGIN StartUSensorOutput */
+  /* USER CODE BEGIN StartUSensorControlledTask */
   /* Infinite loop */
   for(;;)
   {
-    //HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_3);
+  	HCSR04_Read(&xUltrasonicSensorControlled);
+  	xUltrasonicSensorControlled.fDistanceCM = (float)xUltrasonicSensorControlled.ulPulseWidthMS / 58.30875f;
+  	float nvDistanceCM = xUltrasonicSensorControlled.fDistanceCM;
+  	printf("CONTROLLED\r\n");
 
-  	HCSR04_Read();
-  	float f = fDistanceCM;
-  	printf("Distance: %9.6f\r\n", f);
+
+  	osSemaphoreRelease(xBinarySemUSensorHandle);
+  	//printf("CONTROLLED\r\n");
+  	//printf("Controlled: %lu\r\n", (uint32_t)nvDistanceCM);
+  	osDelay(100);
+
+  	//printf("Distance: %9.6f\r\n", nvDistanceCM);
   	//printf("Pulse: %lu\r\n", ulPulseWidthMS);
   	//printf("IC1: %lu\r\n", ulICValRise);
   	//printf("IC2: %lu\r\n", ulICValFall);
 
-    osDelay(200);
   }
-
-  /* USER CODE END StartUSensorOutput */
+  /* USER CODE END StartUSensorControlledTask */
 }
 
-/* USER CODE BEGIN Header_StartServo */
+/* USER CODE BEGIN Header_StartServoTask */
 /**
 * @brief Function implementing the servo thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartServo */
-void StartServo(void *argument)
+/* USER CODE END Header_StartServoTask */
+void StartServoTask(void *argument)
 {
-  /* USER CODE BEGIN StartServo */
+  /* USER CODE BEGIN StartServoTask */
 	uint8_t mode = 0;
 
   /* Infinite loop */
@@ -555,7 +636,6 @@ void StartServo(void *argument)
   	if (mode == 0)
   	{
   	  htim2.Instance->CCR1 = 2460;
-
   	}
   	else if (mode == 1)
   	{
@@ -575,7 +655,28 @@ void StartServo(void *argument)
 
     osDelay(1000);
   }
-  /* USER CODE END StartServo */
+  /* USER CODE END StartServoTask */
+}
+
+/* USER CODE BEGIN Header_StartPIDCalculateTask */
+/**
+* @brief Function implementing the pidCalculate thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartPIDCalculateTask */
+void StartPIDCalculateTask(void *argument)
+{
+  /* USER CODE BEGIN StartPIDCalculateTask */
+  /* Infinite loop */
+  for(;;)
+  {
+  	if (osSemaphoreAcquire(xBinarySemUSensorHandle, 20) == osOK)
+  	{
+    	printf("PID calculate\r\n");
+  	}
+  }
+  /* USER CODE END StartPIDCalculateTask */
 }
 
  /**
