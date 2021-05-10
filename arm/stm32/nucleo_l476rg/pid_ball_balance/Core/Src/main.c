@@ -83,6 +83,11 @@ osSemaphoreId_t xBinarySemUSensorHandle;
 const osSemaphoreAttr_t xBinarySemUSensor_attributes = {
   .name = "xBinarySemUSensor"
 };
+/* Definitions for xEventGroupPID */
+osEventFlagsId_t xEventGroupPIDHandle;
+const osEventFlagsAttr_t xEventGroupPID_attributes = {
+  .name = "xEventGroupPID"
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -107,6 +112,11 @@ void StartPIDCalculateTask(void *argument);
 #define ULTRASONIC_TRIG_PORT GPIOA
 #define ULTRASONIC_INPUT_TRIG_PIN GPIO_PIN_10
 #define ULTRASONIC_CONTROLLED_TRIG_PIN GPIO_PIN_11
+
+
+
+#define mainULTRASONIC_COMMANDED_ISR_BIT (1UL << 0UL)
+#define mainULTRASONIC_CONTROLLED_ISR_BIT (1UL << 1UL)
 
 
 typedef enum
@@ -205,10 +215,22 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		case (uint32_t)HAL_TIM_ACTIVE_CHANNEL_1:
 			captureVal = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
 			updateUltrasonicSensor(&xUltrasonicSensorInput, captureVal);
+
+			// Pulse width entirely captured, so set event group/flag
+			if (xUltrasonicSensorInput.eUltrasonicState == CAPTURE_RISING_EDGE)
+			{
+				osEventFlagsSet(xEventGroupPIDHandle, mainULTRASONIC_COMMANDED_ISR_BIT);
+			}
 			break;
 		case (uint32_t)HAL_TIM_ACTIVE_CHANNEL_2:
 			captureVal = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_2);
 			updateUltrasonicSensor(&xUltrasonicSensorControlled, captureVal);
+
+			// Pulse width entirely captured, so set event group/flag
+			if (xUltrasonicSensorControlled.eUltrasonicState == CAPTURE_RISING_EDGE)
+			{
+				osEventFlagsSet(xEventGroupPIDHandle, mainULTRASONIC_CONTROLLED_ISR_BIT);
+			}
 			break;
 		}
 		break;
@@ -303,6 +325,10 @@ int main(void)
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
+
+  /* Create the event(s) */
+  /* creation of xEventGroupPID */
+  xEventGroupPIDHandle = osEventFlagsNew(&xEventGroupPID_attributes);
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
@@ -576,11 +602,10 @@ void StartUSensorInputTask(void *argument)
   	HCSR04_Read(&xUltrasonicSensorInput);
 		xUltrasonicSensorInput.fDistanceCM = (float)xUltrasonicSensorInput.ulPulseWidthMS / 58.30875f;
   	float nvDistanceCM = xUltrasonicSensorInput.fDistanceCM;
-  	printf("INPUT\r\n");
+  	//printf("COMMANDED\r\n");
 
-  	//printf("INPUT\r\n");
   	//printf("Input: %lu\r\n", (uint32_t)nvDistanceCM);
-  	osDelay(100);
+  	osDelay(10);
   }
   /* USER CODE END 5 */
 }
@@ -601,13 +626,9 @@ void StartUSensorControlledTask(void *argument)
   	HCSR04_Read(&xUltrasonicSensorControlled);
   	xUltrasonicSensorControlled.fDistanceCM = (float)xUltrasonicSensorControlled.ulPulseWidthMS / 58.30875f;
   	float nvDistanceCM = xUltrasonicSensorControlled.fDistanceCM;
-  	printf("CONTROLLED\r\n");
-
-
-  	osSemaphoreRelease(xBinarySemUSensorHandle);
   	//printf("CONTROLLED\r\n");
   	//printf("Controlled: %lu\r\n", (uint32_t)nvDistanceCM);
-  	osDelay(100);
+  	osDelay(10);
 
   	//printf("Distance: %9.6f\r\n", nvDistanceCM);
   	//printf("Pulse: %lu\r\n", ulPulseWidthMS);
@@ -669,11 +690,13 @@ void StartPIDCalculateTask(void *argument)
 {
   /* USER CODE BEGIN StartPIDCalculateTask */
   /* Infinite loop */
+	const uint32_t ulFlags = mainULTRASONIC_COMMANDED_ISR_BIT | mainULTRASONIC_CONTROLLED_ISR_BIT;
+
   for(;;)
   {
-  	if (osSemaphoreAcquire(xBinarySemUSensorHandle, 20) == osOK)
+  	if (osEventFlagsWait(xEventGroupPIDHandle, ulFlags, osFlagsWaitAll, 100) == ulFlags)
   	{
-    	printf("PID calculate\r\n");
+  		printf("PID CALCULATE\r\n");
   	}
   }
   /* USER CODE END StartPIDCalculateTask */
