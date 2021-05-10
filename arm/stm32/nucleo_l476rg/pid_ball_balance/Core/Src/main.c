@@ -90,6 +90,11 @@ void StartPIDCalculateTask(void *argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+#define MAX(a,b) ((a) > (b) ? (a) : (b))
+#define MIN(a,b) ((a) < (b) ? (a) : (b))
+
+
 #define mainULTRASONIC_COMMANDED_ISR_BIT (1UL << 0UL)
 #define mainULTRASONIC_CONTROLLED_ISR_BIT (1UL << 1UL)
 
@@ -118,7 +123,7 @@ typedef struct
 
 
 // Input
-volatile UltrasonicSensor_t xUltrasonicSensorInput =
+volatile UltrasonicSensor_t xUltrasonicSensorCommanded =
 {
 		.pxPort = GPIOA,
 		.uPin = GPIO_PIN_10,
@@ -180,10 +185,10 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 		{
 		case (uint32_t)HAL_TIM_ACTIVE_CHANNEL_1:
 			captureVal = HAL_TIM_ReadCapturedValue(htim, TIM_CHANNEL_1);
-			updateUltrasonicSensor(&xUltrasonicSensorInput, captureVal);
+			updateUltrasonicSensor(&xUltrasonicSensorCommanded, captureVal);
 
 			// Pulse width entirely captured, so set event group/flag
-			if (xUltrasonicSensorInput.eUltrasonicState == CAPTURE_RISING_EDGE)
+			if (xUltrasonicSensorCommanded.eUltrasonicState == CAPTURE_RISING_EDGE)
 			{
 				osEventFlagsSet(xEventGroupPIDHandle, mainULTRASONIC_COMMANDED_ISR_BIT);
 			}
@@ -616,6 +621,7 @@ void StartServoTask(void *argument)
 	/* Infinite loop */
 	for(;;)
 	{
+		/*
 		if (mode == 0)
 		{
 			htim2.Instance->CCR1 = 2460;
@@ -634,6 +640,7 @@ void StartServoTask(void *argument)
 		}
 
 		mode = (mode + 1) % 4;
+		*/
 		printf("%lu\r\n", (uint32_t)htim2.Instance->CCR1);
 
 		osDelay(1000);
@@ -654,11 +661,34 @@ void StartPIDCalculateTask(void *argument)
   /* Infinite loop */
 	const uint32_t ulFlags = mainULTRASONIC_COMMANDED_ISR_BIT | mainULTRASONIC_CONTROLLED_ISR_BIT;
 
+	const float lKP = 1.0f;
+
+	int32_t pidP = 0;
+	int32_t pidI = 0;
+	int32_t pidD = 0;
+	int32_t pidTotal = 0;
+
   for(;;)
   {
   	if (osEventFlagsWait(xEventGroupPIDHandle, ulFlags, osFlagsWaitAll, 100) == ulFlags)
   	{
-  		printf("PID CALCULATE\r\n");
+  		// Clamp sensors
+  		uint32_t commandedDistance = MAX(MIN(xUltrasonicSensorCommanded.ulPulseWidthMS, 3000), 350);
+  		uint32_t controlledDistance = MAX(MIN(xUltrasonicSensorControlled.ulPulseWidthMS, 3000), 350);
+
+
+  		int32_t lError = (controlledDistance - commandedDistance);
+
+
+
+  		pidP = (int32_t)(lKP * lError);
+
+  		pidTotal = pidP + pidI + pidD;
+
+			htim2.Instance->CCR1 = MIN(2460, MAX((1815 + pidTotal), 1170));
+
+  		//printf("Controlled: %lu\r\n", xUltrasonicSensorControlled.ulPulseWidthMS);
+  		//printf("PID CALCULATE: %d\r\n", lError);
   	}
   }
   /* USER CODE END StartPIDCalculateTask */
