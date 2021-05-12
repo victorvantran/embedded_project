@@ -446,7 +446,7 @@ static void MX_TIM2_Init(void)
   htim2.Instance = TIM2;
   htim2.Init.Prescaler = 80 - 1;
   htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-  htim2.Init.Period = 20000 - 1;
+  htim2.Init.Period = 3000 - 1;
   htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
   htim2.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
   if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
@@ -621,6 +621,7 @@ void StartServoTask(void *argument)
 	/* Infinite loop */
 	for(;;)
 	{
+
 		/*
 		if (mode == 0)
 		{
@@ -641,9 +642,90 @@ void StartServoTask(void *argument)
 
 		mode = (mode + 1) % 4;
 		*/
-		printf("%lu\r\n", (uint32_t)htim2.Instance->CCR1);
+
+		/*
+		if (mode == 0)
+		{
+			htim2.Instance->CCR1 = 2015;
+			osDelay(400);
+
+		}
+		else if (mode == 1)
+		{
+			htim2.Instance->CCR1 = 1615;
+			osDelay(400);
+
+		}
+		else if (mode == 2)
+		{
+			htim2.Instance->CCR1 = 2015;
+			osDelay(400);
+
+		}
+
+				mode = (mode + 1) % 3;
+
+		 */
+
+
+		/*
+		if (mode == 0)
+		{
+			htim2.Instance->CCR1 = 2015;
+			osDelay(10);
+		}
+		else if (mode == 1)
+		{
+			htim2.Instance->CCR1 = 1815;
+			osDelay(10);
+		}
+		else if (mode == 2)
+		{
+			htim2.Instance->CCR1 = 1615;
+			osDelay(10);
+		}
+		else if (mode == 3)
+		{
+			htim2.Instance->CCR1 = 1815;
+			osDelay(10);
+		}
+
+		mode = (mode + 1) % 4;
+
+
+		osDelay(400);
+		*/
+
+
+		/*
+		if (mode == 0)
+		{
+			htim2.Instance->CCR1 = 1815 + 7*90;
+		}
+		else if (mode == 1)
+		{
+			htim2.Instance->CCR1 = 1815;
+		}
+		else if (mode == 2)
+		{
+			htim2.Instance->CCR1 = 1815 - 7*90;
+		}
+		else if (mode == 3)
+		{
+			htim2.Instance->CCR1 = 1815;
+		}
+
+		mode = (mode + 1) % 4;
+
 
 		osDelay(1000);
+		*/
+
+
+		osDelay(1000);
+		//printf("%lu\r\n", (uint32_t)htim2.Instance->CCR1);
+
+		//osDelay(400);
 	}
   /* USER CODE END 5 */
 }
@@ -661,16 +743,58 @@ void StartPIDCalculateTask(void *argument)
   /* Infinite loop */
 	const uint32_t ulFlags = mainULTRASONIC_COMMANDED_ISR_BIT | mainULTRASONIC_CONTROLLED_ISR_BIT;
 
-	const float lKP = 1.0f;
+	//
+
+	/*
+	const float lKP = 0.5f;
+	const float lKD = 1.01f;
+	 */
+
+	/*
+	const float lKP = 0.25f;
+	const float lKD = 0.50f;
+	 */
+
+	/*
+	const float lKP = 0.15f;
+	const float lKD = 5.00f;
+	if (lError - lPrevError < 100) pidD = 0;
+	*/
+
+	/*
+	const float lKP = 0.15f;
+	const float lKD = 5.00f;
+	if (lError - lPrevError < 40) pidD = 0;
+	*/
+
+
+	/*
+	const float lKP = 0.25f;
+	const float lKD = 2.50f;
+	if (lError - lPrevError < 100) pidD = 0;
+*/
+
+	/*
+	const float lKP = 0.25f;
+	const float lKD = 3.50f;
+	 */
+
+
+	const float lKP = 0.15f;
+	const float lKD = 0.50f;
+	const int32_t lClampD = 50;
 
 	int32_t pidP = 0;
 	int32_t pidI = 0;
 	int32_t pidD = 0;
 	int32_t pidTotal = 0;
 
+
+	int32_t lPrevError = 0;
+
   for(;;)
   {
-  	if (osEventFlagsWait(xEventGroupPIDHandle, ulFlags, osFlagsWaitAll, 100) == ulFlags)
+  	if (osEventFlagsWait(xEventGroupPIDHandle, ulFlags, osFlagsWaitAll, 400) == ulFlags)
   	{
   		// Clamp sensors
   		uint32_t commandedDistance = MAX(MIN(xUltrasonicSensorCommanded.ulPulseWidthMS, 3000), 350);
@@ -682,14 +806,23 @@ void StartPIDCalculateTask(void *argument)
 
 
   		pidP = (int32_t)(lKP * lError);
+  		pidD = (int32_t)(lKD * (lError - lPrevError)); // (time is constant)
+
+  		if ((lError - lPrevError < lClampD) && (lError - lPrevError > -lClampD)) pidD = 0;
+  		//if (pidD < 200) pidD = 0;
+
 
   		pidTotal = pidP + pidI + pidD;
 
 			htim2.Instance->CCR1 = MIN(2460, MAX((1815 + pidTotal), 1170));
 
+
+			lPrevError = lError;
+
   		//printf("Controlled: %lu\r\n", xUltrasonicSensorControlled.ulPulseWidthMS);
   		//printf("PID CALCULATE: %d\r\n", lError);
   	}
+  	//osDelay(200);
   }
   /* USER CODE END StartPIDCalculateTask */
 }
