@@ -210,6 +210,14 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim)
 
 
 
+float rollingAverage(float average, float newSample, int8_t n)
+{
+	average -= average/n;
+	average += newSample/n;
+
+	return average;
+}
+
 
 
 
@@ -284,7 +292,7 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of xServo */
-  xServoHandle = osThreadNew(StartServoTask, NULL, &xServo_attributes);
+  //xServoHandle = osThreadNew(StartServoTask, NULL, &xServo_attributes);
 
   /* creation of pidCalculate */
   pidCalculateHandle = osThreadNew(StartPIDCalculateTask, NULL, &pidCalculate_attributes);
@@ -780,9 +788,32 @@ void StartPIDCalculateTask(void *argument)
 	 */
 
 
+	/*
 	const float lKP = 0.15f;
 	const float lKD = 0.50f;
 	const int32_t lClampD = 50;
+	*/
+
+	/*
+	const float lKP = 0.35f;//0.2f;
+	const float lKD = 1.25f;//1.0f;
+	const int32_t lClampD = 40;
+	*/
+
+	/*
+	const float lKP = 0.10f;//0.2f;
+	const float lKD = 0.75f;//1.0f;
+	const int32_t lClampD = 20;
+	*/
+
+	/*
+	const float lKP = 0.255f;//0.2f;
+	const float lKD = 2.0f;//1.0f;
+	*/
+
+	const float lKP = 0.20f;//0.2f;
+	const float lKD = 1.50f;//1.0f;
+	const int32_t lClampD = 25;
 
 	int32_t pidP = 0;
 	int32_t pidI = 0;
@@ -792,24 +823,42 @@ void StartPIDCalculateTask(void *argument)
 
 	int32_t lPrevError = 0;
 
+
+	int32_t lAPrevError = 0;
+	int32_t lBPrevError = 0;
+	int32_t lCPrevError = 0;
+	int32_t lDPrevError = 0;
+	int32_t lEPrevError = 0;
+
+
+	float aError = 0;
+
   for(;;)
   {
   	if (osEventFlagsWait(xEventGroupPIDHandle, ulFlags, osFlagsWaitAll, 400) == ulFlags)
   	{
   		// Clamp sensors
-  		uint32_t commandedDistance = MAX(MIN(xUltrasonicSensorCommanded.ulPulseWidthMS, 3000), 350);
-  		uint32_t controlledDistance = MAX(MIN(xUltrasonicSensorControlled.ulPulseWidthMS, 3000), 350);
+  		uint32_t commandedDistance = MAX(MIN(xUltrasonicSensorCommanded.ulPulseWidthMS, 3350), 350);
+  		uint32_t controlledDistance = MAX(MIN(xUltrasonicSensorControlled.ulPulseWidthMS, 3350), 350);
 
 
   		int32_t lError = (controlledDistance - commandedDistance);
 
 
+  		// Filter
+  		lAPrevError = lBPrevError;
+  		lBPrevError = lCPrevError;
+  		lCPrevError = lDPrevError;
+  		lDPrevError = lEPrevError;
+  		lEPrevError = lError;
+  		int32_t avgDeltaError = (int32_t)(0.25f*(lEPrevError - lDPrevError) + 0.25f*(lDPrevError - lCPrevError) + 0.25f*(lCPrevError - lBPrevError) + 0.25f*(lBPrevError - lAPrevError));
+
 
   		pidP = (int32_t)(lKP * lError);
-  		pidD = (int32_t)(lKD * (lError - lPrevError)); // (time is constant)
 
-  		if ((lError - lPrevError < lClampD) && (lError - lPrevError > -lClampD)) pidD = 0;
-  		//if (pidD < 200) pidD = 0;
+  		pidD = (int32_t)(lKD * (avgDeltaError)); // (time is constant)
+
+  		if ((avgDeltaError < lClampD) && (avgDeltaError > -lClampD)) pidD = 0;
 
 
   		pidTotal = pidP + pidI + pidD;
@@ -820,7 +869,7 @@ void StartPIDCalculateTask(void *argument)
 			lPrevError = lError;
 
   		//printf("Controlled: %lu\r\n", xUltrasonicSensorControlled.ulPulseWidthMS);
-  		//printf("PID CALCULATE: %d\r\n", lError);
+  		//printf("ERROR: %d\r\n", lError);
   	}
   	//osDelay(200);
   }
