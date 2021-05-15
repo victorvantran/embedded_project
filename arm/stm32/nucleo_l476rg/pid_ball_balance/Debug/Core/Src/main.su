@@ -11,5 +11,5 @@ main.c:587:13:MX_GPIO_Init	48	static
 main.c:610:4:__io_putchar	16	static
 main.c:624:6:StartServoTask	24	static
 main.c:748:6:StartPIDCalculateTask	96	static
-main.c:887:6:HAL_TIM_PeriodElapsedCallback	16	static
-main.c:904:6:Error_Handler	4	static,ignoring_inline_asm
+main.c:904:6:HAL_TIM_PeriodElapsedCallback	16	static
+main.c:921:6:Error_Handler	4	static,ignoring_inline_asm

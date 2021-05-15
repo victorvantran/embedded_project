@@ -812,7 +812,8 @@ void StartPIDCalculateTask(void *argument)
 	*/
 
 	const float lKP = 0.20f;//0.2f;
-	const float lKD = 1.50f;//1.0f;
+	const float lKD = 1.10f;//1.0f;
+	const float lKI = 0.0001f;
 	const int32_t lClampD = 25;
 
 	int32_t pidP = 0;
@@ -855,6 +856,22 @@ void StartPIDCalculateTask(void *argument)
 
 
   		pidP = (int32_t)(lKP * lError);
+
+  		/*
+  		 * saturation and windup
+  		pidI = (int32_t)(pidI + lKI * lError);
+
+
+  		if (pidI > 0)
+  		{
+    		pidI = MAX(pidI, 150);
+
+  		}
+  		else
+  		{
+    		pidI = MIN(pidI, -150);
+  		}
+  		*/
 
   		pidD = (int32_t)(lKD * (avgDeltaError)); // (time is constant)
 
