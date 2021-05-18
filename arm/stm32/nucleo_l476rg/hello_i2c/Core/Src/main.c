@@ -26,6 +26,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "bme280.h"
+#include "tof.h"
+
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -122,6 +125,9 @@ int8_t user_i2c_write(uint8_t id, uint8_t reg_addr, uint8_t *data, uint16_t len)
 }
 
 
+volatile int model = 0;
+volatile int revision = 0;
+
 /* USER CODE END 0 */
 
 /**
@@ -170,6 +176,20 @@ int main(void)
   dev.settings.osr_t = BME280_OVERSAMPLING_2X;
   dev.settings.filter = BME280_FILTER_COEFF_16;
   rslt = bme280_set_sensor_settings(BME280_OSR_PRESS_SEL | BME280_OSR_TEMP_SEL | BME280_OSR_HUM_SEL | BME280_FILTER_SEL, &dev);
+
+
+  // Init the VL53L0x
+  tofInit(1); // set long range mode (up to 2m)
+  tofGetModel(&model, &revision);
+
+  // Re-init the VL53L0X if there is any problems
+  while(model != 238 || revision != 16)
+  {
+  	while(HAL_I2C_DeInit(&hi2c1) != HAL_OK);
+  	while(HAL_I2C_Init(&hi2c1) != HAL_OK);
+    tofInit(1); // set long range mode (up to 2m)
+    tofGetModel(&model, &revision);
+  }
 
   /* USER CODE END 2 */
 
@@ -408,14 +428,15 @@ void StartBME280Task(void *argument)
 	const uint8_t bme280_address = 0x76;
 
 
-	uint8_t tData = 0xD0;
-	uint8_t rData[1];
+	const uint8_t vl53l0x_address = 0x29;
+
+
+	uint8_t tData = 0x61; //0xD0;
+	uint8_t rData[1000];
 
   /* Infinite loop */
   for(;;)
   {
-  	//HAL_I2C_Master_Transmit(&hi2c1, (0x76<<1) | (0x00), &tData, 1, 50);
-  	//HAL_I2C_Mem_Write(&hi2c1, (0x76<<1) | (0x00), ZZZ, 1, &tData, 1, 50);
 
   	//HAL_I2C_Master_Transmit(&hi2c1, (0x76<<1) | (0x00), &tData, 1, 50);
   	//HAL_I2C_Master_Receive(&hi2c1, (0x76<<1) | (0x01), rData, sizeof(rData), 50);
@@ -438,7 +459,7 @@ void StartBME280Task(void *argument)
 		*/
 
 
-
+  	/*
 		printf("TestBeg\r\n");
 
 
@@ -457,7 +478,7 @@ void StartBME280Task(void *argument)
 			//memset(line1, 0, sizeof(line2));
 			//printf("TEMP: %03.1f\r\n", temperature);
 
-			printf("TEMP: %d\r\n", lTemperature);
+			printf("TEMP: %l\r\n", lTemperature);
 
 
 			//sprintf(line1, "HUMID: %03.1f ", humidity);
@@ -465,9 +486,26 @@ void StartBME280Task(void *argument)
 		}
 
 		printf("TestEnd\r\n");
+  	 */
+
+  	/////
+  	//HAL_I2C_Master_Transmit(&hi2c1, (vl53l0x_address<<1) | (0x00), &tData, 1, 50);
+  	// osDelay(500);
+
+  	/////
+  	//printf("%d\r\n", model);
+  	//osDelay(500);
 
 
-    osDelay(1000);
+
+  	/////
+  	uint16_t distance = tofReadDistance();
+  	//printf("Distance: %u\r\n", distance);
+  	HAL_UART_Transmit(&huart2, (uint8_t *)&distance, 2, 0xFFFF);
+
+
+  	osDelay(50);
+
   }
   /* USER CODE END 5 */
 }
