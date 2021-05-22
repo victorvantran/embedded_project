@@ -87,6 +87,10 @@ PUTCHAR_PROTOTYPE
 // 12-bit ADC raw value
 volatile uint16_t adc_raw;
 
+#define ADC_BUFF_LENGTH 1024
+uint16_t adc_buff[ADC_BUFF_LENGTH];
+
+
 /* USER CODE END 0 */
 
 /**
@@ -122,6 +126,7 @@ int main(void)
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 
+  //HAL_ADC_Start_DMA(&hadc1, (uint32_t *)adc_buff, ADC_BUFF_LENGTH);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -418,6 +423,16 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_ADC_ConvHalfCpltCallback(ADC_HandleTypeDef* hadc)
+{
+
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+
+}
+
 
 /* USER CODE END 4 */
 
@@ -434,11 +449,17 @@ void StartSoundDemoTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
+
   	HAL_ADC_Start(&hadc1);
   	HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
   	adc_raw = HAL_ADC_GetValue(&hadc1);
-  	HAL_UART_Transmit(&huart2, (uint8_t *)&adc_raw, 2, HAL_MAX_DELAY);
-    osDelay(10);
+  	//HAL_UART_Transmit(&huart2, (uint8_t *)&adc_raw, 2, HAL_MAX_DELAY);
+    printf("%u\r\n", adc_raw);
+  	osDelay(10);
+
+
+
+  	//HAL_ADC_Start(&hadc1);
   }
   /* USER CODE END 5 */
 }

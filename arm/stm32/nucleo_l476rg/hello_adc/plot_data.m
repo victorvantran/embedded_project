@@ -14,10 +14,11 @@ s = serial('/dev/ttyACM0', 115200);
 fopen(s);
 
 % plot data
+%{
 i = 100
 while (1)
   data(i) = typecast(srl_read(s, 2), 'uint16');
-  bitand(data(i), 4095);
+  %bitand(data(i), 4095);
   
   plot(data);
   axis([i - 100 i 0 8095]);
@@ -28,8 +29,22 @@ end
 
 % close serial port
 fclose(s);
+%}
 
 
+
+i = 100
+while (1)
+  data(i) = typecast(srl_read(s, 2), 'uint16');
+  plot(data);
+  axis([i - 100 i 0 4096]);
+  
+  pause(0.002);
+  i = i+1;
+end
+
+
+fclose(s);
 
 
 
