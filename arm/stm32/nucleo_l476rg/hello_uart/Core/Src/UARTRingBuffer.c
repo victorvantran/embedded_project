@@ -15,6 +15,9 @@
 
 
 /* IMPLEMENTATION */
+RingBufferHandle_t rxRingBuffer = {{0}, 0, 0};
+RingBufferHandle_t txRingBuffer = {{0}, 0, 0};
+
 void vInitUARTRingBuffer(void)
 {
 	pxRXRingBuffer = &rxRingBuffer;
@@ -162,7 +165,6 @@ void vISRUART(UART_HandleTypeDef *huart)
 			huart->Instance->TDR = c;
 		}
 	}
-
 }
 
 

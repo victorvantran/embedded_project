@@ -33,9 +33,6 @@ typedef struct
 } RingBufferHandle_t;
 
 
-RingBufferHandle_t rxRingBuffer = {{0}, 0, 0};
-RingBufferHandle_t txRingBuffer = {{0}, 0, 0};
-
 RingBufferHandle_t *pxRXRingBuffer;
 RingBufferHandle_t *pxTXRingBuffer;
 

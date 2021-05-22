@@ -25,6 +25,7 @@
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
 #include "string.h"
+#include "UARTRingBuffer.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -112,6 +113,9 @@ int main(void)
   MX_USART2_UART_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
+
+  // Ring Buffer
+  vInitUARTRingBuffer();
 
   /*
   // Interrupt
@@ -369,7 +373,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
 /*
 // Interrupt
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *huart)
@@ -448,8 +451,20 @@ void StartUARTTask(void *argument)
     HAL_UART_Receive_DMA(&huart2, (uint8_t *)uartRxData, sizeof(uartRxData));
     */
 
+
+  	// Ring Buffer
+  	uint8_t status;
+  	unsigned char c;
+
+  	//if(uGetNumReadableCharRXBuffer() > 0)
+  	while (uGetNumReadableCharRXBuffer() > 0)
+  	{
+  		xReadUART(&c);
+  		xWriteUART(c);
+  	}
+
   	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-    osDelay(250);
+    osDelay(100);
   }
   /* USER CODE END 5 */
 }
