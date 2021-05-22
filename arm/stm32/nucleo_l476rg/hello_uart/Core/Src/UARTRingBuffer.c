@@ -11,7 +11,7 @@
 
 
 /* ISR */
-// extern void Uart_isr (UART_HandleTypeDef *huart);
+// extern void vISRUART (UART_HandleTypeDef *huart);
 
 
 /* IMPLEMENTATION */
@@ -37,15 +37,15 @@ void vPutCharRXBuffer(unsigned char c)
 	 */
 	if (uNextHeadIndex != pxRXRingBuffer->uTailIndex)
 	{
-		pxRingBuffer->uHeadIndex = uNextHeadIndex;
-		pxRingBuffer->puBuffer[pxRingBuffer->uHeadIndex] = c;
+		pxRXRingBuffer->uHeadIndex = uNextHeadIndex;
+		pxRXRingBuffer->puBuffer[pxRXRingBuffer->uHeadIndex] = c;
 	}
 }
 
 
 void vPutCharTXBuffer(unsigned char c)
 {
-	uint32_t uNextHeadIndex = (uint32_t)((pxTXRingerBuffer->uHeadIndex + 1) % UART_BUFFER_SIZE);
+	uint32_t uNextHeadIndex = (uint32_t)((pxTXRingBuffer->uHeadIndex + 1) % UART_BUFFER_SIZE);
 
 	/* Only put the character if the head does not overtake the tail within the ring.
 	 * Not equal assumes would be effectively less than (even if the uNextHeadIndex > uTailIndex due to wrap around).
@@ -54,7 +54,7 @@ void vPutCharTXBuffer(unsigned char c)
 	if (uNextHeadIndex != pxTXRingBuffer->uTailIndex)
 	{
 		pxTXRingBuffer->uHeadIndex = uNextHeadIndex;
-		pxTXRingBuffer[pxTXRingBuffer->uHeadIndex] = c;
+		pxTXRingBuffer->puBuffer[pxTXRingBuffer->uHeadIndex] = c;
 	}
 }
 
@@ -137,6 +137,31 @@ void vFlushUART(void)
 
 void vISRUART(UART_HandleTypeDef *huart)
 {
+	uint32_t rISRFlags = READ_REG(huart->Instance->ISR); // SR
+	uint32_t rCR1ITS = READ_REG(huart->Instance->CR1);
+
+	if (((rISRFlags & USART_ISR_RXNE) != RESET) && ((rCR1ITS & USART_CR1_RXNEIE) != RESET))
+	{
+		huart->Instance->ISR;
+		unsigned char c = huart->Instance->RDR;
+		vPutCharRXBuffer(c);
+	}
+
+	if (((rISRFlags & USART_ISR_TXE) != RESET) && ((rCR1ITS & USART_CR1_TXEIE) != RESET))
+	{
+		if (txRingBuffer.uHeadIndex == txRingBuffer.uTailIndex)
+		{
+			__HAL_UART_DISABLE_IT(huart, UART_IT_TXE);
+		}
+		else
+		{
+			unsigned char c = txRingBuffer.puBuffer[txRingBuffer.uTailIndex];
+			txRingBuffer.uTailIndex = (txRingBuffer.uTailIndex + 1) % UART_BUFFER_SIZE;
+
+			huart->Instance->ISR;
+			huart->Instance->TDR = c;
+		}
+	}
 
 }
 

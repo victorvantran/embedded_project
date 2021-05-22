@@ -11,7 +11,7 @@
 /* APPLICATION PROGRAMMER */
 #include "stm32l4xx_hal.h"
 UART_HandleTypeDef huart2;
-#define UART_HANDLE &huart2;
+#define UART_HANDLE &huart2
 #define UART_BUFFER_SIZE 256UL
 
 
@@ -23,7 +23,7 @@ typedef struct
 #if UART_BUFFER_SIZE <= 256UL
 		volatile uint8_t uHeadIndex;
 		volatile uint8_t uTailIndex;
-#else if UART_BUFFER_SIZE <= 65536UL
+#elif UART_BUFFER_SIZE <= 65536UL
 		volatile uint16_t uHeadIndex;
 		volatile uint16_t uTailIndex;
 #else
