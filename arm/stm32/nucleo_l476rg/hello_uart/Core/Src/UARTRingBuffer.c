@@ -59,17 +59,20 @@ void vPutCharTXBuffer(unsigned char c)
 }
 
 
-unsigned char xReadUART(void)
+uint8_t xReadUART(unsigned char *c)
 {
 	/* Check if there is unprocessed/new data available (read/tail has not caught up to write/head)
-	 * Return -1 to signify no new data available */
-	if (pxRXRingBuffer->uHeadIndex == pxRXRingBuffer->uTailIndex) return '\0';
+	 * Return 0 to signify no new data available */
+	if (pxRXRingBuffer->uHeadIndex == pxRXRingBuffer->uTailIndex) return 0;
 
 	/* Unprocessed/New data is available.
 	 * Return it and increment the tailIndex to signify more room to put data into the rxRingBuffer */
-	unsigned char c = pxRXRingBuffer->puBuffer[pxRXRingBuffer->uTailIndex];
+	unsigned char readC = pxRXRingBuffer->puBuffer[pxRXRingBuffer->uTailIndex];
 	pxRXRingBuffer->uTailIndex = (pxRXRingBuffer->uTailIndex + 1) % UART_BUFFER_SIZE;
-	return c;
+	*c = readC;
+
+	/* Return 0 to signify data available and read from */
+	return 1;
 }
 
 
@@ -101,5 +104,40 @@ uint8_t xWriteUART(unsigned char c)
 }
 
 
+uint8_t xWriteStringUART(const unsigned char *s)
+{
+	/* Write each character of the string to the txRingBuffer until null-terminated */
+	while(*s != '\0') xWriteUART(*(s++));
+}
+
+
+uint32_t uGetNumReadableCharRXBuffer(void)
+{
+	/* Adds UART_BUFFER_SIZE to account for uHeadIndex < uTailIndex. Will be modded in the end anyway if uHeadIndex >= uTailIndex */
+	return (uint32_t)(((pxRXRingBuffer->uHeadIndex - pxRXRingBuffer->uTailIndex) + UART_BUFFER_SIZE ) % UART_BUFFER_SIZE);
+}
+
+
+uint8_t xPeek(unsigned char *c)
+{
+	if (pxRXRingBuffer->uHeadIndex == pxRXRingBuffer->uTailIndex) return 0;
+
+	*c = pxRXRingBuffer->puBuffer[pxRXRingBuffer->uTailIndex];
+	return 1;
+}
+
+
+void vFlushUART(void)
+{
+	memset(pxRXRingBuffer->puBuffer, '\0', UART_BUFFER_SIZE);
+	pxRXRingBuffer->uHeadIndex = 0;
+	pxRXRingBuffer->uTailIndex = 0;
+}
+
+
+void vISRUART(UART_HandleTypeDef *huart)
+{
+
+}
 
 

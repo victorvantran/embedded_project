@@ -52,28 +52,39 @@ void vPutCharRXBuffer(unsigned char c);
 void vPutCharTXBuffer(unsigned char c);
 
 
-/* Processes the incoming unsigned char data into the rxRingBuffer and increment that tailIndex of said buffer
- * Returns null char if head == tail, which implies there is no unprocessed/new data in the rxRingBuffer yet.
+/* Reads the unsigned char data from the rxRingBuffer and increment that tailIndex of said buffer
+ * head == tail implies there is no unprocessed/new data in the rxRingBuffer yet.
+ * Thus, the rxRingBuffer does not read any data into the passed character in this implementation.
+ * Returns 0 for failure read and returns 0 for successful read.
  * */
-unsigned char xReadUART(void);
+uint8_t xReadUART(unsigned char *c);
 
-/* Write the incoming unsigned char data into the txRingBuffer and increment that tailIndex of said buffer
- * Returns 0 if head == tail, which implies unprocessed/new data filled the entire txRingBuffer.
+/* Writes the unsigned char data into the txRingBuffer and increment that tailIndex of said buffer
+ * head == tail implies unprocessed/new data filled the entire txRingBuffer.
  * Thus, the txRingBuffer refuses to overwrite/put data in this implementation.
  * Returns 0 for failure write and returns 0 for successful write.
  * */
 uint8_t xWriteUART(unsigned char c);
 
 
+/* Write string to txRingBuffer */
+uint8_t xWriteStringUART(const unsigned char *s);
 
 
+/* Gets the number of readable/processable/new characters currently in the rxRingBuffer */
+uint32_t uGetNumReadableCharRXBuffer(void);
 
 
+/* Peek for the about-to-be-read character in the rxRingBuffer without incrementing the tail */
+uint8_t xPeek(unsigned char *c);
 
-/* Reads the incoming unsigned char data into the rxRingBuffer and increment that tailIndex of said buffer
- * Returns -1 if head == tail, which implies unprocessed/new data filled the entire rxRingBuffer.
- * Thus, the rxRingBuffer refuses to overwrite data in this implementation.
- * */
+/* Clears the entire rxRingBuffer and head/tail index */
+void vFlushRXUART(void);
+
+
+/* To be called during UART ISR */
+void vISRUART(UART_HandleTypeDef *huart);
+
 
 
 #endif /* INC_UARTRINGBUFFER_H_ */
