@@ -143,6 +143,7 @@ void vISRUART(UART_HandleTypeDef *huart)
 	uint32_t rISRFlags = READ_REG(huart->Instance->ISR); // SR
 	uint32_t rCR1ITS = READ_REG(huart->Instance->CR1);
 
+	/* Receive register not empty, so read from it and put it into the head of the rxRingBuffer */
 	if (((rISRFlags & USART_ISR_RXNE) != RESET) && ((rCR1ITS & USART_CR1_RXNEIE) != RESET))
 	{
 		huart->Instance->ISR;
@@ -150,6 +151,7 @@ void vISRUART(UART_HandleTypeDef *huart)
 		vPutCharRXBuffer(c);
 	}
 
+	/* Transmit register empty, so write to it and put it from the tail of the rxRingBuffer */
 	if (((rISRFlags & USART_ISR_TXE) != RESET) && ((rCR1ITS & USART_CR1_TXEIE) != RESET))
 	{
 		if (txRingBuffer.uHeadIndex == txRingBuffer.uTailIndex)

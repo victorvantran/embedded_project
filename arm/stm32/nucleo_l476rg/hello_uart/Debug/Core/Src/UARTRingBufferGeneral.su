@@ -1,0 +1,11 @@
+UARTRingBufferGeneral.c:21:6:vInitUARTRingBuffers	8	static
+UARTRingBufferGeneral.c:27:6:vISRUART	32	static
+UARTRingBufferGeneral.c:90:6:vInitUARTRingBuffer	16	static
+UARTRingBufferGeneral.c:108:6:vPutCharRXBuffer	24	static
+UARTRingBufferGeneral.c:125:6:vPutCharTXBuffer	24	static
+UARTRingBufferGeneral.c:141:9:xReadUART	24	static
+UARTRingBufferGeneral.c:158:9:xWriteUART	24	static
+UARTRingBufferGeneral.c:186:9:xWriteStringUART	16	static
+UARTRingBufferGeneral.c:193:10:uGetNumReadableCharRXBuffer	16	static
+UARTRingBufferGeneral.c:200:9:xPeek	16	static
+UARTRingBufferGeneral.c:209:6:vFlushUART	16	static

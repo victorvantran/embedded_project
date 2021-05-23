@@ -1,5 +1,5 @@
-Core/Src/UARTRingBuffer.o: ../Core/Src/UARTRingBuffer.c \
- ../Core/Inc/UARTRingBuffer.h \
+Core/Src/UARTRingBufferGeneral.o: ../Core/Src/UARTRingBufferGeneral.c \
+ ../Core/Inc/UARTRingBufferGeneral.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h \
  ../Core/Inc/stm32l4xx_hal_conf.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_rcc.h \
@@ -34,7 +34,7 @@ Core/Src/UARTRingBuffer.o: ../Core/Src/UARTRingBuffer.c \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_uart_ex.h
 
-../Core/Inc/UARTRingBuffer.h:
+../Core/Inc/UARTRingBufferGeneral.h:
 
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal.h:
 

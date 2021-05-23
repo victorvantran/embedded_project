@@ -25,7 +25,8 @@
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
 #include "string.h"
-#include "UARTRingBuffer.h"
+//#include "UARTRingBuffer.h"
+#include "UARTRingBufferGeneral.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,6 +46,7 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 
+UART_HandleTypeDef huart1;
 UART_HandleTypeDef huart2;
 
 /* Definitions for uartTask */
@@ -63,6 +65,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_ADC1_Init(void);
+static void MX_USART1_UART_Init(void);
 void StartUARTTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -79,6 +82,9 @@ char uartRxData[100] = "\r\n";
 char uartTxData[100] = "\r\n";
 */
 
+// Ring Buffer
+extern UARTRingBufferHandle_t uartRingBuffer1;
+extern UARTRingBufferHandle_t uartRingBuffer2;
 
 /* USER CODE END 0 */
 
@@ -110,12 +116,16 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 
   // Ring Buffer
-  vInitUARTRingBuffer();
+	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+
+  vInitUARTRingBuffers();
+	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 
   /*
   // Interrupt
@@ -224,7 +234,9 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2|RCC_PERIPHCLK_ADC;
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1|RCC_PERIPHCLK_USART2
+                              |RCC_PERIPHCLK_ADC;
+  PeriphClkInit.Usart1ClockSelection = RCC_USART1CLKSOURCE_PCLK2;
   PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
   PeriphClkInit.AdcClockSelection = RCC_ADCCLKSOURCE_PLLSAI1;
   PeriphClkInit.PLLSAI1.PLLSAI1Source = RCC_PLLSOURCE_HSI;
@@ -307,6 +319,41 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief USART1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_USART1_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART1_Init 0 */
+
+  /* USER CODE END USART1_Init 0 */
+
+  /* USER CODE BEGIN USART1_Init 1 */
+
+  /* USER CODE END USART1_Init 1 */
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX_RX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART1_Init 2 */
+
+  /* USER CODE END USART1_Init 2 */
 
 }
 
@@ -457,11 +504,15 @@ void StartUARTTask(void *argument)
   	unsigned char c;
 
   	//if(uGetNumReadableCharRXBuffer() > 0)
-  	while (uGetNumReadableCharRXBuffer() > 0)
+
+
+  	while (uGetNumReadableCharRXBuffer(&uartRingBuffer2) > 0)
   	{
-  		xReadUART(&c);
-  		xWriteUART(c);
+  		xReadUART(&uartRingBuffer2, &c);
+  		xWriteUART(&uartRingBuffer2, c);
   	}
+
+
 
   	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
     osDelay(100);
