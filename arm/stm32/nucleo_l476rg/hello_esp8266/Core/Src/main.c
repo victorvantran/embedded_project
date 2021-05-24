@@ -60,7 +60,8 @@ const osThreadAttr_t esp8266Task_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
-
+extern UARTRingBufferHandle_t uartRingBuffer1;
+extern UARTRingBufferHandle_t uartRingBuffer2;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -116,9 +117,8 @@ int main(void)
   MX_USART1_UART_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-
+  vInitUARTRingBuffers();
   // printf("gpio.mode(3, gpio.OUTPUT)\r\n");
-
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -381,14 +381,14 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_6, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : PA6 */
-  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  /*Configure GPIO pin : PB0 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 
@@ -410,8 +410,7 @@ void StartESP8266Task(void *argument)
   for(;;)
   {
   	/*
-  	/* NodeMCU communication */
-  	/*
+  	// NodeMCU communication
     printf("gpio.write(3, gpio.LOW)\r\n");
     osDelay(1000);
     printf("gpio.write(3, gpio.HIGH)\r\n");
@@ -419,8 +418,38 @@ void StartESP8266Task(void *argument)
     */
 
 
+  	/*
+  	// AT Communication
+  	uint8_t status;
+  	unsigned char c;
+  	while (uGetNumReadableCharRXBuffer(&uartRingBuffer2) > 0)
+  	{
+  		status = xReadUART(&uartRingBuffer2, &c);
+  		status = xWriteUART(&uartRingBuffer2, c);
+  	}
+  	*/
 
-  	osDelay(1000);
+
+  	uint8_t status;
+  	unsigned char c;
+  	while (uGetNumReadableCharRXBuffer(&uartRingBuffer2) != 0)
+  	{
+  		status = xReadUART(&uartRingBuffer2, &c);
+  		status = xWriteUART(&uartRingBuffer1, c);
+  	}
+
+  	while (uGetNumReadableCharRXBuffer(&uartRingBuffer1) != 0)
+  	{
+  		status = xReadUART(&uartRingBuffer1, &c);
+  		status = xWriteUART(&uartRingBuffer2, c);
+  	}
+
+  	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+  	vFlushRXUART(&uartRingBuffer1);
+  	vFlushRXUART(&uartRingBuffer2);
+    osDelay(100);
+  	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+  	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
   }
   /* USER CODE END 5 */
 }

@@ -10,10 +10,14 @@
 
 /* APPLICATION PROGRAMMER */
 #include "stm32l4xx_hal.h"
-UART_HandleTypeDef huart2;
-#define UART_HANDLE &huart2
-#define UART_BUFFER_SIZE 256UL
 
+#define UART_BUFFER_SIZE 512UL
+
+extern UART_HandleTypeDef huart1;
+extern UART_HandleTypeDef huart2;
+
+#define uart1 &huart1
+#define uart2 &huart2
 
 
 /* IMPLEMENTATION */
@@ -33,20 +37,25 @@ typedef struct
 } RingBufferHandle_t;
 
 
-RingBufferHandle_t *pxRXRingBuffer;
-RingBufferHandle_t *pxTXRingBuffer;
-
+typedef struct
+{
+	UART_HandleTypeDef *pxUARTHandle;
+	RingBufferHandle_t xRXRingBuffer;
+	RingBufferHandle_t xTXRingBuffer;
+} UARTRingBufferHandle_t;
 
 
 /* Initialize ring buffer */
-void vInitUARTRingBuffer(void);
+void vInitUARTRingBuffers(void);
+
+void vInitUARTRingBuffer(UARTRingBufferHandle_t *pxUARTRingBuffer, UART_HandleTypeDef *uartHandle);
 
 
 /* */
-void vPutCharRXBuffer(unsigned char c);
+void vPutCharRXBuffer(UARTRingBufferHandle_t *pxUARTRingBuffer, unsigned char c);
 
 /* */
-void vPutCharTXBuffer(unsigned char c);
+void vPutCharTXBuffer(UARTRingBufferHandle_t *pxUARTRingBuffer, unsigned char c);
 
 
 /* Reads the unsigned char data from the rxRingBuffer and increment that tailIndex of said buffer
@@ -54,33 +63,34 @@ void vPutCharTXBuffer(unsigned char c);
  * Thus, the rxRingBuffer does not read any data into the passed character in this implementation.
  * Returns 0 for failure read and returns 0 for successful read.
  * */
-uint8_t xReadUART(unsigned char *c);
+uint8_t xReadUART(UARTRingBufferHandle_t *pxUARTRingBuffer, unsigned char *c);
 
 /* Writes the unsigned char data into the txRingBuffer and increment that tailIndex of said buffer
  * head == tail implies unprocessed/new data filled the entire txRingBuffer.
  * Thus, the txRingBuffer refuses to overwrite/put data in this implementation.
  * Returns 0 for failure write and returns 0 for successful write.
  * */
-uint8_t xWriteUART(unsigned char c);
+uint8_t xWriteUART(UARTRingBufferHandle_t *pxUARTRingBuffer, unsigned char c);
 
 
 /* Write string to txRingBuffer */
-uint8_t xWriteStringUART(const unsigned char *s);
+uint8_t xWriteStringUART(UARTRingBufferHandle_t *pxUARTRingBuffer, const unsigned char *s);
 
 
 /* Gets the number of readable/processable/new characters currently in the rxRingBuffer */
-uint32_t uGetNumReadableCharRXBuffer(void);
+uint32_t uGetNumReadableCharRXBuffer(UARTRingBufferHandle_t *pxUARTRingBuffer);
 
 
 /* Peek for the about-to-be-read character in the rxRingBuffer without incrementing the tail */
-uint8_t xPeek(unsigned char *c);
+uint8_t xPeek(UARTRingBufferHandle_t *pxUARTRingBuffer, unsigned char *c);
 
 /* Clears the entire rxRingBuffer and head/tail index */
-void vFlushRXUART(void);
+void vFlushRXUART(UARTRingBufferHandle_t *pxUARTRingBuffer);
 
 
 /* To be called during UART ISR */
 void vISRUART(UART_HandleTypeDef *huart);
+
 
 
 

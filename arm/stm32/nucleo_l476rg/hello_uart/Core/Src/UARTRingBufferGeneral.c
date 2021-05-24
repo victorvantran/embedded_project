@@ -186,7 +186,9 @@ uint8_t xWriteUART(UARTRingBufferHandle_t *pxUARTRingBuffer, unsigned char c)
 uint8_t xWriteStringUART(UARTRingBufferHandle_t *pxUARTRingBuffer, const unsigned char *s)
 {
 	/* Write each character of the string to the txRingBuffer until null-terminated */
+	if (*s == '\0') return 0;
 	while(*s != '\0') xWriteUART(pxUARTRingBuffer, *(s++));
+	return 1;
 }
 
 
