@@ -40,6 +40,7 @@ typedef struct
 	uint16_t uHeadIndex;
 	uint16_t uTailIndex;
 #endif
+	volatile uint8_t uRollOver;
 } DMARingBufferHandle_t;
 
 

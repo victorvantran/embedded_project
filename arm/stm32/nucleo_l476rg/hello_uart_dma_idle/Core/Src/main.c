@@ -459,6 +459,10 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 {
+	if (huart == &huart2)
+	{
+		xUART2RingBuffer.xRXBuffer.uRollOver++;
+	}
 	printf("COMPLETE RECEIVE\r\n");
 }
 
