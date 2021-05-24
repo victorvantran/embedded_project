@@ -71,14 +71,24 @@ void USER_UART2_IDLECallback(void)
 			{
 				// [!] size arguement of strncmp due to circular
 
-
-				if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "ON", uParseIndex - uTailIndex) == 0)
+				if (uParseIndex - uTailIndex > 0)
 				{
-					printf("SET LIGHT\r\n");
+					if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "ON", uParseIndex - uTailIndex) == 0)
+					{
+						printf("SET LIGHTz\r\n");
+					}
+					else if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "OFF", uParseIndex - uTailIndex) == 0)
+					{
+						printf("UNSET LIGHTz\r\n");
+					}
+					else
+					{
+						printf("INVALID COMMAND RECEIVED\r\n");
+					}
 				}
-				else if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "OFF", uParseIndex - uTailIndex) == 0)
+				else
 				{
-					printf("UNSET LIGHT\r\n");
+					printf("NO COMMAND RECEIVED (JUST CR)\r\n");
 				}
 
 				// Command found, so update tail to the start of next command in line
@@ -91,10 +101,9 @@ void USER_UART2_IDLECallback(void)
 	}
 	else if (uRollOver == 1)
 	{
-		// temp
+
 		if (uParseIndex > uHeadIndex)
 		{
-
 			char commandBuff[xUART2RingBuffer.xRXBuffer.uDMABufferSize];
 
 			while (uParseIndex < xUART2RingBuffer.xRXBuffer.uDMABufferSize)
@@ -103,13 +112,24 @@ void USER_UART2_IDLECallback(void)
 				{
 					// [!] size arguement of strncmp due to circular
 
-					if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "ON", uParseIndex - uTailIndex + xUART2RingBuffer.xRXBuffer.uDMABufferSize) == 0)
+					if (uParseIndex - uTailIndex > 0)
 					{
-						printf("SET LIGHT\r\n");
+						if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "ON", uParseIndex - uTailIndex) == 0)
+						{
+							printf("SET LIGHTpr\r\n");
+						}
+						else if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "OFF", uParseIndex - uTailIndex) == 0)
+						{
+							printf("UNSET LIGHTpr\r\n");
+						}
+						else
+						{
+							printf("INVALID COMMAND RECEIVED\r\n");
+						}
 					}
-					else if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "OFF", uParseIndex - uTailIndex + xUART2RingBuffer.xRXBuffer.uDMABufferSize) == 0)
+					else
 					{
-						printf("UNSET LIGHT\r\n");
+						printf("NO COMMAND RECEIVED (JUST CR)\r\n");
 					}
 
 					// Command found, so update tail to the start of next command in line
@@ -131,31 +151,53 @@ void USER_UART2_IDLECallback(void)
 				if (xUART2RingBuffer.xRXBuffer.puDMABuffer[uParseIndex] == '\r')
 				{
 					// if uTailIndex > uHeadIndex, use buffer, else use regular
-
 					if (uTailIndex > uHeadIndex)
 					{
 						// Combine and compare
 						memcpy(commandBuff + uFirstHalf, (char *)xUART2RingBuffer.xRXBuffer.puDMABuffer, uParseIndex);
 
-						if (strncmp(commandBuff, "ON", uFirstHalf + uParseIndex) == 0)
+						// uParseIndex will be less than tialIndex in this wrap-around case. So as long as they don't equal each other, a command was received
+						if (uParseIndex - uTailIndex != 0)
 						{
-							printf("SET LIGHT\r\n");
+							if (strncmp(commandBuff, "ON", uFirstHalf + uParseIndex) == 0)
+							{
+								printf("SET LIGHTrin\r\n");
+							}
+							else if (strncmp(commandBuff, "OFF", uFirstHalf + uParseIndex) == 0)
+							{
+								printf("UNSET LIGHTrin\r\n");
+							}
+							else
+							{
+								printf("INVALID COMMAND RECEIVED\r\n");
+							}
 						}
-						else if (strncmp(commandBuff, "OFF", uFirstHalf + uParseIndex) == 0)
+						else
 						{
-							printf("UNSET LIGHT\r\n");
+							printf("NO COMMAND RECEIVED (JUST CR)zzz\r\n");
 						}
 
 					}
 					else
 					{
-						if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "ON", uParseIndex - uTailIndex) == 0)
+						if (uParseIndex - uTailIndex > 0)
 						{
-							printf("SET LIGHT\r\n");
+							if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "ON", uParseIndex - uTailIndex) == 0)
+							{
+								printf("SET LIGHTrf\r\n");
+							}
+							else if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "OFF", uParseIndex - uTailIndex) == 0)
+							{
+								printf("UNSET LIGHTrf\r\n");
+							}
+							else
+							{
+								printf("INVALID COMMAND RECEIVED\r\n");
+							}
 						}
-						else if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "OFF", uParseIndex - uTailIndex) == 0)
+						else
 						{
-							printf("UNSET LIGHT\r\n");
+							printf("NO COMMAND RECEIVED (JUST CR)\r\n");
 						}
 					}
 
@@ -183,66 +225,7 @@ void USER_UART2_IDLECallback(void)
 		xUART2RingBuffer.xRXBuffer.uRollOver = 0;
 	}
 
-
-	/*
-	while (uParseIndex != uHeadIndex)
-		{
-			if (xUART2RingBuffer.xRXBuffer.puDMABuffer[uParseIndex] == '\r')
-			{
-				// [!] size arguement of strncmp due to circular
-
-
-				if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "ON", uParseIndex - uTailIndex) == 0)
-				{
-					printf("SET LIGHT\r\n");
-				}
-				else if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "OFF", uParseIndex - uTailIndex) == 0)
-				{
-					printf("UNSET LIGHT\r\n");
-				}
-
-				// Command found, so update tail to the start of next command in line
-				uTailIndex = (uParseIndex + 1) % xUART2RingBuffer.xRXBuffer.uDMABufferSize;
-				xUART2RingBuffer.xRXBuffer.uTailIndex = uTailIndex;
-			}
-
-			uParseIndex++;
-		}
-
-*/
-
-
-	/*
-	while (uParseIndex != uHeadIndex)
-	{
-		if (xUART2RingBuffer.xRXBuffer.puDMABuffer[uParseIndex] == '\r')
-		{
-			// [!] size arguement of strncmp due to circular
-
-
-			if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "ON", uParseIndex - uTailIndex) == 0)
-			{
-				printf("SET LIGHT\r\n");
-			}
-			else if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "OFF", uParseIndex - uTailIndex) == 0)
-			{
-				printf("UNSET LIGHT\r\n");
-			}
-
-			// Command found, so update tail to the start of next command in line
-			uTailIndex = (uParseIndex + 1) % xUART2RingBuffer.xRXBuffer.uDMABufferSize;
-			xUART2RingBuffer.xRXBuffer.uTailIndex = uTailIndex;
-		}
-
-		uParseIndex++;
-	}
-	*/
-
-
-
 	printf("TailIndex: %u, HeadIndex: %u\r\n", xUART2RingBuffer.xRXBuffer.uTailIndex, xUART2RingBuffer.xRXBuffer.uHeadIndex);
-
-
 
 }
 
