@@ -43,10 +43,81 @@ void USER_UART2_IDLECallback(void)
 	headIndex = tailIndex;
 	*/
 
+	/*
+	 Head and tail backwards!
 	xUART2RingBuffer.xRXBuffer.uTailIndex = xUART2RingBuffer.xRXBuffer.uDMABufferSize - __HAL_DMA_GET_COUNTER(&hdma_usart2_rx);
 	printf("Head: %u, TailIndex: %u\r\n", xUART2RingBuffer.xRXBuffer.uHeadIndex, xUART2RingBuffer.xRXBuffer.uTailIndex);
-
 	xUART2RingBuffer.xRXBuffer.uHeadIndex = xUART2RingBuffer.xRXBuffer.uTailIndex;
+	*/
+
+
+
+
+	// Tail catch up to head
+	xUART2RingBuffer.xRXBuffer.uHeadIndex = xUART2RingBuffer.xRXBuffer.uDMABufferSize - __HAL_DMA_GET_COUNTER(&hdma_usart2_rx);
+
+	// Task notification...
+	uint16_t uTailIndex = xUART2RingBuffer.xRXBuffer.uTailIndex;
+	uint16_t uHeadIndex = xUART2RingBuffer.xRXBuffer.uHeadIndex;
+	uint16_t uParseIndex = uTailIndex;
+
+	// Complete and half complete...
+	while (uParseIndex != uHeadIndex)
+		{
+			if (xUART2RingBuffer.xRXBuffer.puDMABuffer[uParseIndex] == '\r')
+			{
+				// [!] size arguement of strncmp due to circular
+
+
+				if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "ON", uParseIndex - uTailIndex) == 0)
+				{
+					printf("SET LIGHT\r\n");
+				}
+				else if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "OFF", uParseIndex - uTailIndex) == 0)
+				{
+					printf("UNSET LIGHT\r\n");
+				}
+
+				// Command found, so update tail to the start of next command in line
+				uTailIndex = (uParseIndex + 1) % xUART2RingBuffer.xRXBuffer.uDMABufferSize;
+				xUART2RingBuffer.xRXBuffer.uTailIndex = uTailIndex;
+			}
+
+			uParseIndex++;
+		}
+
+	/*
+	while (uParseIndex != uHeadIndex)
+	{
+		if (xUART2RingBuffer.xRXBuffer.puDMABuffer[uParseIndex] == '\r')
+		{
+			// [!] size arguement of strncmp due to circular
+
+
+			if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "ON", uParseIndex - uTailIndex) == 0)
+			{
+				printf("SET LIGHT\r\n");
+			}
+			else if (strncmp((char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex, "OFF", uParseIndex - uTailIndex) == 0)
+			{
+				printf("UNSET LIGHT\r\n");
+			}
+
+			// Command found, so update tail to the start of next command in line
+			uTailIndex = (uParseIndex + 1) % xUART2RingBuffer.xRXBuffer.uDMABufferSize;
+			xUART2RingBuffer.xRXBuffer.uTailIndex = uTailIndex;
+		}
+
+		uParseIndex++;
+	}
+	*/
+
+
+
+	printf("TailIndex: %u, HeadIndex: %u\r\n", uTailIndex, (uint16_t)xUART2RingBuffer.xRXBuffer.uHeadIndex);
+
+
+
 }
 
 

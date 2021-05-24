@@ -9,6 +9,7 @@
 #define INC_UART_DMA_IDLE_H_
 
 #include <stdio.h>
+#include <string.h>
 
 /* APPLICATION PROGRAMMER */
 #include "stm32l4xx_hal.h"
@@ -34,9 +35,10 @@ typedef struct
 	uint16_t uHeadIndex;
 	uint16_t uTailIndex;
 #else
-	uint32_t uDMABufferSize;
-	uint32_t uHeadIndex;
-	uint32_t uTailIndex;
+	// Should not accept any DMA buffer larger than 65535UL items anyway
+	uint16_t uDMABufferSize;
+	uint16_t uHeadIndex;
+	uint16_t uTailIndex;
 #endif
 } DMARingBufferHandle_t;
 
