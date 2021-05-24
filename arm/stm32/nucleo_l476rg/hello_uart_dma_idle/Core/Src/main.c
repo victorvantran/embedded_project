@@ -25,6 +25,7 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include <string.h>
+#include "UART_DMA_IDLE.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -76,8 +77,8 @@ void StartUARTTask(void *argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-#define RX_BFR_SIZE 64
-#define TX_BFR_SIZE 64
+#define RX_BFR_SIZE 16
+#define TX_BFR_SIZE 16
 
 
 uint8_t RxRollover = 0;
@@ -91,36 +92,12 @@ char tx2Buffer[TX_BFR_SIZE];
 
 
 
-void USER_UART_IRQHandler(UART_HandleTypeDef *huart)
-{
-	if (huart->Instance == USART2)
-	{
-		if (__HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE) != RESET)
-		{
-			__HAL_UART_CLEAR_IDLEFLAG(huart);
-			printf("UART1 Idle IRQ Detected\r\n");
-			USER_UART_IDLECallback(huart);
-		}
-	}
-}
 
 
-void USER_UART_IDLECallback(UART_HandleTypeDef *huart)
-{
-	HAL_UART_DMAStop(huart);
 
-	uint8_t data_length = RX_BFR_SIZE - __HAL_DMA_GET_COUNTER(&hdma_usart2_rx);
-
-	printf("Received Data(length = %d)\r\n", data_length);
-
-	HAL_UART_Transmit(huart, rx2Buffer, data_length, HAL_MAX_DELAY);
-
-	memset(rx2Buffer, 0, data_length);
-	data_length = 0;
+extern UARTRingBufferHandle_t xUART2RingBuffer;
 
 
-	HAL_UART_Receive_DMA(huart, rx2Buffer, sizeof(rx2Buffer));
-}
 
 /* USER CODE END 0 */
 
@@ -156,10 +133,17 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
+  vInitUARTRingBuffer(&xUART2RingBuffer,
+  		&huart2,
+			(uint8_t *)rx2Buffer, RX_BFR_SIZE,
+  		(uint8_t *)tx2Buffer, TX_BFR_SIZE);
 
-  /* Fixed-sized command of three bytes <C> */
-  __HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
-  HAL_UART_Receive_DMA(&huart2, rx2Buffer, sizeof(rx2Buffer));
+
+
+
+  //__HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
+  //HAL_UART_Receive_DMA(&huart2, rx2Buffer, sizeof(rx2Buffer));
+  //HAL_DMA_Start_IT(&hdma_usart2_rx, SrcAddress, DstAddress, DataLength)
   //HAL_UART_Receive_DMA(&huart2, rx2Buffer, sizeof(rx2Buffer));
 
   /* USER CODE END 2 */
@@ -472,6 +456,12 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
 }
 */
 
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
+{
+	printf("COMPLETE RECEIVE\r\n");
+}
+
 /*
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 {
@@ -524,7 +514,7 @@ void StartUARTTask(void *argument)
   {
   	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
 
-  	printf("Task\r\n");
+  	//printf("Task\r\n");
   	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
     osDelay(200);
   }

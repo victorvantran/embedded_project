@@ -1,0 +1,3 @@
+UART_DMA_IDLE.c:14:6:USER_UART2_IRQHandler	8	static
+UART_DMA_IDLE.c:25:6:USER_UART2_IDLECallback	8	static
+UART_DMA_IDLE.c:61:6:vInitUARTRingBuffer	24	static

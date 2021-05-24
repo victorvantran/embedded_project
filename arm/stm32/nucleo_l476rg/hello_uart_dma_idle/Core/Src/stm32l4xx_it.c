@@ -23,6 +23,7 @@
 #include "stm32l4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "UART_DMA_IDLE.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,7 +53,7 @@
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-extern void USER_UART_IRQHandler(UART_HandleTypeDef *huart);
+extern void USER_UART2_IRQHandler(void);
 
 /* USER CODE END 0 */
 
@@ -215,10 +216,10 @@ void USART2_IRQHandler(void)
   /* USER CODE BEGIN USART2_IRQn 0 */
 
   /* USER CODE END USART2_IRQn 0 */
-  //HAL_UART_IRQHandler(&huart2);
+  HAL_UART_IRQHandler(&huart2);
   /* USER CODE BEGIN USART2_IRQn 1 */
-  USER_UART_IRQHandler(&huart2);
-  /* USER CODE END USART2_IRQn 1 */
+  USER_UART2_IRQHandler();
+	/* USER CODE END USART2_IRQn 1 */
 }
 
 /**
