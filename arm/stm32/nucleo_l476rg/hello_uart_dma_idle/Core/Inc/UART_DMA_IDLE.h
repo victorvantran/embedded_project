@@ -59,4 +59,10 @@ void vInitUARTRingBuffer(UARTRingBufferHandle_t *pxUARTRingBuffer,
 		uint8_t *dmaTX, uint32_t dmaTXSize);
 
 
+uint8_t bCommandMatch(const char *command, char *candidate, size_t commandLength);
+
+uint8_t bCommandSplitMatch(const char *command,
+		char *candidateFirst, size_t candidateFirstLength,
+		char *candidateSecond, size_t candidateSecondLength);
+
 #endif /* INC_UART_DMA_IDLE_H_ */
