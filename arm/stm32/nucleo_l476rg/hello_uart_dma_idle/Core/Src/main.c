@@ -77,27 +77,13 @@ void StartUARTTask(void *argument);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-#define RX_BFR_SIZE 16
-#define TX_BFR_SIZE 16
+#define RX2_BUFFER_SIZE UART_BUFFER_SIZE
+#define TX2_BUFFER_SIZE UART_BUFFER_SIZE
 
-
-uint8_t RxRollover = 0;
-uint8_t RxCounter = 0;
-uint16_t RxBfrPos = 0;
-uint8_t TxCounter = 0;
-
-
-uint8_t rx2Buffer[RX_BFR_SIZE];
-char tx2Buffer[TX_BFR_SIZE];
-
-
-
-
-
+uint8_t rx2Buffer[RX2_BUFFER_SIZE];
+char tx2Buffer[TX2_BUFFER_SIZE];
 
 extern UARTRingBufferHandle_t xUART2RingBuffer;
-
-
 
 /* USER CODE END 0 */
 
@@ -135,8 +121,8 @@ int main(void)
   /* USER CODE BEGIN 2 */
   vInitUARTRingBuffer(&xUART2RingBuffer,
   		&huart2,
-			(uint8_t *)rx2Buffer, RX_BFR_SIZE,
-  		(uint8_t *)tx2Buffer, TX_BFR_SIZE);
+			(uint8_t *)rx2Buffer, RX2_BUFFER_SIZE,
+  		(uint8_t *)tx2Buffer, TX2_BUFFER_SIZE);
 
 
 
@@ -372,90 +358,6 @@ PUTCHAR_PROTOTYPE
 	return ch;
 }
 
-/*
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
-{
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
-
-
-	if (huart == &huart1)
-	{
-		if (__HAL_UART_GET_FLAG(huart, UART_FLAG_IDLE))
-		{
-			__HAL_UART_CLEAR_IDLEFLAG(&huart1);
-			RxCounter++;
-
-			uint8_t TxSize = 0;
-			uint16_t start = RxBfrPos;
-			RxBfrPos = RX_BFR_SIZE - (uint16_t)huart->hdmarx->Instance->CNDTR;
-			uint16_t len = RX_BFR_SIZE;
-
-			if (RxRollover < 2)
-			{
-				if (RxRollover)
-				{
-					if (RxBfrPos <= start)
-					{
-						len = RxBfrPos + RX_BFR_SIZE - start;
-					}
-					else
-					{
-						len = RX_BFR_SIZE + 1;
-					}
-				}
-				else
-				{
-					len = RxBfrPos - start;
-				}
-			}
-			else
-			{
-				len = RX_BFR_SIZE + 2;
-			}
-
-
-			if (len && (len <= RX_BFR_SIZE))
-			{
-				sprintf(tx2Buffer, "ACK RxC:%d S:%d L:%d RO:%d RXp:%d\r\n", RxCounter, start, len, RxRollover, RxBfrPos);
-				TxSize = strlen(tx2Buffer);
-
-				uint8_t i;
-				for (i = 0; i < len; i++) *(tx2Buffer + TxSize + i) = *(rx2Buffer + ((start + i) % RX_BFR_SIZE));
-				TxSize += i;
-			}
-			else
-			{
-				sprintf(tx2Buffer, "NAK RX BUFFER OVERFLOW ERROR %d\r\n", (len - RX_BFR_SIZE));
-				TxSize = strlen(tx2Buffer);
-			}
-
-			HAL_UART_Transmit(huart, (uint8_t *)tx2Buffer, TxSize, HAL_MAX_DELAY);
-			RxRollover = 0;
-		}
-		else
-		{
-			RxRollover++;
-		}
-
-		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
-
-	}
-
-}
-*/
-
-/*
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
-{
-
-	TxCounter++;
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
-
-
-	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-}
-*/
-
 
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 {
@@ -466,40 +368,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 	printf("COMPLETE RECEIVE\r\n");
 }
 
-/*
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
-{
-	// Check command message format
-	if (rx2Buffer[0] == '<' && rx2Buffer[2] == '>')
-	{
-		// Success
-		char command = (char)(rx2Buffer[1]);
-		if (command == '0')
-		{
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
-			printf("OFF\r\n");
-		}
-		else if (command == '1')
-		{
-			HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
-			printf("ON\r\n");
-		}
-		else
-		{
-			printf("Invalid command\r\n");
-			// Invalid command
-		}
-	}
-	else
-	{
-		printf("Invalid command format\r\n");
-		// Invalid command
-	}
 
-	// Listen for new command
-  HAL_UART_Receive_DMA(&huart2, rx2Buffer, 3);
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
+{
+	printf(" complete hi\r\n");
 }
-*/
+
 
 /* USER CODE END 4 */
 
@@ -520,6 +394,9 @@ void StartUARTTask(void *argument)
 
   	//printf("Task\r\n");
   	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+
+  	char *a = "hi";
+  	HAL_UART_Transmit_DMA(&huart2, (uint8_t *)a, sizeof(a));
     osDelay(200);
   }
   /* USER CODE END 5 */

@@ -15,6 +15,8 @@
 #include "stm32l4xx_hal.h"
 
 // UART2
+#define UART_BUFFER_SIZE 128UL
+
 extern UART_HandleTypeDef huart2;
 extern DMA_HandleTypeDef hdma_usart2_rx;
 void USER_UART2_IRQHandler(void);
@@ -35,10 +37,7 @@ typedef struct
 	uint16_t uHeadIndex;
 	uint16_t uTailIndex;
 #else
-	// Should not accept any DMA buffer larger than 65535UL items anyway
-	uint16_t uDMABufferSize;
-	uint16_t uHeadIndex;
-	uint16_t uTailIndex;
+#error "DMA buffer should not be hold more than 65535 items"
 #endif
 	volatile uint8_t uRollOver;
 } DMARingBufferHandle_t;
@@ -59,10 +58,22 @@ void vInitUARTRingBuffer(UARTRingBufferHandle_t *pxUARTRingBuffer,
 		uint8_t *dmaTX, uint32_t dmaTXSize);
 
 
-uint8_t bCommandMatch(const char *command, char *candidate, size_t commandLength);
+
+uint8_t bCommandMatch(const char *command, const char *candidate, size_t commandLength);
+
 
 uint8_t bCommandSplitMatch(const char *command,
-		char *candidateFirst, size_t candidateFirstLength,
-		char *candidateSecond, size_t candidateSecondLength);
+		const char *candidateFirst, size_t candidateFirstLength,
+		const char *candidateSecond, size_t candidateSecondLength);
+
+
+
+void vHandleCandidateCommand(const char *candidate, size_t candidateLength);
+
+
+void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFirstLength,
+		const char *candidateSecond, size_t candidateSecondLength);
+
+
 
 #endif /* INC_UART_DMA_IDLE_H_ */
