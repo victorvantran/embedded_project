@@ -68,19 +68,17 @@ void USER_UART2_IDLECallback(void)
 	// Task notification...
 	uint16_t uTailIndex = xUART2RingBuffer.xRXBuffer.uTailIndex;
 	uint16_t uHeadIndex = xUART2RingBuffer.xRXBuffer.uHeadIndex;
+	uint8_t uRollOver = xUART2RingBuffer.xRXBuffer.uRollOver;
+
 	uint16_t uParseIndex = uTailIndex;
 
-	// Complete and half complete...
-	uint8_t uRollOver = xUART2RingBuffer.xRXBuffer.uRollOver;
-	//printf("RollOver: %d\r\n", uRollOver);
+	//if (uRollOver == 0)
 
-	if (uRollOver == 0)
+	printf("roll: %d,  tail: %d,  head: %d\r\n", uRollOver, uTailIndex, uHeadIndex);
+	if (xUART2RingBuffer.xRXBuffer.uRollOver == 0)
 	{
-		printf("%d , %d\r\n", uParseIndex, uHeadIndex);
-
 		while (uParseIndex != uHeadIndex)
 		{
-			printf(".");
 			if (xUART2RingBuffer.xRXBuffer.puDMABuffer[uParseIndex] == '\r')
 			{
 				if (uParseIndex - uTailIndex > 0)
@@ -89,6 +87,8 @@ void USER_UART2_IDLECallback(void)
 					size_t candidateLength = uParseIndex - uTailIndex;
 
 					vHandleCandidateCommand(candidate, candidateLength);
+					printf("bad\r\n");
+
 				}
 				else
 				{
@@ -99,7 +99,6 @@ void USER_UART2_IDLECallback(void)
 				uTailIndex = (uParseIndex + 1) % xUART2RingBuffer.xRXBuffer.uDMABufferSize;
 				xUART2RingBuffer.xRXBuffer.uTailIndex = uTailIndex;
 			}
-
 			uParseIndex++;
 		}
 	}
@@ -111,12 +110,11 @@ void USER_UART2_IDLECallback(void)
 			{
 				if (xUART2RingBuffer.xRXBuffer.puDMABuffer[uParseIndex] == '\r')
 				{
-					// [!] size arguement of strncmp due to circular
-
 					if (uParseIndex - uTailIndex > 0)
 					{
 						char *candidate = (char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex;
 						size_t candidateLength = uParseIndex - uTailIndex;
+
 						vHandleCandidateCommand(candidate, candidateLength);
 					}
 					else
@@ -132,7 +130,6 @@ void USER_UART2_IDLECallback(void)
 			}
 
 			uParseIndex = 0;
-			xUART2RingBuffer.xRXBuffer.uRollOver = 0;
 
 			// Look for the next one to complete the firsthalf or just keep going
 			while (uParseIndex != uHeadIndex)
@@ -151,6 +148,9 @@ void USER_UART2_IDLECallback(void)
 							size_t candidateSecondLength = uParseIndex;
 
 							vHandleCandidateCommandSplit(candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength);
+
+							// Only unroll if tail has been successfully used for a wrap-around
+							xUART2RingBuffer.xRXBuffer.uRollOver = 0;
 						}
 						else
 						{
@@ -195,7 +195,6 @@ void USER_UART2_IDLECallback(void)
 		xUART2RingBuffer.xRXBuffer.uRollOver = 0;
 	}
 
-	//printf("lTailIndex: %d\r\n", uTailIndex);
 	printf("TailIndex: %u, HeadIndex: %u\r\n", xUART2RingBuffer.xRXBuffer.uTailIndex, xUART2RingBuffer.xRXBuffer.uHeadIndex);
 
 }
@@ -248,7 +247,7 @@ void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFi
 	}
 	else
 	{
-		printf("INVLD\r\n");
+		printf("INVLDsplit\r\n");
 	}
 }
 
