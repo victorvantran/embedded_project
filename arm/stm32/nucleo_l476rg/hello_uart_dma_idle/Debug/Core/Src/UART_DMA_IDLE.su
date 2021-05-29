@@ -1,7 +1,7 @@
 UART_DMA_IDLE.c:23:6:USER_UART2_IRQHandler	8	static
 UART_DMA_IDLE.c:36:6:vInitUARTRingBuffer	24	static
-UART_DMA_IDLE.c:63:6:USER_UART2_IDLECallback	56	static
-UART_DMA_IDLE.c:211:9:bCommandMatch	24	static
-UART_DMA_IDLE.c:217:9:bCommandSplitMatch	24	static
-UART_DMA_IDLE.c:227:6:vHandleCandidateCommand	16	static
-UART_DMA_IDLE.c:244:6:vHandleCandidateCommandSplit	32	static
+UART_DMA_IDLE.c:63:6:USER_UART2_IDLECallback	72	static
+UART_DMA_IDLE.c:207:9:bCommandMatch	24	static
+UART_DMA_IDLE.c:213:9:bCommandSplitMatch	24	static
+UART_DMA_IDLE.c:223:6:vHandleCandidateCommand	16	static
+UART_DMA_IDLE.c:240:6:vHandleCandidateCommandSplit	32	static

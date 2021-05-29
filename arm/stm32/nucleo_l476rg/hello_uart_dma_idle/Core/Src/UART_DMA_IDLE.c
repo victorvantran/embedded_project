@@ -75,7 +75,7 @@ void USER_UART2_IDLECallback(void)
 	//if (uRollOver == 0)
 
 	printf("roll: %d,  tail: %d,  head: %d\r\n", uRollOver, uTailIndex, uHeadIndex);
-	if (xUART2RingBuffer.xRXBuffer.uRollOver == 0)
+	if (uRollOver == 0)
 	{
 		while (uParseIndex != uHeadIndex)
 		{
@@ -183,16 +183,20 @@ void USER_UART2_IDLECallback(void)
 		}
 		else
 		{
+			// Reset due to too overflow rx buffer due to too much data received before it could all process
 			printf("TOO MUCH DATA SENT AT ONCE BEFORE IT CAN BE PROCESSED. TRY INCREASING BUFFER SIZE >1\r\n");
-			xUART2RingBuffer.xRXBuffer.uTailIndex = uHeadIndex;
-			xUART2RingBuffer.xRXBuffer.uRollOver = 0;
+			HAL_UART_DMAStop(xUART2RingBuffer.huart);
+			vInitUARTRingBuffer(&xUART2RingBuffer, xUART2RingBuffer.huart, xUART2RingBuffer.xRXBuffer.puDMABuffer, xUART2RingBuffer.xRXBuffer.uDMABufferSize,
+					xUART2RingBuffer.xTXBuffer.puDMABuffer, xUART2RingBuffer.xTXBuffer.uDMABufferSize);
 		}
 	}
 	else
 	{
+		// Reset due to too overflow rx buffer due to too much data received before it could all process
 		printf("TOO MUCH DATA SENT AT ONCE BEFORE IT CAN BE PROCESSED. TRY INCREASING BUFFER SIZE >2\r\n");
-		xUART2RingBuffer.xRXBuffer.uTailIndex = uHeadIndex;
-		xUART2RingBuffer.xRXBuffer.uRollOver = 0;
+		HAL_UART_DMAStop(xUART2RingBuffer.huart);
+		vInitUARTRingBuffer(&xUART2RingBuffer, xUART2RingBuffer.huart, xUART2RingBuffer.xRXBuffer.puDMABuffer, xUART2RingBuffer.xRXBuffer.uDMABufferSize,
+				xUART2RingBuffer.xTXBuffer.puDMABuffer, xUART2RingBuffer.xTXBuffer.uDMABufferSize);
 	}
 
 	printf("TailIndex: %u, HeadIndex: %u\r\n", xUART2RingBuffer.xRXBuffer.uTailIndex, xUART2RingBuffer.xRXBuffer.uHeadIndex);
