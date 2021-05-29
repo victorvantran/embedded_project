@@ -124,14 +124,6 @@ int main(void)
 			(uint8_t *)rx2Buffer, RX2_BUFFER_SIZE,
   		(uint8_t *)tx2Buffer, TX2_BUFFER_SIZE);
 
-
-
-
-  //__HAL_UART_ENABLE_IT(&huart2, UART_IT_IDLE);
-  //HAL_UART_Receive_DMA(&huart2, rx2Buffer, sizeof(rx2Buffer));
-  //HAL_DMA_Start_IT(&hdma_usart2_rx, SrcAddress, DstAddress, DataLength)
-  //HAL_UART_Receive_DMA(&huart2, rx2Buffer, sizeof(rx2Buffer));
-
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -365,13 +357,12 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
 	{
 		xUART2RingBuffer.xRXBuffer.uRollOver++;
 	}
-	printf("COMPLETE RECEIVE\r\n");
 }
 
 
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
 {
-	printf(" complete hi\r\n");
+	__NOP();
 }
 
 
@@ -391,13 +382,11 @@ void StartUARTTask(void *argument)
   for(;;)
   {
   	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
-
-  	//printf("Task\r\n");
   	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 
   	char *a = "hi";
-  	HAL_UART_Transmit_DMA(&huart2, (uint8_t *)a, sizeof(a));
-    osDelay(200);
+  	//HAL_UART_Transmit_DMA(&huart2, (uint8_t *)a, sizeof(a));
+    osDelay(500);
   }
   /* USER CODE END 5 */
 }

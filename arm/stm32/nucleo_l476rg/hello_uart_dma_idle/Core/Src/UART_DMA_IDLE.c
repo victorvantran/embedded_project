@@ -8,6 +8,15 @@
 #include "UART_DMA_IDLE.h"
 
 /* APPLICATION PROGRAMMER */
+/*
+ * Note: The delay of implicit CF when sending serial data through putty may cause idle interrupt to occur before \r is sent!
+ * This will cause two idle interrupts to occur for say, "message\r" 1) message 2) \r.
+ * To avoid this, explicitly put CR "message^M"
+ * This will cause a subsequent idle of implicit CR when pressing enter, but that can be handled as its own "NO COMMAND RECEIVED"
+ * for debugging purposes
+ */
+
+
 // UART2
 UARTRingBufferHandle_t xUART2RingBuffer;
 
@@ -17,7 +26,7 @@ void USER_UART2_IRQHandler(void)
 	{
 		__HAL_UART_CLEAR_IDLEFLAG(&huart2);
 
-		printf("UART2 Idle IRQ Detected\r\n");
+		//printf("UART2 Idle IRQ Detected\r\n");
 		USER_UART2_IDLECallback();
 	}
 }
@@ -63,10 +72,15 @@ void USER_UART2_IDLECallback(void)
 
 	// Complete and half complete...
 	uint8_t uRollOver = xUART2RingBuffer.xRXBuffer.uRollOver;
+	//printf("RollOver: %d\r\n", uRollOver);
+
 	if (uRollOver == 0)
 	{
+		printf("%d , %d\r\n", uParseIndex, uHeadIndex);
+
 		while (uParseIndex != uHeadIndex)
 		{
+			printf(".");
 			if (xUART2RingBuffer.xRXBuffer.puDMABuffer[uParseIndex] == '\r')
 			{
 				if (uParseIndex - uTailIndex > 0)
@@ -181,6 +195,7 @@ void USER_UART2_IDLECallback(void)
 		xUART2RingBuffer.xRXBuffer.uRollOver = 0;
 	}
 
+	//printf("lTailIndex: %d\r\n", uTailIndex);
 	printf("TailIndex: %u, HeadIndex: %u\r\n", xUART2RingBuffer.xRXBuffer.uTailIndex, xUART2RingBuffer.xRXBuffer.uHeadIndex);
 
 }
@@ -215,7 +230,7 @@ void vHandleCandidateCommand(const char *candidate, size_t candidateLength)
 	}
 	else
 	{
-		printf("INVALID COMMAND RECEIVED\r\n");
+		printf("INVLD\r\n");
 	}
 }
 
@@ -233,7 +248,7 @@ void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFi
 	}
 	else
 	{
-		printf("INVALID COMMAND RECEIVED\r\n");
+		printf("INVLD\r\n");
 	}
 }
 
