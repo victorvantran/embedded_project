@@ -379,13 +379,29 @@ void StartUARTTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
+	tx2Buffer[0] = 'a';
+	tx2Buffer[1] = 'p';
+	tx2Buffer[2] = 'p';
+	tx2Buffer[3] = 'l';
+	tx2Buffer[4] = 'e';
+	tx2Buffer[5] = '\r';
+
+
+
   for(;;)
   {
   	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
   	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
 
-  	char *a = "hi";
+
   	//HAL_UART_Transmit_DMA(&huart2, (uint8_t *)a, sizeof(a));
+
+
+
+
+
+
+  	HAL_UART_Transmit_DMA(&huart2, (uint8_t *)tx2Buffer, 6);
     osDelay(500);
   }
   /* USER CODE END 5 */

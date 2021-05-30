@@ -26,7 +26,6 @@ void USER_UART2_IRQHandler(void)
 	{
 		__HAL_UART_CLEAR_IDLEFLAG(&huart2);
 
-		//printf("UART2 Idle IRQ Detected\r\n");
 		USER_UART2_IDLECallback();
 	}
 }
@@ -56,7 +55,6 @@ void vInitUARTRingBuffer(UARTRingBufferHandle_t *pxUARTRingBuffer,
   HAL_UART_Receive_DMA(huart, pxUARTRingBuffer->xRXBuffer.puDMABuffer, pxUARTRingBuffer->xRXBuffer.uDMABufferSize);
 
   // Transfer DMA Buffer
-
 }
 
 
@@ -69,12 +67,8 @@ void USER_UART2_IDLECallback(void)
 	uint16_t uTailIndex = xUART2RingBuffer.xRXBuffer.uTailIndex;
 	uint16_t uHeadIndex = xUART2RingBuffer.xRXBuffer.uHeadIndex;
 	uint8_t uRollOver = xUART2RingBuffer.xRXBuffer.uRollOver;
-
 	uint16_t uParseIndex = uTailIndex;
 
-	//if (uRollOver == 0)
-
-	printf("roll: %d,  tail: %d,  head: %d\r\n", uRollOver, uTailIndex, uHeadIndex);
 	if (uRollOver == 0)
 	{
 		while (uParseIndex != uHeadIndex)
@@ -87,12 +81,6 @@ void USER_UART2_IDLECallback(void)
 					size_t candidateLength = uParseIndex - uTailIndex;
 
 					vHandleCandidateCommand(candidate, candidateLength);
-					printf("bad\r\n");
-
-				}
-				else
-				{
-					printf("NO COMMAND RECEIVED (JUST CR)z\r\n");
 				}
 
 				// Candidate command found, so update tail to the start of next command in line
@@ -116,10 +104,6 @@ void USER_UART2_IDLECallback(void)
 						size_t candidateLength = uParseIndex - uTailIndex;
 
 						vHandleCandidateCommand(candidate, candidateLength);
-					}
-					else
-					{
-						printf("NO COMMAND RECEIVED (JUST CR)pr\r\n");
 					}
 
 					// Candidate command found, so update tail to the start of next command in line
@@ -152,10 +136,6 @@ void USER_UART2_IDLECallback(void)
 							// Only unroll if tail has been successfully used for a wrap-around
 							xUART2RingBuffer.xRXBuffer.uRollOver = 0;
 						}
-						else
-						{
-							printf("NO COMMAND RECEIVED (JUST CR)in\r\n");
-						}
 					}
 					// Wraparound found, so treat this as a regular, business as usual
 					else
@@ -166,10 +146,6 @@ void USER_UART2_IDLECallback(void)
 							size_t candidateLength = uParseIndex - uTailIndex;
 
 							vHandleCandidateCommand(candidate, candidateLength);
-						}
-						else
-						{
-							printf("NO COMMAND RECEIVED (JUST CR)rf\r\n");
 						}
 					}
 
@@ -184,7 +160,6 @@ void USER_UART2_IDLECallback(void)
 		else
 		{
 			// Reset due to too overflow rx buffer due to too much data received before it could all process
-			printf("TOO MUCH DATA SENT AT ONCE BEFORE IT CAN BE PROCESSED. TRY INCREASING BUFFER SIZE >1\r\n");
 			HAL_UART_DMAStop(xUART2RingBuffer.huart);
 			vInitUARTRingBuffer(&xUART2RingBuffer, xUART2RingBuffer.huart, xUART2RingBuffer.xRXBuffer.puDMABuffer, xUART2RingBuffer.xRXBuffer.uDMABufferSize,
 					xUART2RingBuffer.xTXBuffer.puDMABuffer, xUART2RingBuffer.xTXBuffer.uDMABufferSize);
@@ -193,7 +168,6 @@ void USER_UART2_IDLECallback(void)
 	else
 	{
 		// Reset due to too overflow rx buffer due to too much data received before it could all process
-		printf("TOO MUCH DATA SENT AT ONCE BEFORE IT CAN BE PROCESSED. TRY INCREASING BUFFER SIZE >2\r\n");
 		HAL_UART_DMAStop(xUART2RingBuffer.huart);
 		vInitUARTRingBuffer(&xUART2RingBuffer, xUART2RingBuffer.huart, xUART2RingBuffer.xRXBuffer.puDMABuffer, xUART2RingBuffer.xRXBuffer.uDMABufferSize,
 				xUART2RingBuffer.xTXBuffer.puDMABuffer, xUART2RingBuffer.xTXBuffer.uDMABufferSize);
