@@ -31,6 +31,8 @@ void USER_UART2_IRQHandler(void)
 }
 
 
+
+
 /* IMPLEMENTATION */
 void vInitUARTRingBuffer(UARTRingBufferHandle_t *pxUARTRingBuffer,
 		UART_HandleTypeDef *huart,
@@ -228,5 +230,21 @@ void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFi
 		printf("INVLDsplit\r\n");
 	}
 }
+
+
+uint8_t bTransmitCommand(UARTRingBufferHandle_t *xRingBuffer, const char *command, size_t numElements)
+{
+	/* Could also add a wait for a semaphore, and semaphore released from isr on transmit complete callback */
+	strncpy(xRingBuffer->xTXBuffer.puDMABuffer, command, numElements);
+	if (HAL_UART_Transmit_DMA(xRingBuffer->huart, (uint8_t *)xRingBuffer->xTXBuffer.puDMABuffer, numElements) == HAL_OK)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
+
 
 

@@ -75,5 +75,8 @@ void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFi
 		const char *candidateSecond, size_t candidateSecondLength);
 
 
+/* Transmit */
+uint8_t bTransmitCommand(UARTRingBufferHandle_t *xRingBuffer, const char *command, size_t numElements);
+
 
 #endif /* INC_UART_DMA_IDLE_H_ */
