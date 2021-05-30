@@ -1,0 +1,10 @@
+thingspeak.c:23:6:USER_ThingSpeak_IRQHandler	16	static
+thingspeak.c:34:6:HAL_UART_RxCpltCallback	16	static
+thingspeak.c:43:6:HAL_UART_TxCpltCallback	16	static,ignoring_inline_asm
+thingspeak.c:51:6:vInitThingSpeak	16	static
+thingspeak.c:72:6:USER_UART_IDLECallback	64	static
+thingspeak.c:191:9:bCommandMatch	24	static
+thingspeak.c:197:9:bCommandSplitMatch	24	static
+thingspeak.c:207:6:vHandleCandidateCommand	16	static
+thingspeak.c:224:6:vHandleCandidateCommandSplit	32	static
+thingspeak.c:242:9:bTransmitCommand	24	static

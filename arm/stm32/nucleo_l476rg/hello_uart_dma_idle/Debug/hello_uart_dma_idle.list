@@ -1156,7 +1156,7 @@ uint8_t bTransmitCommand(UARTRingBufferHandle_t *xRingBuffer, const char *comman
  80009c0:	60b9      	str	r1, [r7, #8]
  80009c2:	607a      	str	r2, [r7, #4]
 	/* Could also add a wait for a semaphore, and semaphore released from isr on transmit complete callback */
-	strncpy(xRingBuffer->xTXBuffer.puDMABuffer, command, numElements);
+	strncpy((char *)xRingBuffer->xTXBuffer.puDMABuffer, command, numElements);
  80009c4:	68fb      	ldr	r3, [r7, #12]
  80009c6:	68db      	ldr	r3, [r3, #12]
  80009c8:	687a      	ldr	r2, [r7, #4]

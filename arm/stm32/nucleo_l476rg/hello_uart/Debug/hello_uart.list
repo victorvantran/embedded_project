@@ -37,13 +37,13 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_macro  0002a70a  00000000  00000000  00049728  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   0001b527  00000000  00000000  00073e32  2**0
+ 17 .debug_line   0001b534  00000000  00000000  00073e32  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    0011198c  00000000  00000000  0008f359  2**0
+ 18 .debug_str    0011198c  00000000  00000000  0008f366  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000053  00000000  00000000  001a0ce5  2**0
+ 19 .comment      00000053  00000000  00000000  001a0cf2  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  000071b0  00000000  00000000  001a0d38  2**2
+ 20 .debug_frame  000071b0  00000000  00000000  001a0d48  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -854,7 +854,7 @@ uint8_t xWriteUART(UARTRingBufferHandle_t *pxUARTRingBuffer, unsigned char c)
  80007fc:	4770      	bx	lr
 
 080007fe <uGetNumReadableCharRXBuffer>:
-	while(*s != '\0') xWriteUART(pxUARTRingBuffer, *(s++));
+	return 1;
 }
 
 
