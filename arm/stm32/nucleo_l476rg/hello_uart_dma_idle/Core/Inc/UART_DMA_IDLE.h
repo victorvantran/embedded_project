@@ -58,19 +58,15 @@ void vInitUARTRingBuffer(UARTRingBufferHandle_t *pxUARTRingBuffer,
 		uint8_t *dmaTX, uint32_t dmaTXSize);
 
 
+/* Receive */
+void USER_UART_IDLECallback(UARTRingBufferHandle_t *pxUARTRingBuffer);
 
 uint8_t bCommandMatch(const char *command, const char *candidate, size_t commandLength);
-
-
 uint8_t bCommandSplitMatch(const char *command,
 		const char *candidateFirst, size_t candidateFirstLength,
 		const char *candidateSecond, size_t candidateSecondLength);
 
-
-
 void vHandleCandidateCommand(const char *candidate, size_t candidateLength);
-
-
 void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFirstLength,
 		const char *candidateSecond, size_t candidateSecondLength);
 

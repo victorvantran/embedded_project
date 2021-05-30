@@ -8,5 +8,5 @@ main.c:347:1:__io_putchar	16	static
 main.c:354:6:HAL_UART_RxCpltCallback	16	static
 main.c:363:6:HAL_UART_TxCpltCallback	16	static,ignoring_inline_asm
 main.c:378:6:StartUARTTask	16	static
-main.c:419:6:HAL_TIM_PeriodElapsedCallback	16	static
-main.c:436:6:Error_Handler	4	static,ignoring_inline_asm
+main.c:410:6:HAL_TIM_PeriodElapsedCallback	16	static
+main.c:427:6:Error_Handler	4	static,ignoring_inline_asm

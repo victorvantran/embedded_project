@@ -26,7 +26,7 @@ void USER_UART2_IRQHandler(void)
 	{
 		__HAL_UART_CLEAR_IDLEFLAG(&huart2);
 
-		USER_UART2_IDLECallback();
+		USER_UART_IDLECallback(&xUART2RingBuffer);
 	}
 }
 
@@ -60,34 +60,34 @@ void vInitUARTRingBuffer(UARTRingBufferHandle_t *pxUARTRingBuffer,
 }
 
 
-void USER_UART2_IDLECallback(void)
+void USER_UART_IDLECallback(UARTRingBufferHandle_t *pxUARTRingBuffer)
 {
 	// Tail catch up to head
-	xUART2RingBuffer.xRXBuffer.uHeadIndex = xUART2RingBuffer.xRXBuffer.uDMABufferSize - __HAL_DMA_GET_COUNTER(&hdma_usart2_rx);
+	pxUARTRingBuffer->xRXBuffer.uHeadIndex = pxUARTRingBuffer->xRXBuffer.uDMABufferSize - __HAL_DMA_GET_COUNTER(&hdma_usart2_rx);
 
 	// Task notification...
-	uint16_t uTailIndex = xUART2RingBuffer.xRXBuffer.uTailIndex;
-	uint16_t uHeadIndex = xUART2RingBuffer.xRXBuffer.uHeadIndex;
-	uint8_t uRollOver = xUART2RingBuffer.xRXBuffer.uRollOver;
+	uint16_t uTailIndex = pxUARTRingBuffer->xRXBuffer.uTailIndex;
+	uint16_t uHeadIndex = pxUARTRingBuffer->xRXBuffer.uHeadIndex;
+	uint8_t uRollOver = pxUARTRingBuffer->xRXBuffer.uRollOver;
 	uint16_t uParseIndex = uTailIndex;
 
 	if (uRollOver == 0)
 	{
 		while (uParseIndex != uHeadIndex)
 		{
-			if (xUART2RingBuffer.xRXBuffer.puDMABuffer[uParseIndex] == '\r')
+			if (pxUARTRingBuffer->xRXBuffer.puDMABuffer[uParseIndex] == '\r')
 			{
 				if (uParseIndex - uTailIndex > 0)
 				{
-					char *candidate = (char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex;
+					char *candidate = (char *)pxUARTRingBuffer->xRXBuffer.puDMABuffer + uTailIndex;
 					size_t candidateLength = uParseIndex - uTailIndex;
 
 					vHandleCandidateCommand(candidate, candidateLength);
 				}
 
 				// Candidate command found, so update tail to the start of next command in line
-				uTailIndex = (uParseIndex + 1) % xUART2RingBuffer.xRXBuffer.uDMABufferSize;
-				xUART2RingBuffer.xRXBuffer.uTailIndex = uTailIndex;
+				uTailIndex = (uParseIndex + 1) % pxUARTRingBuffer->xRXBuffer.uDMABufferSize;
+				pxUARTRingBuffer->xRXBuffer.uTailIndex = uTailIndex;
 			}
 			uParseIndex++;
 		}
@@ -96,21 +96,21 @@ void USER_UART2_IDLECallback(void)
 	{
 		if (uParseIndex > uHeadIndex)
 		{
-			while (uParseIndex < xUART2RingBuffer.xRXBuffer.uDMABufferSize)
+			while (uParseIndex < pxUARTRingBuffer->xRXBuffer.uDMABufferSize)
 			{
-				if (xUART2RingBuffer.xRXBuffer.puDMABuffer[uParseIndex] == '\r')
+				if (pxUARTRingBuffer->xRXBuffer.puDMABuffer[uParseIndex] == '\r')
 				{
 					if (uParseIndex - uTailIndex > 0)
 					{
-						char *candidate = (char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex;
+						char *candidate = (char *)pxUARTRingBuffer->xRXBuffer.puDMABuffer + uTailIndex;
 						size_t candidateLength = uParseIndex - uTailIndex;
 
 						vHandleCandidateCommand(candidate, candidateLength);
 					}
 
 					// Candidate command found, so update tail to the start of next command in line
-					uTailIndex = (uParseIndex + 1) % xUART2RingBuffer.xRXBuffer.uDMABufferSize;
-					xUART2RingBuffer.xRXBuffer.uTailIndex = uTailIndex;
+					uTailIndex = (uParseIndex + 1) % pxUARTRingBuffer->xRXBuffer.uDMABufferSize;
+					pxUARTRingBuffer->xRXBuffer.uTailIndex = uTailIndex;
 				}
 				uParseIndex++;
 			}
@@ -120,7 +120,7 @@ void USER_UART2_IDLECallback(void)
 			// Look for the next one to complete the firsthalf or just keep going
 			while (uParseIndex != uHeadIndex)
 			{
-				if (xUART2RingBuffer.xRXBuffer.puDMABuffer[uParseIndex] == '\r')
+				if (pxUARTRingBuffer->xRXBuffer.puDMABuffer[uParseIndex] == '\r')
 				{
 					// if uTailIndex > uHeadIndex, use buffer, else use regular
 					if (uTailIndex > uHeadIndex)
@@ -128,15 +128,15 @@ void USER_UART2_IDLECallback(void)
 						// uParseIndex will be less than tialIndex in this wrap-around case. So as long as they don't equal each other, a command was received
 						if (uParseIndex - uTailIndex != 0)
 						{
-							char *candidateFirst = (char *)(xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex);
-							size_t candidateFirstLength = xUART2RingBuffer.xRXBuffer.uDMABufferSize - uTailIndex;
-							char *candidateSecond = (char *)(xUART2RingBuffer.xRXBuffer.puDMABuffer);
+							char *candidateFirst = (char *)(pxUARTRingBuffer->xRXBuffer.puDMABuffer + uTailIndex);
+							size_t candidateFirstLength = pxUARTRingBuffer->xRXBuffer.uDMABufferSize - uTailIndex;
+							char *candidateSecond = (char *)(pxUARTRingBuffer->xRXBuffer.puDMABuffer);
 							size_t candidateSecondLength = uParseIndex;
 
 							vHandleCandidateCommandSplit(candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength);
 
 							// Only unroll if tail has been successfully used for a wrap-around
-							xUART2RingBuffer.xRXBuffer.uRollOver = 0;
+							pxUARTRingBuffer->xRXBuffer.uRollOver = 0;
 						}
 					}
 					// Wraparound found, so treat this as a regular, business as usual
@@ -144,7 +144,7 @@ void USER_UART2_IDLECallback(void)
 					{
 						if (uParseIndex - uTailIndex > 0)
 						{
-							char *candidate = (char *)xUART2RingBuffer.xRXBuffer.puDMABuffer + uTailIndex;
+							char *candidate = (char *)pxUARTRingBuffer->xRXBuffer.puDMABuffer + uTailIndex;
 							size_t candidateLength = uParseIndex - uTailIndex;
 
 							vHandleCandidateCommand(candidate, candidateLength);
@@ -152,8 +152,8 @@ void USER_UART2_IDLECallback(void)
 					}
 
 					// Candidate command found, so update tail to the start of next command in line
-					uTailIndex = (uParseIndex + 1) % xUART2RingBuffer.xRXBuffer.uDMABufferSize;
-					xUART2RingBuffer.xRXBuffer.uTailIndex = uTailIndex;
+					uTailIndex = (uParseIndex + 1) % pxUARTRingBuffer->xRXBuffer.uDMABufferSize;
+					pxUARTRingBuffer->xRXBuffer.uTailIndex = uTailIndex;
 				}
 
 				uParseIndex++;
@@ -162,20 +162,20 @@ void USER_UART2_IDLECallback(void)
 		else
 		{
 			// Reset due to too overflow rx buffer due to too much data received before it could all process
-			HAL_UART_DMAStop(xUART2RingBuffer.huart);
-			vInitUARTRingBuffer(&xUART2RingBuffer, xUART2RingBuffer.huart, xUART2RingBuffer.xRXBuffer.puDMABuffer, xUART2RingBuffer.xRXBuffer.uDMABufferSize,
-					xUART2RingBuffer.xTXBuffer.puDMABuffer, xUART2RingBuffer.xTXBuffer.uDMABufferSize);
+			HAL_UART_DMAStop(pxUARTRingBuffer->huart);
+			vInitUARTRingBuffer(pxUARTRingBuffer, pxUARTRingBuffer->huart, pxUARTRingBuffer->xRXBuffer.puDMABuffer, pxUARTRingBuffer->xRXBuffer.uDMABufferSize,
+					pxUARTRingBuffer->xTXBuffer.puDMABuffer, pxUARTRingBuffer->xTXBuffer.uDMABufferSize);
 		}
 	}
 	else
 	{
 		// Reset due to too overflow rx buffer due to too much data received before it could all process
-		HAL_UART_DMAStop(xUART2RingBuffer.huart);
-		vInitUARTRingBuffer(&xUART2RingBuffer, xUART2RingBuffer.huart, xUART2RingBuffer.xRXBuffer.puDMABuffer, xUART2RingBuffer.xRXBuffer.uDMABufferSize,
-				xUART2RingBuffer.xTXBuffer.puDMABuffer, xUART2RingBuffer.xTXBuffer.uDMABufferSize);
+		HAL_UART_DMAStop(pxUARTRingBuffer->huart);
+		vInitUARTRingBuffer(pxUARTRingBuffer, pxUARTRingBuffer->huart, pxUARTRingBuffer->xRXBuffer.puDMABuffer, pxUARTRingBuffer->xRXBuffer.uDMABufferSize,
+				pxUARTRingBuffer->xTXBuffer.puDMABuffer, pxUARTRingBuffer->xTXBuffer.uDMABufferSize);
 	}
 
-	printf("TailIndex: %u, HeadIndex: %u\r\n", xUART2RingBuffer.xRXBuffer.uTailIndex, xUART2RingBuffer.xRXBuffer.uHeadIndex);
+	printf("TailIndex: %u, HeadIndex: %u\r\n", pxUARTRingBuffer->xRXBuffer.uTailIndex, pxUARTRingBuffer->xRXBuffer.uHeadIndex);
 
 }
 
