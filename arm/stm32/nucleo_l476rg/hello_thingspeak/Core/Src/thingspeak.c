@@ -17,8 +17,8 @@
  * for debugging purposes
  */
 
-
-UARTRingBufferHandle_t xUART2RingBuffer;
+ThingSpeakHandle_t xThingSpeak;
+/* extern ThingSpeakHandle_t xThingSpeak in main */
 
 void USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART)
 {
@@ -26,21 +26,21 @@ void USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART)
 	{
 		__HAL_UART_CLEAR_IDLEFLAG(pxHUART);
 
-		USER_UART_IDLECallback(&xUART2RingBuffer);
+		USER_UART_IDLECallback(&xThingSpeak);
 	}
 }
 
 
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart)
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *pxHUART)
 {
-	if (huart == xUART2RingBuffer.huart)
+	if (pxHUART == xThingSpeak.huart)
 	{
-		xUART2RingBuffer.xRXBuffer.uRollOver++;
+		xThingSpeak.xRXBuffer.uRollOver++;
 	}
 }
 
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *pxHUART)
 {
 	__NOP();
 }
@@ -48,55 +48,54 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart)
 
 
 /* IMPLEMENTATION */
-void vInitThingSpeak(UARTRingBufferHandle_t *pxUARTRingBuffer, UART_HandleTypeDef *huart)
+void vInitThingSpeak(ThingSpeakHandle_t *pxThingSpeak, UART_HandleTypeDef *huart, DMA_HandleTypeDef *pxUART_DMA_RX)
 {
 	// Structure
-	pxUARTRingBuffer->huart = huart;
-	memset(pxUARTRingBuffer->xRXBuffer.puDMABuffer, 0, sizeof(pxUARTRingBuffer->xRXBuffer.puDMABuffer));
-	pxUARTRingBuffer->xRXBuffer.uHeadIndex = 0;
-	pxUARTRingBuffer->xRXBuffer.uTailIndex = 0;
-	pxUARTRingBuffer->xRXBuffer.uRollOver = 0;
-	memset(pxUARTRingBuffer->xTXBuffer.puDMABuffer, 0, sizeof(pxUARTRingBuffer->xTXBuffer.puDMABuffer));
-	pxUARTRingBuffer->xTXBuffer.uHeadIndex = 0;
-	pxUARTRingBuffer->xTXBuffer.uTailIndex = 0;
-	pxUARTRingBuffer->xTXBuffer.uRollOver = 0;
+	pxThingSpeak->huart = huart;
+	pxThingSpeak->pxUART_DMA_RX = pxUART_DMA_RX;
+	memset(pxThingSpeak->xRXBuffer.puDMABuffer, 0, sizeof(pxThingSpeak->xRXBuffer.puDMABuffer));
+	pxThingSpeak->xRXBuffer.uHeadIndex = 0;
+	pxThingSpeak->xRXBuffer.uTailIndex = 0;
+	pxThingSpeak->xRXBuffer.uRollOver = 0;
+	memset(pxThingSpeak->xTXBuffer.puDMABuffer, 0, sizeof(pxThingSpeak->xTXBuffer.puDMABuffer));
+	pxThingSpeak->xTXBuffer.uHeadIndex = 0;
+	pxThingSpeak->xTXBuffer.uTailIndex = 0;
+	pxThingSpeak->xTXBuffer.uRollOver = 0;
 
 	// Receive DMA Buffer
   __HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
-  HAL_UART_Receive_DMA(huart, pxUARTRingBuffer->xRXBuffer.puDMABuffer, sizeof(pxUARTRingBuffer->xRXBuffer.puDMABuffer));
-
-  // Transfer DMA Buffer
+  HAL_UART_Receive_DMA(huart, pxThingSpeak->xRXBuffer.puDMABuffer, sizeof(pxThingSpeak->xRXBuffer.puDMABuffer));
 }
 
 
-void USER_UART_IDLECallback(UARTRingBufferHandle_t *pxUARTRingBuffer)
+void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 {
 	// Tail catch up to head
-	pxUARTRingBuffer->xRXBuffer.uHeadIndex = sizeof(pxUARTRingBuffer->xRXBuffer.puDMABuffer) - __HAL_DMA_GET_COUNTER(&hdma_usart2_rx);
+	pxThingSpeak->xRXBuffer.uHeadIndex = sizeof(pxThingSpeak->xRXBuffer.puDMABuffer) - __HAL_DMA_GET_COUNTER(pxThingSpeak->pxUART_DMA_RX);
 
-	// Task notification...
-	uint16_t uTailIndex = pxUARTRingBuffer->xRXBuffer.uTailIndex;
-	uint16_t uHeadIndex = pxUARTRingBuffer->xRXBuffer.uHeadIndex;
-	uint8_t uRollOver = pxUARTRingBuffer->xRXBuffer.uRollOver;
+	// [!] To be Task deferred...
+	uint16_t uTailIndex = pxThingSpeak->xRXBuffer.uTailIndex;
+	uint16_t uHeadIndex = pxThingSpeak->xRXBuffer.uHeadIndex;
+	uint8_t uRollOver = pxThingSpeak->xRXBuffer.uRollOver;
 	uint16_t uParseIndex = uTailIndex;
 
 	if (uRollOver == 0)
 	{
 		while (uParseIndex != uHeadIndex)
 		{
-			if (pxUARTRingBuffer->xRXBuffer.puDMABuffer[uParseIndex] == '\r')
+			if (pxThingSpeak->xRXBuffer.puDMABuffer[uParseIndex] == '\r')
 			{
 				if (uParseIndex - uTailIndex > 0)
 				{
-					char *candidate = (char *)pxUARTRingBuffer->xRXBuffer.puDMABuffer + uTailIndex;
+					char *candidate = (char *)pxThingSpeak->xRXBuffer.puDMABuffer + uTailIndex;
 					size_t candidateLength = uParseIndex - uTailIndex;
 
 					vHandleCandidateCommand(candidate, candidateLength);
 				}
 
 				// Candidate command found, so update tail to the start of next command in line
-				uTailIndex = (uParseIndex + 1) % sizeof(pxUARTRingBuffer->xRXBuffer.puDMABuffer) ;
-				pxUARTRingBuffer->xRXBuffer.uTailIndex = uTailIndex;
+				uTailIndex = (uParseIndex + 1) % sizeof(pxThingSpeak->xRXBuffer.puDMABuffer) ;
+				pxThingSpeak->xRXBuffer.uTailIndex = uTailIndex;
 			}
 			uParseIndex++;
 		}
@@ -105,21 +104,21 @@ void USER_UART_IDLECallback(UARTRingBufferHandle_t *pxUARTRingBuffer)
 	{
 		if (uParseIndex > uHeadIndex)
 		{
-			while (uParseIndex < sizeof(pxUARTRingBuffer->xRXBuffer.puDMABuffer) )
+			while (uParseIndex < sizeof(pxThingSpeak->xRXBuffer.puDMABuffer) )
 			{
-				if (pxUARTRingBuffer->xRXBuffer.puDMABuffer[uParseIndex] == '\r')
+				if (pxThingSpeak->xRXBuffer.puDMABuffer[uParseIndex] == '\r')
 				{
 					if (uParseIndex - uTailIndex > 0)
 					{
-						char *candidate = (char *)pxUARTRingBuffer->xRXBuffer.puDMABuffer + uTailIndex;
+						char *candidate = (char *)pxThingSpeak->xRXBuffer.puDMABuffer + uTailIndex;
 						size_t candidateLength = uParseIndex - uTailIndex;
 
 						vHandleCandidateCommand(candidate, candidateLength);
 					}
 
 					// Candidate command found, so update tail to the start of next command in line
-					uTailIndex = (uParseIndex + 1) % sizeof(pxUARTRingBuffer->xRXBuffer.puDMABuffer);
-					pxUARTRingBuffer->xRXBuffer.uTailIndex = uTailIndex;
+					uTailIndex = (uParseIndex + 1) % sizeof(pxThingSpeak->xRXBuffer.puDMABuffer);
+					pxThingSpeak->xRXBuffer.uTailIndex = uTailIndex;
 				}
 				uParseIndex++;
 			}
@@ -129,7 +128,7 @@ void USER_UART_IDLECallback(UARTRingBufferHandle_t *pxUARTRingBuffer)
 			// Look for the next one to complete the firsthalf or just keep going
 			while (uParseIndex != uHeadIndex)
 			{
-				if (pxUARTRingBuffer->xRXBuffer.puDMABuffer[uParseIndex] == '\r')
+				if (pxThingSpeak->xRXBuffer.puDMABuffer[uParseIndex] == '\r')
 				{
 					// if uTailIndex > uHeadIndex, use buffer, else use regular
 					if (uTailIndex > uHeadIndex)
@@ -137,15 +136,15 @@ void USER_UART_IDLECallback(UARTRingBufferHandle_t *pxUARTRingBuffer)
 						// uParseIndex will be less than tialIndex in this wrap-around case. So as long as they don't equal each other, a command was received
 						if (uParseIndex - uTailIndex != 0)
 						{
-							char *candidateFirst = (char *)(pxUARTRingBuffer->xRXBuffer.puDMABuffer + uTailIndex);
-							size_t candidateFirstLength = sizeof(pxUARTRingBuffer->xRXBuffer.puDMABuffer) - uTailIndex;
-							char *candidateSecond = (char *)(pxUARTRingBuffer->xRXBuffer.puDMABuffer);
+							char *candidateFirst = (char *)(pxThingSpeak->xRXBuffer.puDMABuffer + uTailIndex);
+							size_t candidateFirstLength = sizeof(pxThingSpeak->xRXBuffer.puDMABuffer) - uTailIndex;
+							char *candidateSecond = (char *)(pxThingSpeak->xRXBuffer.puDMABuffer);
 							size_t candidateSecondLength = uParseIndex;
 
 							vHandleCandidateCommandSplit(candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength);
 
 							// Only unroll if tail has been successfully used for a wrap-around
-							pxUARTRingBuffer->xRXBuffer.uRollOver = 0;
+							pxThingSpeak->xRXBuffer.uRollOver = 0;
 						}
 					}
 					// Wraparound found, so treat this as a regular, business as usual
@@ -153,7 +152,7 @@ void USER_UART_IDLECallback(UARTRingBufferHandle_t *pxUARTRingBuffer)
 					{
 						if (uParseIndex - uTailIndex > 0)
 						{
-							char *candidate = (char *)pxUARTRingBuffer->xRXBuffer.puDMABuffer + uTailIndex;
+							char *candidate = (char *)pxThingSpeak->xRXBuffer.puDMABuffer + uTailIndex;
 							size_t candidateLength = uParseIndex - uTailIndex;
 
 							vHandleCandidateCommand(candidate, candidateLength);
@@ -161,8 +160,8 @@ void USER_UART_IDLECallback(UARTRingBufferHandle_t *pxUARTRingBuffer)
 					}
 
 					// Candidate command found, so update tail to the start of next command in line
-					uTailIndex = (uParseIndex + 1) % sizeof(pxUARTRingBuffer->xRXBuffer.puDMABuffer);
-					pxUARTRingBuffer->xRXBuffer.uTailIndex = uTailIndex;
+					uTailIndex = (uParseIndex + 1) % sizeof(pxThingSpeak->xRXBuffer.puDMABuffer);
+					pxThingSpeak->xRXBuffer.uTailIndex = uTailIndex;
 				}
 
 				uParseIndex++;
@@ -171,18 +170,18 @@ void USER_UART_IDLECallback(UARTRingBufferHandle_t *pxUARTRingBuffer)
 		else
 		{
 			// Reset due to too overflow rx buffer due to too much data received before it could all process
-			HAL_UART_DMAStop(pxUARTRingBuffer->huart);
-			vInitThingSpeak(pxUARTRingBuffer, pxUARTRingBuffer->huart);
+			HAL_UART_DMAStop(pxThingSpeak->huart);
+			vInitThingSpeak(pxThingSpeak, pxThingSpeak->huart, pxThingSpeak->pxUART_DMA_RX);
 		}
 	}
 	else
 	{
 		// Reset due to too overflow rx buffer due to too much data received before it could all process
-		HAL_UART_DMAStop(pxUARTRingBuffer->huart);
-		vInitThingSpeak(pxUARTRingBuffer, pxUARTRingBuffer->huart);
+		HAL_UART_DMAStop(pxThingSpeak->huart);
+		vInitThingSpeak(pxThingSpeak, pxThingSpeak->huart, pxThingSpeak->pxUART_DMA_RX);
 	}
 
-	printf("TailIndex: %u, HeadIndex: %u\r\n", pxUARTRingBuffer->xRXBuffer.uTailIndex, pxUARTRingBuffer->xRXBuffer.uHeadIndex);
+	printf("TailIndex: %u, HeadIndex: %u\r\n", pxThingSpeak->xRXBuffer.uTailIndex, pxThingSpeak->xRXBuffer.uHeadIndex);
 
 }
 
@@ -239,11 +238,11 @@ void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFi
 }
 
 
-uint8_t bTransmitCommand(UARTRingBufferHandle_t *xRingBuffer, const char *command, size_t numElements)
+uint8_t bTransmitCommand(ThingSpeakHandle_t *pxThingSpeak, const char *command, size_t numElements)
 {
-	/* Could also add a wait for a semaphore, and semaphore released from isr on transmit complete callback */
-	strncpy((char *)xRingBuffer->xTXBuffer.puDMABuffer, command, numElements);
-	if (HAL_UART_Transmit_DMA(xRingBuffer->huart, (uint8_t *)xRingBuffer->xTXBuffer.puDMABuffer, numElements) == HAL_OK)
+	/* [!] Could also add a wait for a semaphore, and semaphore released from isr on transmit complete callback */
+	strncpy((char *)pxThingSpeak->xTXBuffer.puDMABuffer, command, numElements);
+	if (HAL_UART_Transmit_DMA(pxThingSpeak->huart, (uint8_t *)pxThingSpeak->xTXBuffer.puDMABuffer, numElements) == HAL_OK)
 	{
 		return 1;
 	}

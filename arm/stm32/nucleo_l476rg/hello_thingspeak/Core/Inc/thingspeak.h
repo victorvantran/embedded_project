@@ -11,17 +11,21 @@
 #include <stdio.h>
 #include <string.h>
 
+
+/* IMPLEMENTATION */
+
+
+
+
+
 /* APPLICATION PROGRAMMER */
 #include "stm32l4xx_hal.h"
 
 // UART2
 #define UART_BUFFER_SIZE 128UL
-extern UART_HandleTypeDef huart2;
-extern DMA_HandleTypeDef hdma_usart2_rx;
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef* huart);
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef* huart);
-// extern USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *huart); // stm_it
-
+void USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART);
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *pxHUART);
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *pxHUART);
 
 
 /* IMPLEMENTATION */
@@ -29,7 +33,6 @@ typedef struct
 {
 	uint8_t puDMABuffer[UART_BUFFER_SIZE];
 #if UART_BUFFER_SIZE <= 255UL
-	uint8_t uDMABufferSize;
 	uint8_t uHeadIndex;
 	uint8_t uTailIndex;
 #elif UART_BUFFER_SIZE <= 65535UL
@@ -46,17 +49,18 @@ typedef struct
 typedef struct
 {
 	UART_HandleTypeDef *huart;
+	DMA_HandleTypeDef *pxUART_DMA_RX;
 	DMARingBufferHandle_t xRXBuffer;
 	DMARingBufferHandle_t xTXBuffer;
-} UARTRingBufferHandle_t;
+} ThingSpeakHandle_t;
 
 
 /* Initialize ring buffer */
-void vInitThingSpeak(UARTRingBufferHandle_t *pxUARTRingBuffer, UART_HandleTypeDef *huart);
+void vInitThingSpeak(ThingSpeakHandle_t *pxThingSpeak, UART_HandleTypeDef *huart, DMA_HandleTypeDef *pxUART_DMA_RX);
 
 
 /* Receive */
-void USER_UART_IDLECallback(UARTRingBufferHandle_t *pxUARTRingBuffer);
+void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak);
 
 uint8_t bCommandMatch(const char *command, const char *candidate, size_t commandLength);
 uint8_t bCommandSplitMatch(const char *command,
@@ -69,8 +73,7 @@ void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFi
 
 
 /* Transmit */
-uint8_t bTransmitCommand(UARTRingBufferHandle_t *xRingBuffer, const char *command, size_t numElements);
-
+uint8_t bTransmitCommand(ThingSpeakHandle_t *pxThingSpeak, const char *command, size_t numElements);
 
 
 

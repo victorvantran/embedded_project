@@ -87,8 +87,7 @@ PUTCHAR_PROTOTYPE
 	return ch;
 }
 
-
-extern UARTRingBufferHandle_t xUART2RingBuffer;
+extern ThingSpeakHandle_t xThingSpeak;
 
 /* USER CODE END 0 */
 
@@ -124,7 +123,7 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  vInitThingSpeak(&xUART2RingBuffer, &huart2);
+  vInitThingSpeak(&xThingSpeak, &huart2, &hdma_usart2_rx);
   /* USER CODE END 2 */
 
   /* Init scheduler */
