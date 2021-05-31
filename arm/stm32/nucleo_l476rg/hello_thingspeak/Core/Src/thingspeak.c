@@ -66,7 +66,7 @@ void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 				if (uParseIndex - uTailIndex > 0)
 				{
 					char *candidate = (char *)pxThingSpeak->xRXBuffer.puDMABuffer + uTailIndex;
-					size_t candidateLength = uParseIndex - uTailIndex;
+					size_t candidateLength = uParseIndex - uTailIndex - 1;
 
 					vHandleCandidateCommand(candidate, candidateLength);
 				}
@@ -89,7 +89,7 @@ void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 					if (uParseIndex - uTailIndex > 0)
 					{
 						char *candidate = (char *)pxThingSpeak->xRXBuffer.puDMABuffer + uTailIndex;
-						size_t candidateLength = uParseIndex - uTailIndex;
+						size_t candidateLength = uParseIndex - uTailIndex - 1;
 
 						vHandleCandidateCommand(candidate, candidateLength);
 					}
@@ -131,7 +131,7 @@ void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 						if (uParseIndex - uTailIndex > 0)
 						{
 							char *candidate = (char *)pxThingSpeak->xRXBuffer.puDMABuffer + uTailIndex;
-							size_t candidateLength = uParseIndex - uTailIndex;
+							size_t candidateLength = uParseIndex - uTailIndex - 1;
 
 							vHandleCandidateCommand(candidate, candidateLength);
 						}
@@ -207,7 +207,8 @@ void vHandleCandidateCommand(const char *candidate, size_t candidateLength)
 	}
 	else
 	{
-		HAL_UART_Transmit(&huart2, (const char *)candidate, candidateLength, 1000);
+		//HAL_UART_Transmit(&huart2, "INVLD: ", 7, 1000);
+		HAL_UART_Transmit(&huart2, (char *)candidate, candidateLength, 1000);
 		//printf("INVLD\r\n");
 	}
 }
@@ -230,8 +231,8 @@ void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFi
 	}
 	else
 	{
-		HAL_UART_Transmit(&huart2, (const char *)candidateFirst, candidateFirstLength, 1000);
-		HAL_UART_Transmit(&huart2, (const char *)candidateSecond, candidateSecondLength, 1000);
+		HAL_UART_Transmit(&huart2, (char *)candidateFirst, candidateFirstLength, 1000);
+		HAL_UART_Transmit(&huart2, (char *)candidateSecond, candidateSecondLength, 1000);
 		//printf("INVLD\r\n");
 	}
 }
