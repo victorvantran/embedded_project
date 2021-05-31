@@ -17,37 +17,14 @@
  * for debugging purposes
  */
 
-ThingSpeakHandle_t xThingSpeak;
 /* extern ThingSpeakHandle_t xThingSpeak in main */
-
-void USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART)
-{
-	if (__HAL_UART_GET_FLAG(pxHUART, UART_FLAG_IDLE) != RESET)
-	{
-		__HAL_UART_CLEAR_IDLEFLAG(pxHUART);
-
-		USER_UART_IDLECallback(&xThingSpeak);
-	}
-}
-
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *pxHUART)
-{
-	if (pxHUART == xThingSpeak.huart)
-	{
-		xThingSpeak.xRXBuffer.uRollOver++;
-	}
-}
-
-
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *pxHUART)
-{
-	__NOP();
-}
 
 
 
 /* IMPLEMENTATION */
+ThingSpeakHandle_t xThingSpeak;
+
+
 void vInitThingSpeak(ThingSpeakHandle_t *pxThingSpeak, UART_HandleTypeDef *huart, DMA_HandleTypeDef *pxUART_DMA_RX)
 {
 	// Structure
@@ -83,7 +60,8 @@ void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 	{
 		while (uParseIndex != uHeadIndex)
 		{
-			if (pxThingSpeak->xRXBuffer.puDMABuffer[uParseIndex] == '\r')
+			//if (pxThingSpeak->xRXBuffer.puDMABuffer[uParseIndex] == '\r')
+			if (bEndMatch(pxThingSpeak, uParseIndex))
 			{
 				if (uParseIndex - uTailIndex > 0)
 				{
@@ -106,7 +84,7 @@ void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 		{
 			while (uParseIndex < sizeof(pxThingSpeak->xRXBuffer.puDMABuffer) )
 			{
-				if (pxThingSpeak->xRXBuffer.puDMABuffer[uParseIndex] == '\r')
+				if (bEndMatch(pxThingSpeak, uParseIndex))
 				{
 					if (uParseIndex - uTailIndex > 0)
 					{
@@ -128,7 +106,7 @@ void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 			// Look for the next one to complete the firsthalf or just keep going
 			while (uParseIndex != uHeadIndex)
 			{
-				if (pxThingSpeak->xRXBuffer.puDMABuffer[uParseIndex] == '\r')
+				if (bEndMatch(pxThingSpeak, uParseIndex))
 				{
 					// if uTailIndex > uHeadIndex, use buffer, else use regular
 					if (uTailIndex > uHeadIndex)
@@ -186,6 +164,12 @@ void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 }
 
 
+uint8_t bEndMatch(ThingSpeakHandle_t *pxThingSpeak, uint16_t uParseIndex)
+{
+	return (pxThingSpeak->xRXBuffer.puDMABuffer[uParseIndex] == '\n') &&
+			(pxThingSpeak->xRXBuffer.puDMABuffer[(uParseIndex - 1) % sizeof(pxThingSpeak->xRXBuffer.puDMABuffer)] == '\r');
+}
+
 
 uint8_t bCommandMatch(const char *command, const char *candidate, size_t candidateLength)
 {
@@ -203,6 +187,10 @@ uint8_t bCommandSplitMatch(const char *command,
 }
 
 
+/* Debug purposes on serial monitor */
+extern UART_HandleTypeDef huart2;
+
+
 void vHandleCandidateCommand(const char *candidate, size_t candidateLength)
 {
 	if (bCommandMatch("ON", candidate, candidateLength))
@@ -213,9 +201,14 @@ void vHandleCandidateCommand(const char *candidate, size_t candidateLength)
 	{
 		printf("UNSET LIGHT\r\n");
 	}
+	else if (bCommandMatch("OK", candidate, candidateLength))
+	{
+		printf("OK Received\r\n");
+	}
 	else
 	{
-		printf("INVLD\r\n");
+		HAL_UART_Transmit(&huart2, (const char *)candidate, candidateLength, 1000);
+		//printf("INVLD\r\n");
 	}
 }
 
@@ -231,9 +224,15 @@ void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFi
 	{
 		printf("UNSET LIGHT\r\n");
 	}
+	else if (bCommandSplitMatch("OK", candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength))
+	{
+		printf("OK Received\r\n");
+	}
 	else
 	{
-		printf("INVLD\r\n");
+		HAL_UART_Transmit(&huart2, (const char *)candidateFirst, candidateFirstLength, 1000);
+		HAL_UART_Transmit(&huart2, (const char *)candidateSecond, candidateSecondLength, 1000);
+		//printf("INVLD\r\n");
 	}
 }
 
@@ -250,6 +249,32 @@ uint8_t bTransmitCommand(ThingSpeakHandle_t *pxThingSpeak, const char *command, 
 	{
 		return 0;
 	}
+}
+
+
+void USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART)
+{
+	if (__HAL_UART_GET_FLAG(pxHUART, UART_FLAG_IDLE) != RESET)
+	{
+		__HAL_UART_CLEAR_IDLEFLAG(pxHUART);
+
+		USER_UART_IDLECallback(&xThingSpeak);
+	}
+}
+
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *pxHUART)
+{
+	if (pxHUART == xThingSpeak.huart)
+	{
+		xThingSpeak.xRXBuffer.uRollOver++;
+	}
+}
+
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *pxHUART)
+{
+	__NOP();
 }
 
 

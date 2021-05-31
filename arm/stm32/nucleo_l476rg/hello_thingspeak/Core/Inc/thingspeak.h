@@ -20,12 +20,9 @@
 
 /* APPLICATION PROGRAMMER */
 #include "stm32l4xx_hal.h"
-
-// UART2
 #define UART_BUFFER_SIZE 128UL
-void USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART);
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *pxHUART);
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *pxHUART);
+// call USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART) in stm32xxxx_it.c
+
 
 
 /* IMPLEMENTATION */
@@ -62,6 +59,8 @@ void vInitThingSpeak(ThingSpeakHandle_t *pxThingSpeak, UART_HandleTypeDef *huart
 /* Receive */
 void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak);
 
+/* AT Commands and Messages end in \r\n */
+uint8_t bEndMatch(ThingSpeakHandle_t *pxThingSpeak, uint16_t uParseIndex);
 uint8_t bCommandMatch(const char *command, const char *candidate, size_t commandLength);
 uint8_t bCommandSplitMatch(const char *command,
 		const char *candidateFirst, size_t candidateFirstLength,
@@ -74,6 +73,12 @@ void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFi
 
 /* Transmit */
 uint8_t bTransmitCommand(ThingSpeakHandle_t *pxThingSpeak, const char *command, size_t numElements);
+
+
+/* Event Handler */
+void USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART);
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *pxHUART);
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *pxHUART);
 
 
 
