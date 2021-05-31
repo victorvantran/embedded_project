@@ -203,12 +203,15 @@ void vHandleCandidateCommand(const char *candidate, size_t candidateLength)
 	}
 	else if (bCommandMatch("OK", candidate, candidateLength))
 	{
+		/* Give Semaphore from ISR */
+
 		printf("OK Received\r\n");
 	}
 	else
 	{
 		//HAL_UART_Transmit(&huart2, "INVLD: ", 7, 1000);
 		HAL_UART_Transmit(&huart2, (char *)candidate, candidateLength, 1000);
+		HAL_UART_Transmit(&huart2, "\r\n", 2, 1000);
 		//printf("INVLD\r\n");
 	}
 }
@@ -227,12 +230,14 @@ void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFi
 	}
 	else if (bCommandSplitMatch("OK", candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength))
 	{
+		/* Give Semaphore from ISR */
 		printf("OK Received\r\n");
 	}
 	else
 	{
 		HAL_UART_Transmit(&huart2, (char *)candidateFirst, candidateFirstLength, 1000);
 		HAL_UART_Transmit(&huart2, (char *)candidateSecond, candidateSecondLength, 1000);
+		HAL_UART_Transmit(&huart2, "\r\n", 2, 1000);
 		//printf("INVLD\r\n");
 	}
 }
@@ -276,6 +281,33 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *pxHUART)
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *pxHUART)
 {
 	__NOP();
+}
+
+
+
+uint8_t bTransmitThingSpeakData(char *apiKey, uint8_t field, uint16_t value)
+{
+	char local_buf[100] = {0};
+	char local_buf2[30] = {0};
+
+	bTransmitCommand(&xThingSpeak, "AT+CIPSTART=\"TCP\",\"184.106.153.149\",80\r\n", sizeof("AT+CIPSTART=\"TCP\",\"184.106.153.149\",80\r\n"));
+	osDelay(3000);
+
+	//sprintf(local_buf, "GET /update?api_key=%sfield%u=%u\r\n", apiKey, field, value);
+	sprintf(local_buf, "GET https://api.thingspeak.com/update?api_key=%s&field%u=%u\r\n", apiKey, field, value);
+	int len = strlen(local_buf);
+
+	sprintf(local_buf2, "AT+CIPSEND=%d\r\n", len);
+	bTransmitCommand(&xThingSpeak, local_buf2, strlen(local_buf2));
+	osDelay(3000);
+
+	bTransmitCommand(&xThingSpeak, local_buf, strlen(local_buf));
+	osDelay(3000);
+
+
+	osDelay(3000);
+
+	return 1;
 }
 
 

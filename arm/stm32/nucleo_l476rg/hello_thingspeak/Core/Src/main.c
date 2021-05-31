@@ -372,9 +372,15 @@ void StartThingSpeakTask(void *argument)
 
   	//printf("hello task\r\n");
 
-  	bTransmitCommand(&xThingSpeak, "AT\r\n", 4);
+  	//bTransmitCommand(&xThingSpeak, "AT+CWLAP\r\n", 4 + 6);
+  	//bTransmitCommand(&xThingSpeak, "AT\r\n", 4);
 
-  	osDelay(500);
+  	//bTransmitCommand(&xThingSpeak, "AT+CIFSR\r\n", 4 + 6);
+
+  	bTransmitThingSpeakData("HE3ZUVZ1MKI1FOPB", 1, 543);
+
+
+  	osDelay(20000);
   }
   /* USER CODE END 5 */
 }

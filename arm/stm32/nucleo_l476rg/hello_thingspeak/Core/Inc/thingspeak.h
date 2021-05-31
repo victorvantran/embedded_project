@@ -20,7 +20,7 @@
 
 /* APPLICATION PROGRAMMER */
 #include "stm32l4xx_hal.h"
-#define UART_BUFFER_SIZE 128UL
+#define UART_BUFFER_SIZE 1024UL//128UL
 // call USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART) in stm32xxxx_it.c
 
 
@@ -81,5 +81,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *pxHUART);
 void HAL_UART_TxCpltCallback(UART_HandleTypeDef *pxHUART);
 
 
+/* ThingSpeak */
+uint8_t bTransmitThingSpeakData(char *apiKey, uint8_t field, uint16_t value);
 
 #endif /* INC_THINGSPEAK_H_ */
