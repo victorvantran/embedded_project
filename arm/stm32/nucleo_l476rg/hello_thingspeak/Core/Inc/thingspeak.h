@@ -22,7 +22,7 @@
 #include "stm32l4xx_hal.h"
 #include "cmsis_os.h"
 
-#define UART_BUFFER_SIZE 1024UL//128UL
+#define UART_BUFFER_SIZE 256UL//1024UL//128UL [!} THINGSPEAK TASK SIZE CORRELATES TO BUFFER SIZE DUE TO HANDLING LOCALBUFF
 // call USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART) in stm32xxxx_it.c
 
 

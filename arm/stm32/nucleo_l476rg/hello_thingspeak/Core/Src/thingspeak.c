@@ -9,7 +9,7 @@
 #include "thingspeak.h"
 
 /* APPLICATION PROGRAMMER */
-/*
+/*processMessageTask
  * Note: The delay of implicit CF when sending serial data through putty may cause idle interrupt to occur before \r is sent!
  * This will cause two idle interrupts to occur for say, "message\r" 1) message 2) \r.
  * To avoid this, explicitly put CR "message^M"
@@ -78,6 +78,7 @@ void vStartThingSpeakTask(void *argument)
   	i += 20;
   	osDelay(20000);
   	//osDelay(20000);
+  	printf("thingspeak\r\n");
 
   	//xTaskNotifyFromISR((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle, (uint32_t)pxThingSpeak->xRXBuffer.uHeadIndex, eSetValueWithOverwrite, &xHigherPriorityTaskWoken);
   	//portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
@@ -92,8 +93,6 @@ void vStartThingSpeakTask(void *argument)
 
 void vStartProcMessageTask(void *argument)
 {
-  /* USER CODE BEGIN StartProcMessageTask */
-  /* Infinite loop */
 	uint32_t uHeadIndex = 0;
 	ThingSpeakHandle_t *pxThingSpeak = argument;
 
@@ -111,8 +110,15 @@ void vStartProcMessageTask(void *argument)
   	{
   		// Error Handle
   	}
+
+  	printf("parse\r\n");
+
+  	/*
+  	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+    osDelay(100);
+  	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+  	*/
   }
-  /* USER CODE END StartProcMessageTask */
 }
 
 
@@ -337,7 +343,7 @@ void vHandleCandidateCommand(ThingSpeakHandle_t *pxThingSpeak, const char *candi
 	else if (bCommandMatch("OK", candidate, candidateLength))
 	{
 		printf("OK Received\r\n");
-		printf("%lu\r\n", (uint32_t)pxThingSpeak->xThingSpeakTaskHandle);
+		//printf("%lu\r\n", (uint32_t)pxThingSpeak->xThingSpeakTaskHandle);
 
 		/* Task Notify */
 		xTaskNotify((TaskHandle_t)pxThingSpeak->xThingSpeakTaskHandle, (uint32_t)OK, eSetValueWithOverwrite);

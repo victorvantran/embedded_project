@@ -43,11 +43,11 @@
 #endif /* __GNUC__ */
 
 #define THINGSPEAK_TASK_NAME "thingSpeakTask"
-#define THINGSPEAK_TASK_SIZE (128 * 4)
+#define THINGSPEAK_TASK_SIZE (128 * 8)
 #define THINGSPEAK_TASK_PRIORITY (osPriority_t) osPriorityAboveNormal
 
 #define PROCESS_MESSAGE_TASK_NAME "processMessageTask"
-#define PROCESS_MESSAGE_TASK_SIZE (128 * 4)
+#define PROCESS_MESSAGE_TASK_SIZE (128 * 8)
 #define PROCESS_MESSAGE_TASK_PRIORITY (osPriority_t) osPriorityNormal
 /* USER CODE END PD */
 
@@ -375,7 +375,6 @@ void StartTinkerTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-	int i = 1151;
   for(;;)
   {
   	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
@@ -391,8 +390,9 @@ void StartTinkerTask(void *argument)
 
   	//bTransmitThingSpeakData(&xThingSpeak, "HE3ZUVZ1MKI1FOPB", 1, i);
   	//i += 20;
-  	osDelay(200000);
-
+  	osDelay(1000);
+  	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+  	printf("hello task\r\n");
 
   	//xTaskNotifyFromISR((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle, (uint32_t)pxThingSpeak->xRXBuffer.uHeadIndex, eSetValueWithOverwrite, &xHigherPriorityTaskWoken);
   	//portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
