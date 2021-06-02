@@ -42,13 +42,7 @@
 	#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
 #endif /* __GNUC__ */
 
-#define THINGSPEAK_TASK_NAME "thingSpeakTask"
-#define THINGSPEAK_TASK_SIZE (128 * 8)
-#define THINGSPEAK_TASK_PRIORITY (osPriority_t) osPriorityAboveNormal
 
-#define PROCESS_MESSAGE_TASK_NAME "processMessageTask"
-#define PROCESS_MESSAGE_TASK_SIZE (128 * 8)
-#define PROCESS_MESSAGE_TASK_PRIORITY (osPriority_t) osPriorityNormal
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -392,7 +386,6 @@ void StartTinkerTask(void *argument)
   	//i += 20;
   	osDelay(1000);
   	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-  	printf("hello task\r\n");
 
   	//xTaskNotifyFromISR((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle, (uint32_t)pxThingSpeak->xRXBuffer.uHeadIndex, eSetValueWithOverwrite, &xHigherPriorityTaskWoken);
   	//portYIELD_FROM_ISR(xHigherPriorityTaskWoken);

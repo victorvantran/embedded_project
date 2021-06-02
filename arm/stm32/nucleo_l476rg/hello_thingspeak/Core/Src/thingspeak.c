@@ -56,7 +56,7 @@ void vStartThingSpeakTask(void *argument)
 	//HAL_Delay(3000);
 	ThingSpeakHandle_t *pxThingSpeak = argument;
 
-	int i = 711;
+	int i = 1711;
   for(;;)
   {
   	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
@@ -73,18 +73,9 @@ void vStartThingSpeakTask(void *argument)
   	//bTransmitThingSpeakData(pxThingSpeak, "HE3ZUVZ1MKI1FOPB", 1, i);
 
   	bTransmitThingSpeakData(pxThingSpeak, "HE3ZUVZ1MKI1FOPB", 1, i);
-  	//bTransmitCommand(&xThingSpeak, "AT\r\n", 4);
 
   	i += 20;
   	osDelay(20000);
-  	//osDelay(20000);
-  	printf("thingspeak\r\n");
-
-  	//xTaskNotifyFromISR((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle, (uint32_t)pxThingSpeak->xRXBuffer.uHeadIndex, eSetValueWithOverwrite, &xHigherPriorityTaskWoken);
-  	//portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-
-  	//xTaskNotifyGive((TaskHandle_t)procMessageTaskHandle);
-
   }
 }
 
@@ -108,16 +99,8 @@ void vStartProcMessageTask(void *argument)
   	}
   	else
   	{
-  		// Error Handle
+  		/* Error Handle: Timeout occurred before a message came */
   	}
-
-  	printf("parse\r\n");
-
-  	/*
-  	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-    osDelay(100);
-  	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-  	*/
   }
 }
 
@@ -312,7 +295,9 @@ uint8_t bEndMatch(ThingSpeakHandle_t *pxThingSpeak, uint16_t uParseIndex)
 
 uint8_t bCommandMatch(const char *command, const char *candidate, size_t candidateLength)
 {
-	return (strlen(command) == candidateLength) && (strncmp(command, candidate, candidateLength) == 0);
+	return strnstr(candidate, command, candidateLength) != NULL;
+	//return (strncmp(command, (const char*)xThingSpeak.xRXBuffer.puDMABuffer + xThingSpeak.xRXBuffer.uHeadIndex - 2 - candidateLength, candidateLength) == 0);
+	//return (strlen(command) == candidateLength) && (strncmp(command, candidate, candidateLength) == 0);
 }
 
 
@@ -320,9 +305,45 @@ uint8_t bCommandSplitMatch(const char *command,
 		const char *candidateFirst, size_t candidateFirstLength,
 		const char *candidateSecond, size_t candidateSecondLength)
 {
-	return (strlen(command) == candidateFirstLength + candidateSecondLength) &&
-			(strncmp(command, candidateFirst, candidateFirstLength) == 0) &&
-			(strncmp(command + candidateFirstLength, candidateSecond, candidateSecondLength) == 0);
+	char circular[candidateFirstLength + candidateSecondLength];
+	memcpy(circular, candidateFirst, candidateFirstLength);
+	memcpy(circular + candidateFirstLength, candidateSecond, candidateSecondLength);
+
+	return strnstr((const char*)circular, command, sizeof(circular)) != NULL;
+
+
+
+	//return 0;
+
+	/*
+	 * 	if (strlen(command) < candidateFirstLength)
+	{
+		if (strncmp(candidateFirst, command, candidateFirstLength) != NULL) return 1;
+	}
+
+	if (strlen(command) < candidateSecondLength)
+	{
+		if (strncmp(candidateSecond, command, candidateSecondLength) != NULL) return 1;
+	}
+	 *
+	 *
+	 */
+
+	/*
+	 * 	//return (strlen(command) == candidateFirstLength + candidateSecondLength) &&
+	//		(strncmp(command, candidateFirst, candidateFirstLength) == 0) &&
+	//		(strncmp(command + candidateFirstLength, candidateSecond, candidateSecondLength) == 0);
+	 *
+	 */
+
+
+	/*
+	const char *pc1FirstOccurence = strnstr(candidateFirst, command, candidateFirstLength);
+	const char *pc2FirstOccurence = strnstr(candidateSecond, command, candidateFirstLength);
+
+	return (pcFirstOccurence != NULL &&
+				(strncmp(command + candidateFirstLength, candidateSecond, candidateSecondLength) == 0);
+				*/
 }
 
 
@@ -340,21 +361,38 @@ void vHandleCandidateCommand(ThingSpeakHandle_t *pxThingSpeak, const char *candi
 	{
 		printf("UNSET LIGHT\r\n");
 	}
+	else if (bCommandMatch("SEND OK", candidate, candidateLength))
+	{
+		printf("SEND OK Received\r\n");
+	}
 	else if (bCommandMatch("OK", candidate, candidateLength))
 	{
 		printf("OK Received\r\n");
+		//HAL_UART_Transmit(&huart2, (char *)candidate, candidateLength, 1000);
+		//HAL_UART_Transmit(&huart2, "\r\n", 2, 1000);
 		//printf("%lu\r\n", (uint32_t)pxThingSpeak->xThingSpeakTaskHandle);
 
 		/* Task Notify */
 		xTaskNotify((TaskHandle_t)pxThingSpeak->xThingSpeakTaskHandle, (uint32_t)OK, eSetValueWithOverwrite);
 	}
+	else if (bCommandMatch(">", candidate, candidateLength))
+	{
+		printf("> Received\r\n");
+	}
+	else if (bCommandMatch("CLOSED", candidate, candidateLength))
+	{
+		printf("CLOSED Received\r\n");
+	}
 	else
 	{
 		//HAL_UART_Transmit(&huart2, "INVLD: ", 7, 1000);
-		HAL_UART_Transmit(&huart2, (char *)candidate, candidateLength, 1000);
-		HAL_UART_Transmit(&huart2, "\r\n", 2, 1000);
+		//HAL_UART_Transmit(&huart2, (char *)candidate, candidateLength, 1000);
+		//HAL_UART_Transmit(&huart2, "\r\n", 2, 1000);
 		//printf("INVLD\r\n");
 	}
+
+	HAL_UART_Transmit(&huart2, (char *)candidate, candidateLength, 1000);
+	HAL_UART_Transmit(&huart2, "\r\n", 2, 1000);
 }
 
 
@@ -375,13 +413,26 @@ void vHandleCandidateCommandSplit(ThingSpeakHandle_t *pxThingSpeak, const char *
 		/* TaskNotify */
 		xTaskNotify((TaskHandle_t)pxThingSpeak->xThingSpeakTaskHandle, (uint32_t)OK, eSetValueWithOverwrite);
 	}
+	else if (bCommandSplitMatch(">", candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength))
+	{
+		printf("> Received\r\n");
+	}
+	else if (bCommandSplitMatch("SEND OK", candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength))
+	{
+		printf("SEND OK Received\r\n");
+	}
+	else if (bCommandSplitMatch("CLOSED", candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength))
+	{
+		printf("CLOSED Received\r\n");
+	}
 	else
 	{
-		HAL_UART_Transmit(&huart2, (char *)candidateFirst, candidateFirstLength, 1000);
-		HAL_UART_Transmit(&huart2, (char *)candidateSecond, candidateSecondLength, 1000);
-		HAL_UART_Transmit(&huart2, "\r\n", 2, 1000);
 		//printf("INVLD\r\n");
 	}
+
+	HAL_UART_Transmit(&huart2, (char *)candidateFirst, candidateFirstLength, 1000);
+	HAL_UART_Transmit(&huart2, (char *)candidateSecond, candidateSecondLength, 1000);
+	HAL_UART_Transmit(&huart2, "\r\n", 2, 1000);
 }
 
 
@@ -443,7 +494,8 @@ uint8_t bTransmitThingSpeakData(ThingSpeakHandle_t *pxThingSpeak, char *apiKey, 
 	//osDelay(3000);
 
 	//sprintf(local_buf, "GET /update?api_key=%sfield%u=%u\r\n", apiKey, field, value);
-	sprintf(local_buf, "GET https://api.thingspeak.com/update?api_key=%s&field%u=%u\r\n", apiKey, field, value);
+	//sprintf(local_buf, "GET https://api.thingspeak.com/update?api_key=%s&field%u=%u\r\n", apiKey, field, value);
+	sprintf(local_buf, "GET /update?api_key=%s&field%u=%u\r\n", apiKey, field, value);
 	int len = strlen(local_buf);
 
 	sprintf(local_buf2, "AT+CIPSEND=%d\r\n", len);
@@ -454,8 +506,6 @@ uint8_t bTransmitThingSpeakData(ThingSpeakHandle_t *pxThingSpeak, char *apiKey, 
 	bTransmitCommand(pxThingSpeak, local_buf, strlen(local_buf));
 	bReceiveThingSpeakCommand(pxThingSpeak, OK, pdMS_TO_TICKS(3000));
 	//osDelay(3000);
-
-
 
 	return 1;
 }

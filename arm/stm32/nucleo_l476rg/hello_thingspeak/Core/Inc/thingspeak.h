@@ -8,26 +8,30 @@
 #ifndef INC_THINGSPEAK_H_
 #define INC_THINGSPEAK_H_
 
-#include <stdio.h>
-#include <string.h>
-
-
-/* IMPLEMENTATION */
-
-
-
 
 
 /* APPLICATION PROGRAMMER */
 #include "stm32l4xx_hal.h"
 #include "cmsis_os.h"
 
-#define UART_BUFFER_SIZE 256UL//1024UL//128UL [!} THINGSPEAK TASK SIZE CORRELATES TO BUFFER SIZE DUE TO HANDLING LOCALBUFF
+#define UART_BUFFER_SIZE 256UL
 // call USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART) in stm32xxxx_it.c
+
+#define THINGSPEAK_TASK_NAME "thingSpeakTask"
+#define THINGSPEAK_TASK_SIZE (128 * 4) + (UART_BUFFER_SIZE)
+#define THINGSPEAK_TASK_PRIORITY (osPriority_t) osPriorityAboveNormal
+
+#define PROCESS_MESSAGE_TASK_NAME "processMessageTask"
+#define PROCESS_MESSAGE_TASK_SIZE (128 * 4) + (UART_BUFFER_SIZE)
+#define PROCESS_MESSAGE_TASK_PRIORITY (osPriority_t) osPriorityNormal
 
 
 
 /* IMPLEMENTATION */
+#include <stdio.h>
+#include <string.h>
+
+
 typedef struct
 {
 	uint8_t puDMABuffer[UART_BUFFER_SIZE];
@@ -65,7 +69,11 @@ void vStartProcMessageTask(void *argument);
 /* Commands */
 typedef enum
 {
-	OK
+	OK,
+	GT,
+	SEND_OK,
+	CLOSED
+
 } ATCommand_t;
 
 
