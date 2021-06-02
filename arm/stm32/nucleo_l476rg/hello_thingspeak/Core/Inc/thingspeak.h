@@ -51,34 +51,44 @@ typedef struct
 	DMA_HandleTypeDef *pxUART_DMA_RX;
 	DMARingBufferHandle_t xRXBuffer;
 	DMARingBufferHandle_t xTXBuffer;
+	osThreadId_t xThingSpeakTaskHandle;
+	osThreadAttr_t xThingSpeakTaskAttributes;
 	osThreadId_t xProcMessageTaskHandle;
 	osThreadAttr_t xProcMessageTaskAttributes;
 } ThingSpeakHandle_t;
 
 
-
-osThreadId_t procMessageTask1Handle;
-const osThreadAttr_t procMessageTask1_attributes;
+void vStartThingSpeakTask(void *argument);
 void vStartProcMessageTask(void *argument);
 
 
+/* Commands */
+typedef enum
+{
+	OK
+} ATCommand_t;
+
+
 /* Initialize ring buffer */
-void vInitThingSpeak(ThingSpeakHandle_t *pxThingSpeak, UART_HandleTypeDef *huart, DMA_HandleTypeDef *pxUART_DMA_RX);
+void vInitThingSpeak(ThingSpeakHandle_t *pxThingSpeak, UART_HandleTypeDef *huart, DMA_HandleTypeDef *pxUART_DMA_RX,
+		const char *pcThingSpeakTaskName, uint32_t uThingSpeakTaskSize, osPriority_t xThingSpeakTaskPriority,
+		const char *pcProcessMessageTaskName, uint32_t uProcessMessageTaskSize, osPriority_t xProcessMessageTaskPriority);
+
 void vRefreshThingSpeak(ThingSpeakHandle_t *pxThingSpeak);
 
 /* Receive */
 void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak);
 
 /* AT Commands and Messages end in \r\n */
-uint8_t bParseMessage(uint16_t uTailIndex, uint16_t uHeadIndex, uint16_t uParseIndex, uint8_t uRollOver);
+uint8_t bParseMessage(ThingSpeakHandle_t *pxThingSpeak, uint16_t uHeadIndex);
 uint8_t bEndMatch(ThingSpeakHandle_t *pxThingSpeak, uint16_t uParseIndex);
 uint8_t bCommandMatch(const char *command, const char *candidate, size_t commandLength);
 uint8_t bCommandSplitMatch(const char *command,
 		const char *candidateFirst, size_t candidateFirstLength,
 		const char *candidateSecond, size_t candidateSecondLength);
 
-void vHandleCandidateCommand(const char *candidate, size_t candidateLength);
-void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFirstLength,
+void vHandleCandidateCommand(ThingSpeakHandle_t *pxThingSpeak, const char *candidate, size_t candidateLength);
+void vHandleCandidateCommandSplit(ThingSpeakHandle_t *pxThingSpeak, const char *candidateFirst, size_t candidateFirstLength,
 		const char *candidateSecond, size_t candidateSecondLength);
 
 
@@ -93,6 +103,6 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *pxHUART);
 
 
 /* ThingSpeak */
-uint8_t bTransmitThingSpeakData(char *apiKey, uint8_t field, uint16_t value);
+uint8_t bTransmitThingSpeakData(ThingSpeakHandle_t *pxThingSpeak, char *apiKey, uint8_t field, uint16_t value);
 
 #endif /* INC_THINGSPEAK_H_ */

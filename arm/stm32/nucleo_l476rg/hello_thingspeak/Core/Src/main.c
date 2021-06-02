@@ -41,6 +41,14 @@
 #else
 	#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
 #endif /* __GNUC__ */
+
+#define THINGSPEAK_TASK_NAME "thingSpeakTask"
+#define THINGSPEAK_TASK_SIZE (128 * 4)
+#define THINGSPEAK_TASK_PRIORITY (osPriority_t) osPriorityAboveNormal
+
+#define PROCESS_MESSAGE_TASK_NAME "processMessageTask"
+#define PROCESS_MESSAGE_TASK_SIZE (128 * 4)
+#define PROCESS_MESSAGE_TASK_PRIORITY (osPriority_t) osPriorityNormal
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,19 +64,12 @@ DMA_HandleTypeDef hdma_usart1_tx;
 DMA_HandleTypeDef hdma_usart2_rx;
 DMA_HandleTypeDef hdma_usart2_tx;
 
-/* Definitions for thingspeakTask */
-osThreadId_t thingspeakTaskHandle;
-const osThreadAttr_t thingspeakTask_attributes = {
-  .name = "thingspeakTask",
+/* Definitions for tinkerTask */
+osThreadId_t tinkerTaskHandle;
+const osThreadAttr_t tinkerTask_attributes = {
+  .name = "tinkerTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
-};
-/* Definitions for procMessageTask */
-osThreadId_t procMessageTaskHandle;
-const osThreadAttr_t procMessageTask_attributes = {
-  .name = "procMessageTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityAboveNormal,
 };
 /* USER CODE BEGIN PV */
 
@@ -80,8 +81,7 @@ static void MX_GPIO_Init(void);
 static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART1_UART_Init(void);
-void StartThingSpeakTask(void *argument);
-void StartProcMessageTask(void *argument);
+void StartTinkerTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -153,11 +153,8 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of thingspeakTask */
-  thingspeakTaskHandle = osThreadNew(StartThingSpeakTask, NULL, &thingspeakTask_attributes);
-
-  /* creation of procMessageTask */
-  procMessageTaskHandle = osThreadNew(StartProcMessageTask, NULL, &procMessageTask_attributes);
+  /* creation of tinkerTask */
+  tinkerTaskHandle = osThreadNew(StartTinkerTask, NULL, &tinkerTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -165,7 +162,9 @@ int main(void)
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
-  vInitThingSpeak(&xThingSpeak, &huart2, &hdma_usart2_rx);
+  vInitThingSpeak(&xThingSpeak, &huart1, &hdma_usart1_rx,
+  		THINGSPEAK_TASK_NAME, THINGSPEAK_TASK_SIZE, THINGSPEAK_TASK_PRIORITY,
+  		PROCESS_MESSAGE_TASK_NAME, PROCESS_MESSAGE_TASK_SIZE, PROCESS_MESSAGE_TASK_PRIORITY);
 
   /* USER CODE END RTOS_EVENTS */
 
@@ -365,18 +364,18 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartThingSpeakTask */
+/* USER CODE BEGIN Header_StartTinkerTask */
 /**
-  * @brief  Function implementing the thingspeakTask thread.
+  * @brief  Function implementing the tinkerTask thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartThingSpeakTask */
-void StartThingSpeakTask(void *argument)
+/* USER CODE END Header_StartTinkerTask */
+void StartTinkerTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-	int i = 300;
+	int i = 1151;
   for(;;)
   {
   	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
@@ -390,11 +389,9 @@ void StartThingSpeakTask(void *argument)
 
   	//bTransmitCommand(&xThingSpeak, "AT+CIFSR\r\n", 4 + 6);
 
-  	//bTransmitThingSpeakData("HE3ZUVZ1MKI1FOPB", 1, i);
-  	i += 20;
-  	osDelay(2000);
-
-
+  	//bTransmitThingSpeakData(&xThingSpeak, "HE3ZUVZ1MKI1FOPB", 1, i);
+  	//i += 20;
+  	osDelay(200000);
 
 
   	//xTaskNotifyFromISR((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle, (uint32_t)pxThingSpeak->xRXBuffer.uHeadIndex, eSetValueWithOverwrite, &xHigherPriorityTaskWoken);
@@ -404,38 +401,6 @@ void StartThingSpeakTask(void *argument)
 
   }
   /* USER CODE END 5 */
-}
-
-/* USER CODE BEGIN Header_StartProcMessageTask */
-/**
-* @brief Function implementing the procMessageTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartProcMessageTask */
-void StartProcMessageTask(void *argument)
-{
-  /* USER CODE BEGIN StartProcMessageTask */
-  /* Infinite loop */
-  for(;;)
-  {
-  	//if (xTaskNotifyWait(0, 0xffffffff, NULL, pdMS_TO_TICKS(1000)) == pdTRUE)
-  	//if (xTaskNotifyWait(0, 0xffffffff, NULL, 3) == pdTRUE)
-  	if (ulTaskNotifyTake(pdTRUE, HAL_MAX_DELAY))
-  	{
-    	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
-  	}
-  	else
-  	{
-    	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
-  	}
-
-  	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-    //osDelay(100);
-  	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-
-  }
-  /* USER CODE END StartProcMessageTask */
 }
 
  /**

@@ -17,41 +17,108 @@
  * for debugging purposes
  */
 
+
+ThingSpeakHandle_t xThingSpeak;
 /* extern ThingSpeakHandle_t xThingSpeak in main */
+
+void USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART)
+{
+	if (__HAL_UART_GET_FLAG(pxHUART, UART_FLAG_IDLE) != RESET)
+	{
+		__HAL_UART_CLEAR_IDLEFLAG(pxHUART);
+
+		USER_UART_IDLECallback(&xThingSpeak);
+	}
+}
+
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *pxHUART)
+{
+	if (pxHUART == xThingSpeak.huart)
+	{
+		xThingSpeak.xRXBuffer.uRollOver++;
+	}
+}
+
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *pxHUART)
+{
+	__NOP();
+}
+
 
 
 
 /* IMPLEMENTATION */
-ThingSpeakHandle_t xThingSpeak;
+void vStartThingSpeakTask(void *argument)
+{
+	//bTransmitCommand(&xThingSpeak, "AT+RST\r\n", 4 + 4);
+	//HAL_Delay(3000);
+	ThingSpeakHandle_t *pxThingSpeak = argument;
+
+	int i = 711;
+  for(;;)
+  {
+  	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+
+  	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+
+  	//printf("hello task\r\n");
+
+  	//bTransmitCommand(&xThingSpeak, "AT+CWLAP\r\n", 4 + 6);
+  	//bTransmitCommand(&xThingSpeak, "AT\r\n", 4);
+
+  	//bTransmitCommand(&xThingSpeak, "AT+CIFSR\r\n", 4 + 6);
+
+  	//bTransmitThingSpeakData(pxThingSpeak, "HE3ZUVZ1MKI1FOPB", 1, i);
+
+  	bTransmitThingSpeakData(pxThingSpeak, "HE3ZUVZ1MKI1FOPB", 1, i);
+  	//bTransmitCommand(&xThingSpeak, "AT\r\n", 4);
+
+  	i += 20;
+  	osDelay(20000);
+  	//osDelay(20000);
+
+  	//xTaskNotifyFromISR((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle, (uint32_t)pxThingSpeak->xRXBuffer.uHeadIndex, eSetValueWithOverwrite, &xHigherPriorityTaskWoken);
+  	//portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+
+  	//xTaskNotifyGive((TaskHandle_t)procMessageTaskHandle);
+
+  }
+}
+
+
 
 
 void vStartProcMessageTask(void *argument)
 {
   /* USER CODE BEGIN StartProcMessageTask */
   /* Infinite loop */
+	uint32_t uHeadIndex = 0;
+	ThingSpeakHandle_t *pxThingSpeak = argument;
+
   for(;;)
   {
-  	//if (xTaskNotifyWait(0, 0xffffffff, NULL, pdMS_TO_TICKS(1000)) == pdTRUE)
-  	//if (xTaskNotifyWait(0, 0xffffffff, NULL, 3) == pdTRUE)
-  	if (ulTaskNotifyTake(pdTRUE, HAL_MAX_DELAY))
+  	if (xTaskNotifyWait(0, 0xffffffff, &uHeadIndex, pdMS_TO_TICKS(1000)) == pdTRUE)
   	{
-    	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+  		bParseMessage(pxThingSpeak, (uint16_t)uHeadIndex);
+
+    	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+      osDelay(100);
+    	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
   	}
   	else
   	{
-    	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+  		// Error Handle
   	}
-
-  	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-    osDelay(100);
-  	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
-
   }
   /* USER CODE END StartProcMessageTask */
 }
 
 
-void vInitThingSpeak(ThingSpeakHandle_t *pxThingSpeak, UART_HandleTypeDef *huart, DMA_HandleTypeDef *pxUART_DMA_RX)
+void vInitThingSpeak(ThingSpeakHandle_t *pxThingSpeak, UART_HandleTypeDef *huart, DMA_HandleTypeDef *pxUART_DMA_RX,
+		const char *pcThingSpeakTaskName, uint32_t uThingSpeakTaskSize, osPriority_t xThingSpeakTaskPriority,
+		const char *pcProcessMessageTaskName, uint32_t uProcessMessageTaskSize, osPriority_t xProcessMessageTaskPriority)
 {
 	// Structure
 	pxThingSpeak->huart = huart;
@@ -65,10 +132,15 @@ void vInitThingSpeak(ThingSpeakHandle_t *pxThingSpeak, UART_HandleTypeDef *huart
 	pxThingSpeak->xTXBuffer.uTailIndex = 0;
 	pxThingSpeak->xTXBuffer.uRollOver = 0;
 
-	pxThingSpeak->xProcMessageTaskAttributes.name = "procMessage1Task";
-	pxThingSpeak->xProcMessageTaskAttributes.stack_size = 128 * 4;
-	pxThingSpeak->xProcMessageTaskAttributes.priority = (osPriority_t) osPriorityAboveNormal,
-	pxThingSpeak->xProcMessageTaskHandle = osThreadNew(vStartProcMessageTask, NULL, &pxThingSpeak->xProcMessageTaskAttributes);
+	pxThingSpeak->xThingSpeakTaskAttributes.name = pcThingSpeakTaskName;
+	pxThingSpeak->xThingSpeakTaskAttributes.stack_size = uThingSpeakTaskSize;
+	pxThingSpeak->xThingSpeakTaskAttributes.priority = xThingSpeakTaskPriority,
+	pxThingSpeak->xThingSpeakTaskHandle = osThreadNew(vStartThingSpeakTask, pxThingSpeak, &pxThingSpeak->xThingSpeakTaskAttributes);
+
+	pxThingSpeak->xProcMessageTaskAttributes.name = pcProcessMessageTaskName;
+	pxThingSpeak->xProcMessageTaskAttributes.stack_size = uProcessMessageTaskSize;
+	pxThingSpeak->xProcMessageTaskAttributes.priority = xProcessMessageTaskPriority,
+	pxThingSpeak->xProcMessageTaskHandle = osThreadNew(vStartProcMessageTask, pxThingSpeak, &pxThingSpeak->xProcMessageTaskAttributes);
 
 
 	// Receive DMA Buffer
@@ -97,12 +169,20 @@ void vRefreshThingSpeak(ThingSpeakHandle_t *pxThingSpeak)
 
 void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 {
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
 	// Tail catch up to head
 	pxThingSpeak->xRXBuffer.uHeadIndex = sizeof(pxThingSpeak->xRXBuffer.puDMABuffer) - __HAL_DMA_GET_COUNTER(pxThingSpeak->pxUART_DMA_RX);
 
-	// [!] To be Task deferred...
+	// Overwrite the most recent viable head (mailbox)
+	xTaskNotifyFromISR((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle, (uint32_t)pxThingSpeak->xRXBuffer.uHeadIndex, eSetValueWithOverwrite, &xHigherPriorityTaskWoken);
+	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+}
+
+
+uint8_t bParseMessage(ThingSpeakHandle_t *pxThingSpeak, uint16_t uHeadIndex)
+{
 	uint16_t uTailIndex = pxThingSpeak->xRXBuffer.uTailIndex;
-	uint16_t uHeadIndex = pxThingSpeak->xRXBuffer.uHeadIndex;
 	uint8_t uRollOver = pxThingSpeak->xRXBuffer.uRollOver;
 	uint16_t uParseIndex = uTailIndex;
 
@@ -118,7 +198,7 @@ void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 					char *candidate = (char *)pxThingSpeak->xRXBuffer.puDMABuffer + uTailIndex;
 					size_t candidateLength = uParseIndex - uTailIndex - 1;
 
-					vHandleCandidateCommand(candidate, candidateLength);
+					vHandleCandidateCommand(pxThingSpeak, candidate, candidateLength);
 				}
 
 				// Candidate command found, so update tail to the start of next command in line
@@ -141,7 +221,7 @@ void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 						char *candidate = (char *)pxThingSpeak->xRXBuffer.puDMABuffer + uTailIndex;
 						size_t candidateLength = uParseIndex - uTailIndex - 1;
 
-						vHandleCandidateCommand(candidate, candidateLength);
+						vHandleCandidateCommand(pxThingSpeak, candidate, candidateLength);
 					}
 
 					// Candidate command found, so update tail to the start of next command in line
@@ -169,7 +249,7 @@ void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 							char *candidateSecond = (char *)(pxThingSpeak->xRXBuffer.puDMABuffer);
 							size_t candidateSecondLength = uParseIndex;
 
-							vHandleCandidateCommandSplit(candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength);
+							vHandleCandidateCommandSplit(pxThingSpeak, candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength);
 
 							// Only unroll if tail has been successfully used for a wrap-around
 							pxThingSpeak->xRXBuffer.uRollOver = 0;
@@ -183,7 +263,7 @@ void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 							char *candidate = (char *)pxThingSpeak->xRXBuffer.puDMABuffer + uTailIndex;
 							size_t candidateLength = uParseIndex - uTailIndex - 1;
 
-							vHandleCandidateCommand(candidate, candidateLength);
+							vHandleCandidateCommand(pxThingSpeak, candidate, candidateLength);
 						}
 					}
 
@@ -213,29 +293,7 @@ void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 
 	printf("TailIndex: %u, HeadIndex: %u\r\n", pxThingSpeak->xRXBuffer.uTailIndex, pxThingSpeak->xRXBuffer.uHeadIndex);
 
-
-
-	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-	xTaskNotifyFromISR((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle, (uint32_t)pxThingSpeak->xRXBuffer.uHeadIndex, eSetValueWithOverwrite, &xHigherPriorityTaskWoken);
-	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-
-	//vTaskNotifyGiveFromISR((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle, &xHigherPriorityTaskWoken);
-	//portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-
-
-	//printf("%u\r\n", ((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle));
-
-
-	//BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-	//vTaskNotifyGiveFromISR((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle, &xHigherPriorityTaskWoken);
-	//portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
-
-}
-
-
-uint8_t bParseMessage(uint16_t uTailIndex, uint16_t uHeadIndex, uint16_t uParseIndex, uint8_t uRollOver)
-{
-
+	return 0;
 }
 
 
@@ -266,7 +324,7 @@ uint8_t bCommandSplitMatch(const char *command,
 extern UART_HandleTypeDef huart2;
 
 
-void vHandleCandidateCommand(const char *candidate, size_t candidateLength)
+void vHandleCandidateCommand(ThingSpeakHandle_t *pxThingSpeak, const char *candidate, size_t candidateLength)
 {
 	if (bCommandMatch("ON", candidate, candidateLength))
 	{
@@ -278,9 +336,11 @@ void vHandleCandidateCommand(const char *candidate, size_t candidateLength)
 	}
 	else if (bCommandMatch("OK", candidate, candidateLength))
 	{
-		/* Give Semaphore from ISR */
-
 		printf("OK Received\r\n");
+		printf("%lu\r\n", (uint32_t)pxThingSpeak->xThingSpeakTaskHandle);
+
+		/* Task Notify */
+		xTaskNotify((TaskHandle_t)pxThingSpeak->xThingSpeakTaskHandle, (uint32_t)OK, eSetValueWithOverwrite);
 	}
 	else
 	{
@@ -292,7 +352,7 @@ void vHandleCandidateCommand(const char *candidate, size_t candidateLength)
 }
 
 
-void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFirstLength,
+void vHandleCandidateCommandSplit(ThingSpeakHandle_t *pxThingSpeak, const char *candidateFirst, size_t candidateFirstLength,
 		const char *candidateSecond, size_t candidateSecondLength)
 {
 	if (bCommandSplitMatch("ON", candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength))
@@ -305,8 +365,9 @@ void vHandleCandidateCommandSplit(const char *candidateFirst, size_t candidateFi
 	}
 	else if (bCommandSplitMatch("OK", candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength))
 	{
-		/* Give Semaphore from ISR */
 		printf("OK Received\r\n");
+		/* TaskNotify */
+		xTaskNotify((TaskHandle_t)pxThingSpeak->xThingSpeakTaskHandle, (uint32_t)OK, eSetValueWithOverwrite);
 	}
 	else
 	{
@@ -333,57 +394,68 @@ uint8_t bTransmitCommand(ThingSpeakHandle_t *pxThingSpeak, const char *command, 
 }
 
 
-void USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART)
+uint8_t bReceiveThingSpeakCommand(ThingSpeakHandle_t *pxThingSpeak, ATCommand_t eATCommand, TickType_t xTicksToWait)
 {
-	if (__HAL_UART_GET_FLAG(pxHUART, UART_FLAG_IDLE) != RESET)
+	// Another Task for "Event group" Or Mailbox notification that waits for
+
+	// "Expects" said data, and will wait for a period of time for it
+	// If it does not get the data in time or gets the wrong data (based on xTaskNotifyWait), then return 0.
+	// If success then return 1.
+
+
+	// Enum for message
+	uint32_t uCommand;
+	if (xTaskNotifyWait(0, 0xffffffff, &uCommand, xTicksToWait) == pdPASS)
 	{
-		__HAL_UART_CLEAR_IDLEFLAG(pxHUART);
-
-		USER_UART_IDLECallback(&xThingSpeak);
+		if ((ATCommand_t)uCommand == eATCommand)
+		{
+			return 1;
+		}
+		else
+		{
+			/* Error Handle: Wrong command expected */
+			return 0;
+		}
 	}
-}
-
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *pxHUART)
-{
-	if (pxHUART == xThingSpeak.huart)
+	else
 	{
-		xThingSpeak.xRXBuffer.uRollOver++;
+		/* Error Handle: Timeout */
+		return 0;
 	}
+
 }
 
 
-void HAL_UART_TxCpltCallback(UART_HandleTypeDef *pxHUART)
+uint8_t bTransmitThingSpeakData(ThingSpeakHandle_t *pxThingSpeak, char *apiKey, uint8_t field, uint16_t value)
 {
-	__NOP();
-}
-
-
-
-uint8_t bTransmitThingSpeakData(char *apiKey, uint8_t field, uint16_t value)
-{
+	//osDelay(3000);
 	char local_buf[100] = {0};
 	char local_buf2[30] = {0};
 
-	bTransmitCommand(&xThingSpeak, "AT+CIPSTART=\"TCP\",\"184.106.153.149\",80\r\n", sizeof("AT+CIPSTART=\"TCP\",\"184.106.153.149\",80\r\n"));
-	osDelay(3000);
+	bTransmitCommand(pxThingSpeak, "AT+CIPSTART=\"TCP\",\"184.106.153.149\",80\r\n", sizeof("AT+CIPSTART=\"TCP\",\"184.106.153.149\",80\r\n"));
+	bReceiveThingSpeakCommand(pxThingSpeak, OK, pdMS_TO_TICKS(3000));
+	//osDelay(3000);
 
 	//sprintf(local_buf, "GET /update?api_key=%sfield%u=%u\r\n", apiKey, field, value);
 	sprintf(local_buf, "GET https://api.thingspeak.com/update?api_key=%s&field%u=%u\r\n", apiKey, field, value);
 	int len = strlen(local_buf);
 
 	sprintf(local_buf2, "AT+CIPSEND=%d\r\n", len);
-	bTransmitCommand(&xThingSpeak, local_buf2, strlen(local_buf2));
-	osDelay(3000);
+	bTransmitCommand(pxThingSpeak, local_buf2, strlen(local_buf2));
+	bReceiveThingSpeakCommand(pxThingSpeak, OK, pdMS_TO_TICKS(3000));
+	//osDelay(3000);
 
-	bTransmitCommand(&xThingSpeak, local_buf, strlen(local_buf));
-	osDelay(3000);
+	bTransmitCommand(pxThingSpeak, local_buf, strlen(local_buf));
+	bReceiveThingSpeakCommand(pxThingSpeak, OK, pdMS_TO_TICKS(3000));
+	//osDelay(3000);
 
 
-	osDelay(3000);
 
 	return 1;
 }
+
+
+
 
 
 
