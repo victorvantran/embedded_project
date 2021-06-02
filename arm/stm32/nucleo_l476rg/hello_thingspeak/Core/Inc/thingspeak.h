@@ -20,6 +20,8 @@
 
 /* APPLICATION PROGRAMMER */
 #include "stm32l4xx_hal.h"
+#include "cmsis_os.h"
+
 #define UART_BUFFER_SIZE 1024UL//128UL
 // call USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART) in stm32xxxx_it.c
 
@@ -49,17 +51,26 @@ typedef struct
 	DMA_HandleTypeDef *pxUART_DMA_RX;
 	DMARingBufferHandle_t xRXBuffer;
 	DMARingBufferHandle_t xTXBuffer;
+	osThreadId_t xProcMessageTaskHandle;
+	osThreadAttr_t xProcMessageTaskAttributes;
 } ThingSpeakHandle_t;
+
+
+
+osThreadId_t procMessageTask1Handle;
+const osThreadAttr_t procMessageTask1_attributes;
+void vStartProcMessageTask(void *argument);
 
 
 /* Initialize ring buffer */
 void vInitThingSpeak(ThingSpeakHandle_t *pxThingSpeak, UART_HandleTypeDef *huart, DMA_HandleTypeDef *pxUART_DMA_RX);
-
+void vRefreshThingSpeak(ThingSpeakHandle_t *pxThingSpeak);
 
 /* Receive */
 void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak);
 
 /* AT Commands and Messages end in \r\n */
+uint8_t bParseMessage(uint16_t uTailIndex, uint16_t uHeadIndex, uint16_t uParseIndex, uint8_t uRollOver);
 uint8_t bEndMatch(ThingSpeakHandle_t *pxThingSpeak, uint16_t uParseIndex);
 uint8_t bCommandMatch(const char *command, const char *candidate, size_t commandLength);
 uint8_t bCommandSplitMatch(const char *command,

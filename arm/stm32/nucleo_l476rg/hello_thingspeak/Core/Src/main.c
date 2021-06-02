@@ -63,6 +63,13 @@ const osThreadAttr_t thingspeakTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for procMessageTask */
+osThreadId_t procMessageTaskHandle;
+const osThreadAttr_t procMessageTask_attributes = {
+  .name = "procMessageTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityAboveNormal,
+};
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -74,6 +81,7 @@ static void MX_DMA_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_USART1_UART_Init(void);
 void StartThingSpeakTask(void *argument);
+void StartProcMessageTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -123,7 +131,6 @@ int main(void)
   MX_USART2_UART_Init();
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-  vInitThingSpeak(&xThingSpeak, &huart1, &hdma_usart1_rx);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -149,12 +156,17 @@ int main(void)
   /* creation of thingspeakTask */
   thingspeakTaskHandle = osThreadNew(StartThingSpeakTask, NULL, &thingspeakTask_attributes);
 
+  /* creation of procMessageTask */
+  procMessageTaskHandle = osThreadNew(StartProcMessageTask, NULL, &procMessageTask_attributes);
+
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
   /* USER CODE END RTOS_THREADS */
 
   /* USER CODE BEGIN RTOS_EVENTS */
   /* add events, ... */
+  vInitThingSpeak(&xThingSpeak, &huart2, &hdma_usart2_rx);
+
   /* USER CODE END RTOS_EVENTS */
 
   /* Start scheduler */
@@ -364,6 +376,7 @@ void StartThingSpeakTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
+	int i = 300;
   for(;;)
   {
   	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
@@ -377,12 +390,52 @@ void StartThingSpeakTask(void *argument)
 
   	//bTransmitCommand(&xThingSpeak, "AT+CIFSR\r\n", 4 + 6);
 
-  	bTransmitThingSpeakData("HE3ZUVZ1MKI1FOPB", 1, 543);
+  	//bTransmitThingSpeakData("HE3ZUVZ1MKI1FOPB", 1, i);
+  	i += 20;
+  	osDelay(2000);
 
 
-  	osDelay(20000);
+
+
+  	//xTaskNotifyFromISR((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle, (uint32_t)pxThingSpeak->xRXBuffer.uHeadIndex, eSetValueWithOverwrite, &xHigherPriorityTaskWoken);
+  	//portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+
+  	//xTaskNotifyGive((TaskHandle_t)procMessageTaskHandle);
+
   }
   /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_StartProcMessageTask */
+/**
+* @brief Function implementing the procMessageTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartProcMessageTask */
+void StartProcMessageTask(void *argument)
+{
+  /* USER CODE BEGIN StartProcMessageTask */
+  /* Infinite loop */
+  for(;;)
+  {
+  	//if (xTaskNotifyWait(0, 0xffffffff, NULL, pdMS_TO_TICKS(1000)) == pdTRUE)
+  	//if (xTaskNotifyWait(0, 0xffffffff, NULL, 3) == pdTRUE)
+  	if (ulTaskNotifyTake(pdTRUE, HAL_MAX_DELAY))
+  	{
+    	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+  	}
+  	else
+  	{
+    	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+  	}
+
+  	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+    //osDelay(100);
+  	//HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+
+  }
+  /* USER CODE END StartProcMessageTask */
 }
 
  /**

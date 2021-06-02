@@ -25,6 +25,32 @@
 ThingSpeakHandle_t xThingSpeak;
 
 
+void vStartProcMessageTask(void *argument)
+{
+  /* USER CODE BEGIN StartProcMessageTask */
+  /* Infinite loop */
+  for(;;)
+  {
+  	//if (xTaskNotifyWait(0, 0xffffffff, NULL, pdMS_TO_TICKS(1000)) == pdTRUE)
+  	//if (xTaskNotifyWait(0, 0xffffffff, NULL, 3) == pdTRUE)
+  	if (ulTaskNotifyTake(pdTRUE, HAL_MAX_DELAY))
+  	{
+    	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_SET);
+  	}
+  	else
+  	{
+    	//HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0, GPIO_PIN_RESET);
+  	}
+
+  	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+    osDelay(100);
+  	HAL_GPIO_TogglePin(GPIOB, GPIO_PIN_0);
+
+  }
+  /* USER CODE END StartProcMessageTask */
+}
+
+
 void vInitThingSpeak(ThingSpeakHandle_t *pxThingSpeak, UART_HandleTypeDef *huart, DMA_HandleTypeDef *pxUART_DMA_RX)
 {
 	// Structure
@@ -39,9 +65,33 @@ void vInitThingSpeak(ThingSpeakHandle_t *pxThingSpeak, UART_HandleTypeDef *huart
 	pxThingSpeak->xTXBuffer.uTailIndex = 0;
 	pxThingSpeak->xTXBuffer.uRollOver = 0;
 
+	pxThingSpeak->xProcMessageTaskAttributes.name = "procMessage1Task";
+	pxThingSpeak->xProcMessageTaskAttributes.stack_size = 128 * 4;
+	pxThingSpeak->xProcMessageTaskAttributes.priority = (osPriority_t) osPriorityAboveNormal,
+	pxThingSpeak->xProcMessageTaskHandle = osThreadNew(vStartProcMessageTask, NULL, &pxThingSpeak->xProcMessageTaskAttributes);
+
+
 	// Receive DMA Buffer
   __HAL_UART_ENABLE_IT(huart, UART_IT_IDLE);
   HAL_UART_Receive_DMA(huart, pxThingSpeak->xRXBuffer.puDMABuffer, sizeof(pxThingSpeak->xRXBuffer.puDMABuffer));
+}
+
+
+void vRefreshThingSpeak(ThingSpeakHandle_t *pxThingSpeak)
+{
+	HAL_UART_DMAStop(pxThingSpeak->huart);
+
+	memset(pxThingSpeak->xRXBuffer.puDMABuffer, 0, sizeof(pxThingSpeak->xRXBuffer.puDMABuffer));
+	pxThingSpeak->xRXBuffer.uHeadIndex = 0;
+	pxThingSpeak->xRXBuffer.uTailIndex = 0;
+	pxThingSpeak->xRXBuffer.uRollOver = 0;
+	memset(pxThingSpeak->xTXBuffer.puDMABuffer, 0, sizeof(pxThingSpeak->xTXBuffer.puDMABuffer));
+	pxThingSpeak->xTXBuffer.uHeadIndex = 0;
+	pxThingSpeak->xTXBuffer.uTailIndex = 0;
+	pxThingSpeak->xTXBuffer.uRollOver = 0;
+
+  __HAL_UART_ENABLE_IT(pxThingSpeak->huart, UART_IT_IDLE);
+  HAL_UART_Receive_DMA(pxThingSpeak->huart, pxThingSpeak->xRXBuffer.puDMABuffer, sizeof(pxThingSpeak->xRXBuffer.puDMABuffer));
 }
 
 
@@ -148,18 +198,43 @@ void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak)
 		else
 		{
 			// Reset due to too overflow rx buffer due to too much data received before it could all process
-			HAL_UART_DMAStop(pxThingSpeak->huart);
-			vInitThingSpeak(pxThingSpeak, pxThingSpeak->huart, pxThingSpeak->pxUART_DMA_RX);
+			//HAL_UART_DMAStop(pxThingSpeak->huart);
+			//vInitThingSpeak(pxThingSpeak, pxThingSpeak->huart, pxThingSpeak->pxUART_DMA_RX, pxThingSpeak->xProcMessageTaskHandle);
+			vRefreshThingSpeak(pxThingSpeak);
 		}
 	}
 	else
 	{
 		// Reset due to too overflow rx buffer due to too much data received before it could all process
-		HAL_UART_DMAStop(pxThingSpeak->huart);
-		vInitThingSpeak(pxThingSpeak, pxThingSpeak->huart, pxThingSpeak->pxUART_DMA_RX);
+		//HAL_UART_DMAStop(pxThingSpeak->huart);
+		//vInitThingSpeak(pxThingSpeak, pxThingSpeak->huart, pxThingSpeak->pxUART_DMA_RX, pxThingSpeak->xProcMessageTaskHandle);
+		vRefreshThingSpeak(pxThingSpeak);
 	}
 
 	printf("TailIndex: %u, HeadIndex: %u\r\n", pxThingSpeak->xRXBuffer.uTailIndex, pxThingSpeak->xRXBuffer.uHeadIndex);
+
+
+
+	BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+	xTaskNotifyFromISR((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle, (uint32_t)pxThingSpeak->xRXBuffer.uHeadIndex, eSetValueWithOverwrite, &xHigherPriorityTaskWoken);
+	portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+
+	//vTaskNotifyGiveFromISR((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle, &xHigherPriorityTaskWoken);
+	//portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+
+
+	//printf("%u\r\n", ((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle));
+
+
+	//BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+	//vTaskNotifyGiveFromISR((TaskHandle_t)pxThingSpeak->xProcMessageTaskHandle, &xHigherPriorityTaskWoken);
+	//portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+
+}
+
+
+uint8_t bParseMessage(uint16_t uTailIndex, uint16_t uHeadIndex, uint16_t uParseIndex, uint8_t uRollOver)
+{
 
 }
 
