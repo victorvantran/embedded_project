@@ -24,19 +24,15 @@
 #define BME280_CHIP_ADDRESS 0xD0
 #define BME280_MEASURE_DATA_ADDRESS 0xF7
 
-#define BME280_CTRL_HUM 0xF2
-#define BME280_CTRL_MEAS 0xF4
+#define BME280_CTRL_HUM_ADDRESS 0xF2
+#define BME280_CTRL_MEAS_ADDRESS 0xF4
 
 #define BME280_CALIBRATE_ADDRESS_A 0x88
 #define BME280_CALIBRATE_ADDRESS_B 0xE1
 
-
-
-
 #define BME280_SLEEP_MODE 0x00
 #define BME280_FORCED_MODE 0x01
 #define BME280_NORMAL_MODE 0x11
-
 
 
 
@@ -71,6 +67,8 @@ typedef struct
 		int16_t sH5;
 		int8_t cH6;
 	} xDigH;
+
+	int32_t lTemperatureFine;
 } BME280CalibrationData_t;
 
 
@@ -165,8 +163,33 @@ void BME280_vMeasureForced(BME280Handle_t *pxBME280,
 /* Read the raw register data [pressure, temperature, humidity] and cast 20-bit, 20-bit, 16-bit to the respective raw data */
 void BME280_vReadRawData(BME280Handle_t *pxBME280);
 
+/* Compensation formals are based on Bosch Sensortec BME280 Datasheet */
+
+/* Calculate t_fine (Temperature Fine Resolution Value) that is used to calculate compensated temperature, pressure, and humidity */
+int32_t BME280_lCalculateTemperatureFine(BME280Handle_t *pxBME280);
+
+/* Fast compensation due to no floating point calculations (2 point precision) */
+int32_t BME280_lCompensateTemperatureData(BME280Handle_t *pxBME280);
+/* Returns pressure in Pascal [Pa] in unsigned 32-bit integer 24.8 format. Divide by 256.0f for Pa value */
+uint32_t BME280_ulCompensatePressureData(BME280Handle_t *pxBME280);
+int32_t BME280_lCompensateHumidityData(BME280Handle_t *pxBME280);
+
+/* Cortex-M4 FPU cannot support double precision operations, so opt for float */
+float BME280_fCompensateTemperatureData(BME280Handle_t *pxBME280);
+float BME280_fCompensatePressureData(BME280Handle_t *pxBME280);
+float BME280_fCompensateHumidityData(BME280Handle_t *pxBME280);
+
+
+
+
 /* DEBUG */
 void BME280_vPrintRawData(BME280Handle_t *pxBME280);
+
+void BME280_vPrintCalibrationData(BME280Handle_t *pxBME280);
+
+void BME280_vPrintlCompensatedData(BME280Handle_t *pxBME280);
+
+void BME280_vPrintfCompensatedData(BME280Handle_t *pxBME280);
 
 
 #endif /* INC_BME280_H_ */
