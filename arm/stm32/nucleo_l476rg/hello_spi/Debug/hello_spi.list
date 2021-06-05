@@ -37,11 +37,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  16 .debug_macro  000071ac  00000000  00000000  0004eb98  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_line   00021be9  00000000  00000000  00055d44  2**0
+ 17 .debug_line   00021be7  00000000  00000000  00055d44  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    00103e77  00000000  00000000  0007792d  2**0
+ 18 .debug_str    00103e77  00000000  00000000  0007792b  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000053  00000000  00000000  0017b7a4  2**0
+ 19 .comment      00000053  00000000  00000000  0017b7a2  2**0
                   CONTENTS, READONLY
  20 .debug_frame  00008480  00000000  00000000  0017b7f8  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
@@ -1440,9 +1440,9 @@ static void MX_SPI1_Init(void)
  8000eaa:	4b18      	ldr	r3, [pc, #96]	; (8000f0c <MX_SPI1_Init+0x74>)
  8000eac:	2200      	movs	r2, #0
  8000eae:	609a      	str	r2, [r3, #8]
-  hspi1.Init.DataSize = SPI_DATASIZE_4BIT;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
  8000eb0:	4b16      	ldr	r3, [pc, #88]	; (8000f0c <MX_SPI1_Init+0x74>)
- 8000eb2:	f44f 7240 	mov.w	r2, #768	; 0x300
+ 8000eb2:	f44f 62e0 	mov.w	r2, #1792	; 0x700
  8000eb6:	60da      	str	r2, [r3, #12]
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
  8000eb8:	4b14      	ldr	r3, [pc, #80]	; (8000f0c <MX_SPI1_Init+0x74>)
@@ -1727,11 +1727,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
  800104c:	4a04      	ldr	r2, [pc, #16]	; (8001060 <HAL_TIM_PeriodElapsedCallback+0x20>)
  800104e:	4293      	cmp	r3, r2
  8001050:	d101      	bne.n	8001056 <HAL_TIM_PeriodElapsedCallback+0x16>
-		{
-			FatFsCnt = 0;
-			SDTimer_Handler();
-		}
-		*/
     HAL_IncTick();
  8001052:	f000 fa4f 	bl	80014f4 <HAL_IncTick>
   }

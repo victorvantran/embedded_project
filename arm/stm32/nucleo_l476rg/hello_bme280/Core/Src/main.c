@@ -55,7 +55,7 @@ UART_HandleTypeDef huart2;
 osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
-  .stack_size = 128 * 4,
+  .stack_size = 128 * 4*2,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
@@ -347,11 +347,20 @@ void StartDefaultTask(void *argument)
 
 
   	//HAL_I2C_Mem_Read(&hi2c1, (0x76<<1), BME280_DATA_ADDRESS, 1, &(xBME280.xRawData), 8, 50);
+  	//BME280_vDisableHumidity(&xBME280);
+  	//osDelay(200);
 
-  	BME280_vMeasureRawData(&xBME280);
+
+  	BME280_vMeasureAllForced(&xBME280);
+  	//BME280_vMeasureForced(&xBME280, 1, 0, 1);
+  	BME280_vReadRawData(&xBME280);
   	BME280_vPrintRawData(&xBME280);
-
   	//HAL_I2C_Master_Transmit(&hi2c, DevAddress, pData, Size, 1000);
+
+  	BME280_vPrintCalibrationData(&xBME280);
+  	BME280_vPrintCompensatedData(&xBME280);
+
+
     osDelay(2000);
   }
   /* USER CODE END 5 */

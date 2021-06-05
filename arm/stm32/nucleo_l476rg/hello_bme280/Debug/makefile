@@ -66,7 +66,7 @@ main-build: hello_bme280.elf secondary-outputs
 
 # Tool invocations
 hello_bme280.elf: $(OBJS) $(USER_OBJS) /home/victor/Desktop/git_local_repository/embedded_project/arm/stm32/nucleo_l476rg/hello_bme280/STM32L476RGTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "hello_bme280.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/victor/Desktop/git_local_repository/embedded_project/arm/stm32/nucleo_l476rg/hello_bme280/STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="hello_bme280.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "hello_bme280.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/victor/Desktop/git_local_repository/embedded_project/arm/stm32/nucleo_l476rg/hello_bme280/STM32L476RGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="hello_bme280.map" -Wl,--gc-sections -static -u_printf_float --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

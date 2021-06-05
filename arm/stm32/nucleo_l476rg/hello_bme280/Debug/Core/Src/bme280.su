@@ -1,0 +1,9 @@
+bme280.c:21:6:BME280_vInit	24	static
+bme280.c:35:6:BME280_vReadCalibrationData	40	static
+bme280.c:62:9:BME280_vReadChipID	40	static
+bme280.c:71:6:BME280_vMeasureAllForced	32	static
+bme280.c:82:6:BME280_vMeasureForced	40	static
+bme280.c:97:6:BME280_vReadRawData	32	static
+bme280.c:118:6:BME280_vPrintRawData	16	static
+bme280.c:126:6:BME280_vPrintCalibrationData	16	static
+bme280.c:135:6:BME280_vPrintCompensatedData	40	static
