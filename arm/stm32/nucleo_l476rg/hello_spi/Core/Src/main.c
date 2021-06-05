@@ -58,7 +58,7 @@ UART_HandleTypeDef huart2;
 osThreadId_t microSDTaskHandle;
 const osThreadAttr_t microSDTask_attributes = {
   .name = "microSDTask",
-  .stack_size = 128 * 4,
+  .stack_size = 128 * 4 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* USER CODE BEGIN PV */
@@ -369,7 +369,7 @@ static void MX_SPI1_Init(void)
   hspi1.Instance = SPI1;
   hspi1.Init.Mode = SPI_MODE_MASTER;
   hspi1.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi1.Init.DataSize = SPI_DATASIZE_4BIT;
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
@@ -490,14 +490,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
   /* USER CODE END Callback 0 */
   if (htim->Instance == TIM6) {
-  	/*
-		FatFsCnt++;
-		if (FatFsCnt >= 10)
-		{
-			FatFsCnt = 0;
-			SDTimer_Handler();
-		}
-		*/
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */

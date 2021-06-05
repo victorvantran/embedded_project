@@ -14,7 +14,7 @@
 #include "stm32l4xx_hal.h"
 #include "cmsis_os.h"
 
-#define UART_BUFFER_SIZE 256UL
+#define UART_BUFFER_SIZE 512UL //256UL
 // call USER_ThingSpeak_IRQHandler(UART_HandleTypeDef *pxHUART) in stm32xxxx_it.c
 
 #define THINGSPEAK_TASK_NAME "thingSpeakTask"
@@ -72,7 +72,8 @@ typedef enum
 	OK,
 	GT,
 	SEND_OK,
-	CLOSED
+	CLOSED,
+	AT_ERROR
 
 } ATCommand_t;
 
@@ -90,14 +91,21 @@ void USER_UART_IDLECallback(ThingSpeakHandle_t *pxThingSpeak);
 /* AT Commands and Messages end in \r\n */
 uint8_t bParseMessage(ThingSpeakHandle_t *pxThingSpeak, uint16_t uHeadIndex);
 uint8_t bEndMatch(ThingSpeakHandle_t *pxThingSpeak, uint16_t uParseIndex);
+
 uint8_t bCommandMatch(const char *command, const char *candidate, size_t commandLength);
 uint8_t bCommandSplitMatch(const char *command,
+		const char *candidateFirst, size_t candidateFirstLength,
+		const char *candidateSecond, size_t candidateSecondLength);
+uint8_t bCommandSubMatch(const char *command, const char *candidate, size_t commandLength);
+uint8_t bCommandSplitSubMatch(const char *command,
 		const char *candidateFirst, size_t candidateFirstLength,
 		const char *candidateSecond, size_t candidateSecondLength);
 
 void vHandleCandidateCommand(ThingSpeakHandle_t *pxThingSpeak, const char *candidate, size_t candidateLength);
 void vHandleCandidateCommandSplit(ThingSpeakHandle_t *pxThingSpeak, const char *candidateFirst, size_t candidateFirstLength,
 		const char *candidateSecond, size_t candidateSecondLength);
+
+uint8_t bReceiveThingSpeakCommand(ThingSpeakHandle_t *pxThingSpeak, ATCommand_t eATCommand, TickType_t xTicksToWait);
 
 
 /* Transmit */
@@ -112,5 +120,9 @@ void HAL_UART_TxCpltCallback(UART_HandleTypeDef *pxHUART);
 
 /* ThingSpeak */
 uint8_t bTransmitThingSpeakData(ThingSpeakHandle_t *pxThingSpeak, char *apiKey, uint8_t field, uint16_t value);
+
+/* ThingSpeak */
+uint8_t bTransmitElephantSQLData(ThingSpeakHandle_t *pxThingSpeak, char *apiKey, uint8_t field, uint16_t value);
+
 
 #endif /* INC_THINGSPEAK_H_ */

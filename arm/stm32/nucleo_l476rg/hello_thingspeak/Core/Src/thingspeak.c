@@ -74,6 +74,7 @@ void vStartThingSpeakTask(void *argument)
 
   	bTransmitThingSpeakData(pxThingSpeak, "HE3ZUVZ1MKI1FOPB", 1, i);
 
+
   	i += 20;
   	osDelay(20000);
   }
@@ -295,9 +296,7 @@ uint8_t bEndMatch(ThingSpeakHandle_t *pxThingSpeak, uint16_t uParseIndex)
 
 uint8_t bCommandMatch(const char *command, const char *candidate, size_t candidateLength)
 {
-	return strnstr(candidate, command, candidateLength) != NULL;
-	//return (strncmp(command, (const char*)xThingSpeak.xRXBuffer.puDMABuffer + xThingSpeak.xRXBuffer.uHeadIndex - 2 - candidateLength, candidateLength) == 0);
-	//return (strlen(command) == candidateLength) && (strncmp(command, candidate, candidateLength) == 0);
+	return (strlen(command) == candidateLength) && (strncmp(command, candidate, candidateLength) == 0);
 }
 
 
@@ -305,46 +304,30 @@ uint8_t bCommandSplitMatch(const char *command,
 		const char *candidateFirst, size_t candidateFirstLength,
 		const char *candidateSecond, size_t candidateSecondLength)
 {
+	return (strlen(command) == candidateFirstLength + candidateSecondLength) &&
+		(strncmp(command, candidateFirst, candidateFirstLength) == 0) &&
+		(strncmp(command + candidateFirstLength, candidateSecond, candidateSecondLength) == 0);
+}
+
+
+uint8_t bCommandSubMatch(const char *command, const char *candidate, size_t candidateLength)
+{
+	return strnstr(candidate, command, candidateLength) != NULL;
+}
+
+
+uint8_t bCommandSplitSubMatch(const char *command,
+		const char *candidateFirst, size_t candidateFirstLength,
+		const char *candidateSecond, size_t candidateSecondLength)
+{
+	/* Make a custom strnstr for circular buffer to avoid naive memcpy and strnstr */
 	char circular[candidateFirstLength + candidateSecondLength];
 	memcpy(circular, candidateFirst, candidateFirstLength);
 	memcpy(circular + candidateFirstLength, candidateSecond, candidateSecondLength);
 
 	return strnstr((const char*)circular, command, sizeof(circular)) != NULL;
-
-
-
-	//return 0;
-
-	/*
-	 * 	if (strlen(command) < candidateFirstLength)
-	{
-		if (strncmp(candidateFirst, command, candidateFirstLength) != NULL) return 1;
-	}
-
-	if (strlen(command) < candidateSecondLength)
-	{
-		if (strncmp(candidateSecond, command, candidateSecondLength) != NULL) return 1;
-	}
-	 *
-	 *
-	 */
-
-	/*
-	 * 	//return (strlen(command) == candidateFirstLength + candidateSecondLength) &&
-	//		(strncmp(command, candidateFirst, candidateFirstLength) == 0) &&
-	//		(strncmp(command + candidateFirstLength, candidateSecond, candidateSecondLength) == 0);
-	 *
-	 */
-
-
-	/*
-	const char *pc1FirstOccurence = strnstr(candidateFirst, command, candidateFirstLength);
-	const char *pc2FirstOccurence = strnstr(candidateSecond, command, candidateFirstLength);
-
-	return (pcFirstOccurence != NULL &&
-				(strncmp(command + candidateFirstLength, candidateSecond, candidateSecondLength) == 0);
-				*/
 }
+
 
 
 /* Debug purposes on serial monitor */
@@ -361,33 +344,28 @@ void vHandleCandidateCommand(ThingSpeakHandle_t *pxThingSpeak, const char *candi
 	{
 		printf("UNSET LIGHT\r\n");
 	}
-	else if (bCommandMatch("SEND OK", candidate, candidateLength))
-	{
-		printf("SEND OK Received\r\n");
-	}
 	else if (bCommandMatch("OK", candidate, candidateLength))
 	{
 		printf("OK Received\r\n");
-		//HAL_UART_Transmit(&huart2, (char *)candidate, candidateLength, 1000);
-		//HAL_UART_Transmit(&huart2, "\r\n", 2, 1000);
-		//printf("%lu\r\n", (uint32_t)pxThingSpeak->xThingSpeakTaskHandle);
-
-		/* Task Notify */
 		xTaskNotify((TaskHandle_t)pxThingSpeak->xThingSpeakTaskHandle, (uint32_t)OK, eSetValueWithOverwrite);
 	}
 	else if (bCommandMatch(">", candidate, candidateLength))
 	{
 		printf("> Received\r\n");
+		xTaskNotify((TaskHandle_t)pxThingSpeak->xThingSpeakTaskHandle, (uint32_t)GT, eSetValueWithOverwrite);
+	}
+	else if (bCommandMatch("SEND OK", candidate, candidateLength))
+	{
+		printf("SEND OK Received\r\n");
+		xTaskNotify((TaskHandle_t)pxThingSpeak->xThingSpeakTaskHandle, (uint32_t)SEND_OK, eSetValueWithOverwrite);
 	}
 	else if (bCommandMatch("CLOSED", candidate, candidateLength))
 	{
 		printf("CLOSED Received\r\n");
+		xTaskNotify((TaskHandle_t)pxThingSpeak->xThingSpeakTaskHandle, (uint32_t)CLOSED, eSetValueWithOverwrite);
 	}
 	else
 	{
-		//HAL_UART_Transmit(&huart2, "INVLD: ", 7, 1000);
-		//HAL_UART_Transmit(&huart2, (char *)candidate, candidateLength, 1000);
-		//HAL_UART_Transmit(&huart2, "\r\n", 2, 1000);
 		//printf("INVLD\r\n");
 	}
 
@@ -410,20 +388,22 @@ void vHandleCandidateCommandSplit(ThingSpeakHandle_t *pxThingSpeak, const char *
 	else if (bCommandSplitMatch("OK", candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength))
 	{
 		printf("OK Received\r\n");
-		/* TaskNotify */
 		xTaskNotify((TaskHandle_t)pxThingSpeak->xThingSpeakTaskHandle, (uint32_t)OK, eSetValueWithOverwrite);
 	}
 	else if (bCommandSplitMatch(">", candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength))
 	{
 		printf("> Received\r\n");
+		xTaskNotify((TaskHandle_t)pxThingSpeak->xThingSpeakTaskHandle, (uint32_t)GT, eSetValueWithOverwrite);
 	}
 	else if (bCommandSplitMatch("SEND OK", candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength))
 	{
 		printf("SEND OK Received\r\n");
+		xTaskNotify((TaskHandle_t)pxThingSpeak->xThingSpeakTaskHandle, (uint32_t)SEND_OK, eSetValueWithOverwrite);
 	}
 	else if (bCommandSplitMatch("CLOSED", candidateFirst, candidateFirstLength, candidateSecond, candidateSecondLength))
 	{
 		printf("CLOSED Received\r\n");
+		xTaskNotify((TaskHandle_t)pxThingSpeak->xThingSpeakTaskHandle, (uint32_t)CLOSED, eSetValueWithOverwrite);
 	}
 	else
 	{
@@ -500,18 +480,14 @@ uint8_t bTransmitThingSpeakData(ThingSpeakHandle_t *pxThingSpeak, char *apiKey, 
 
 	sprintf(local_buf2, "AT+CIPSEND=%d\r\n", len);
 	bTransmitCommand(pxThingSpeak, local_buf2, strlen(local_buf2));
-	bReceiveThingSpeakCommand(pxThingSpeak, OK, pdMS_TO_TICKS(3000));
+	bReceiveThingSpeakCommand(pxThingSpeak, SEND_OK, pdMS_TO_TICKS(3000));
 	//osDelay(3000);
 
 	bTransmitCommand(pxThingSpeak, local_buf, strlen(local_buf));
-	bReceiveThingSpeakCommand(pxThingSpeak, OK, pdMS_TO_TICKS(3000));
+	bReceiveThingSpeakCommand(pxThingSpeak, CLOSED, pdMS_TO_TICKS(3000));
 	//osDelay(3000);
 
 	return 1;
 }
-
-
-
-
 
 
