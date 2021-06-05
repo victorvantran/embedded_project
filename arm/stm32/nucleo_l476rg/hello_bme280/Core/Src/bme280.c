@@ -143,14 +143,8 @@ int32_t BME280_lCompensateTemperatureData(BME280Handle_t *pxBME280)
 	int32_t lTemperature;
 	lTemperature = ((BME280_lCalculateTemperatureFine(pxBME280)) * 5 + 128) >> 8;
 
-	if (lTemperature < lTemperatureMin)
-	{
-			lTemperature = lTemperatureMin;
-	}
-	else if (lTemperature > lTemperatureMax)
-	{
-			lTemperature = lTemperatureMax;
-	}
+	lTemperature = lTemperature < lTemperatureMin ? lTemperatureMin : lTemperature;
+	lTemperature = lTemperature > lTemperatureMax ? lTemperatureMax : lTemperature;
 
 	return lTemperature;
 }
@@ -159,8 +153,8 @@ int32_t BME280_lCompensateTemperatureData(BME280Handle_t *pxBME280)
 
 uint32_t BME280_ulCompensatePressureData(BME280Handle_t *pxBME280)
 {
-	static const uint32_t lPressureMin = 3000000;
-	static const uint32_t lPressureMax = 11000000;
+	static const uint32_t ulPressureMin = 30000 * 256;
+	static const uint32_t ulPressureMax = 110000 * 256;
 
 	int32_t lPressureRaw = (int32_t)pxBME280->xMeasureRawData.ulPressureRawData;
 	int32_t lTemperatureFine = pxBME280->xCalibrationData.lTemperatureFine;
@@ -174,7 +168,8 @@ uint32_t BME280_ulCompensatePressureData(BME280Handle_t *pxBME280)
 	int64_t llDigP8 = (int64_t)pxBME280->xCalibrationData.xDigP.sP8;
 	int64_t llDigP9 = (int64_t)pxBME280->xCalibrationData.xDigP.sP9;
 
-	int64_t lVar1, lVar2, lPressure;
+	int64_t lVar1, lVar2, llPressure;
+	uint32_t ulPressure;
 	lVar1 = ((int64_t)lTemperatureFine) - 128000;
 	lVar2 = lVar1 * lVar1 * (int64_t)llDigP6;
 	lVar2 = lVar2 + ((lVar1*(int64_t)llDigP5) << 17);
@@ -182,44 +177,135 @@ uint32_t BME280_ulCompensatePressureData(BME280Handle_t *pxBME280)
 	lVar1 = ((lVar1 * lVar1 * (int64_t)llDigP3) >> 8) + ((lVar1 * (int64_t)llDigP2) << 12);
 	lVar1 = (((((int64_t)1) << 47)+lVar1))*((int64_t)llDigP1) >> 33;
 
-	if (lVar1 == 0) return lPressureMin; // Account for divide by zero
+	if (lVar1 == 0) return ulPressureMin; /* Account for divide by zero */
 
-	lPressure = 1048576 - lPressureRaw;
-	lPressure = (((lPressure << 31)-lVar2) * 3125)/lVar1;
-	lVar1 = (((int64_t)llDigP9) * (lPressure >> 13) * (lPressure >> 13)) >> 25;
-	lVar2 = (((int64_t)llDigP8) * lPressure) >> 19;
-	lPressure = ((lPressure + lVar1 + lVar2) >> 8) + (((int64_t)llDigP7) << 4);
-	return (uint32_t)lPressure;
+	llPressure = 1048576 - lPressureRaw;
+	llPressure = (((llPressure << 31)-lVar2) * 3125)/lVar1;
+	lVar1 = (((int64_t)llDigP9) * (llPressure >> 13) * (llPressure >> 13)) >> 25;
+	lVar2 = (((int64_t)llDigP8) * llPressure) >> 19;
+	llPressure = (((llPressure + lVar1 + lVar2) >> 8) + (((int64_t)llDigP7) << 4));
+	ulPressure = (uint32_t)llPressure;
+
+	ulPressure = ulPressure < ulPressureMin ? ulPressureMin : ulPressure;
+	ulPressure = ulPressure > ulPressureMax ? ulPressureMax : ulPressure;
+
+	return ulPressure;
 }
 
+
+
+uint32_t BME280_ulCompensateHumidityData(BME280Handle_t *pxBME280)
+{
+	static const uint32_t ulHumidityMax = 102400;
+
+	int32_t lHumidityRaw = (int32_t)pxBME280->xMeasureRawData.uHumidityRawData;
+	int32_t lTemperatureFine = pxBME280->xCalibrationData.lTemperatureFine;
+	int32_t lDigH1 = (int32_t)pxBME280->xCalibrationData.xDigH.ucH1;
+	int32_t lDigH2 = (int32_t)pxBME280->xCalibrationData.xDigH.usH2;
+	int32_t lDigH3 = (int32_t)pxBME280->xCalibrationData.xDigH.ucH3;
+	int32_t lDigH4 = (int32_t)pxBME280->xCalibrationData.xDigH.sH4;
+	int32_t lDigH5 = (int32_t)pxBME280->xCalibrationData.xDigH.sH5;
+	int32_t lDigH6 = (int32_t)pxBME280->xCalibrationData.xDigH.cH6;
+
+	uint32_t ulHumidity;
+
+	ulHumidity = (lTemperatureFine - ((int32_t)76800));
+	ulHumidity = (((((lHumidityRaw << 14) - ((lDigH4) << 20) - ((lDigH5) *
+	ulHumidity)) + ((int32_t)16384)) >> 15) * (((((((ulHumidity *
+	(lDigH6)) >> 10) * (((ulHumidity * (lDigH3)) >> 11) +
+	((int32_t)32768))) >> 10) + ((int32_t)2097152)) * (lDigH2) +
+	8192) >> 14));
+	ulHumidity = ((ulHumidity - (((((ulHumidity >> 15) * (ulHumidity >> 15)) >> 7) *
+	(lDigH1)) >> 4)) >> 12);
+	ulHumidity = (ulHumidity > ulHumidityMax ? ulHumidityMax : ulHumidity);
+
+	return ulHumidity;
+}
 
 
 
 float BME280_fCompensateTemperatureData(BME280Handle_t *pxBME280)
 {
-	static const float fTemperatureMin = -4000.0f;
-	static const float fTemperatureMax = 8500.0f;
-
-	int32_t lTemperatureRaw = (int32_t)pxBME280->xMeasureRawData.ulTemperatureRawData;
-	int32_t lDigT1 = pxBME280->xCalibrationData.xDigT.usT1;
-	int32_t lDigT2 = pxBME280->xCalibrationData.xDigT.sT2;
-	int32_t lDigT3 = pxBME280->xCalibrationData.xDigT.sT3;
+	static const float fTemperatureMin = -40.0f;
+	static const float fTemperatureMax = 85.0f;
 
 	float fTemperature;
 
 	fTemperature = (float)(BME280_lCalculateTemperatureFine(pxBME280)) / 5120.0f;
-
-	if (fTemperature < fTemperatureMin)
-	{
-			fTemperature = fTemperatureMin;
-	}
-	else if (fTemperature > fTemperatureMax)
-	{
-			fTemperature = fTemperatureMax;
-	}
+	fTemperature = fTemperature < fTemperatureMin ? fTemperatureMin : fTemperature;
+	fTemperature = fTemperature > fTemperatureMax ? fTemperatureMax : fTemperature;
 
 	return fTemperature;
 }
+
+
+
+float BME280_fCompensatePressureData(BME280Handle_t *pxBME280)
+{
+	static const float fPressureMin = 30000.0f;
+	static const float fPressureMax = 110000.0f;
+
+	int32_t lPressureRaw = (int32_t)pxBME280->xMeasureRawData.ulPressureRawData;
+	int32_t lTemperatureFine = pxBME280->xCalibrationData.lTemperatureFine;
+	float fDigP1 = (float)pxBME280->xCalibrationData.xDigP.usP1;
+	float fDigP2 = (float)pxBME280->xCalibrationData.xDigP.sP2;
+	float fDigP3 = (float)pxBME280->xCalibrationData.xDigP.sP3;
+	float fDigP4 = (float)pxBME280->xCalibrationData.xDigP.sP4;
+	float fDigP5 = (float)pxBME280->xCalibrationData.xDigP.sP5;
+	float fDigP6 = (float)pxBME280->xCalibrationData.xDigP.sP6;
+	float fDigP7 = (float)pxBME280->xCalibrationData.xDigP.sP7;
+	float fDigP8 = (float)pxBME280->xCalibrationData.xDigP.sP8;
+	float fDigP9 = (float)pxBME280->xCalibrationData.xDigP.sP9;
+
+	float fVar1, fVar2, fPressure;
+	fVar1 = ((float)lTemperatureFine / 2.0f) - 64000.0f;
+	fVar2 = fVar1 * fVar1 * (fDigP6) / 32768.0;
+	fVar2 = fVar2 + fVar1 * (fDigP5) * 2.0;
+	fVar2 = (fVar2 / 4.0) + ((fDigP4) * 65536.0);
+	fVar1 = ((fDigP3) * fVar1 * fVar1 / 524288.0 + (fDigP2) * fVar1) / 524288.0;
+	fVar1 = (1.0 + fVar1 / 32768.0) * (fDigP1);
+
+	if (fVar1 == 0.0) return fPressureMin; /* Account for divide by zero */
+
+	fPressure = 1048576.0 - (float)lPressureRaw;
+	fPressure = (fPressure - (fVar2 / 4096.0)) * 6250.0 / fVar1;
+	fVar1 = (fDigP9) * fPressure * fPressure / 2147483648.0;
+	fVar2 = fPressure * (fDigP8) / 32768.0;
+	fPressure = fPressure + (fVar1 + fVar2 + (fDigP7)) / 16.0;
+
+	fPressure = fPressure > fPressureMax ? fPressureMax : fPressure;
+
+	return fPressure;
+}
+
+
+float BME280_fCompensateHumidityData(BME280Handle_t *pxBME280)
+{
+	static const float fHumidityMin = 0.0f;
+	static const float fHumidityMax = 100.0f;
+
+	int32_t lHumidityRaw = (int32_t)pxBME280->xMeasureRawData.uHumidityRawData;
+	int32_t lTemperatureFine = pxBME280->xCalibrationData.lTemperatureFine;
+	float fDigH1 = (float)pxBME280->xCalibrationData.xDigH.ucH1;
+	float fDigH2 = (float)pxBME280->xCalibrationData.xDigH.usH2;
+	float fDigH3 = (float)pxBME280->xCalibrationData.xDigH.ucH3;
+	float fDigH4 = (float)pxBME280->xCalibrationData.xDigH.sH4;
+	float fDigH5 = (float)pxBME280->xCalibrationData.xDigH.sH5;
+	float fDigH6 = (float)pxBME280->xCalibrationData.xDigH.cH6;
+
+	float fHumidity;
+	fHumidity = (((float)lTemperatureFine) - 76800.0f);
+	fHumidity = (lHumidityRaw - ((fDigH4) * 64.0f + (fDigH5) / 16384.0f *
+	fHumidity)) * ((fDigH2) / 65536.0f * (1.0f + (fDigH6) /
+	67108864.0f * fHumidity *
+	(1.0 + (fDigH3) / 67108864.0f * fHumidity)));
+	fHumidity = fHumidity * (1.0f - (fDigH1) * fHumidity / 524288.0f);
+	fHumidity = fHumidity < fHumidityMin ? fHumidityMin : fHumidity;
+	fHumidity = fHumidity > fHumidityMax ? fHumidityMax : fHumidity;
+
+	return fHumidity;
+}
+
 
 
 
@@ -257,14 +343,16 @@ void BME280_vPrintCalibrationData(BME280Handle_t *pxBME280)
 }
 
 
+
 void BME280_vPrintlCompensatedData(BME280Handle_t *pxBME280)
 {
 	int32_t lCompensatedTemperatureData = BME280_lCompensateTemperatureData(pxBME280);
 	uint32_t lCompensatedPressureData = BME280_ulCompensatePressureData(pxBME280);
+	uint32_t lCompensatedHumidityData = BME280_ulCompensateHumidityData(pxBME280);
 
 	printf("lTemperature Calibrated Data: %d\r\n", lCompensatedTemperatureData);
 	printf("lPressure Calibrated Data: %u\r\n", lCompensatedPressureData);
-
+	printf("lHumidity Calibrated Data: %u\r\n", lCompensatedHumidityData);
 }
 
 
@@ -272,7 +360,12 @@ void BME280_vPrintlCompensatedData(BME280Handle_t *pxBME280)
 void BME280_vPrintfCompensatedData(BME280Handle_t *pxBME280)
 {
 	float fCompensatedTemperatureData = BME280_fCompensateTemperatureData(pxBME280);
-	printf("fTemperature Calibrated Data: %.8f\r\n", fCompensatedTemperatureData);
+	float fCompensatedPressureData = BME280_fCompensatePressureData(pxBME280);
+	float fCompensatedHumidityData = BME280_fCompensateHumidityData(pxBME280);
+
+	printf("fTemperature Calibrated Data: %.8fC\r\n", fCompensatedTemperatureData);
+	printf("fPressure Calibrated Data: %.8fPa\r\n", fCompensatedPressureData);
+	printf("fHumidity Calibrated Data: %.8f%%\r\n", fCompensatedHumidityData);
 }
 
 

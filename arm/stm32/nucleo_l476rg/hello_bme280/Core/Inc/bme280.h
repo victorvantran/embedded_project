@@ -112,14 +112,12 @@ typedef struct
 
 
 
-
 typedef struct
 {
 	uint32_t ulPressureRawData;
 	uint32_t ulTemperatureRawData;
 	uint16_t uHumidityRawData;
 } BME280MeasureRawData_t;
-
 
 
 
@@ -134,7 +132,6 @@ typedef struct
 	BME280MeasureRawData_t xMeasureRawData;
 
 } BME280Handle_t;
-
 
 
 
@@ -163,20 +160,26 @@ void BME280_vMeasureForced(BME280Handle_t *pxBME280,
 /* Read the raw register data [pressure, temperature, humidity] and cast 20-bit, 20-bit, 16-bit to the respective raw data */
 void BME280_vReadRawData(BME280Handle_t *pxBME280);
 
+
 /* Compensation formals are based on Bosch Sensortec BME280 Datasheet */
 
 /* Calculate t_fine (Temperature Fine Resolution Value) that is used to calculate compensated temperature, pressure, and humidity */
 int32_t BME280_lCalculateTemperatureFine(BME280Handle_t *pxBME280);
 
-/* Fast compensation due to no floating point calculations (2 point precision) */
+/* Returns temperature in [C] value * 100. Divide by 100.0f to get the proper [C] value.
+ * Fast compensation due to no floating point calculations. */
 int32_t BME280_lCompensateTemperatureData(BME280Handle_t *pxBME280);
-/* Returns pressure in Pascal [Pa] in unsigned 32-bit integer 24.8 format. Divide by 256.0f for Pa value */
+/* Returns pressure in pre-Pascal pre-[Pa] unsigned 32-bit integer 24.8 format. Divide by 256.0f for [Pa] value. */
 uint32_t BME280_ulCompensatePressureData(BME280Handle_t *pxBME280);
-int32_t BME280_lCompensateHumidityData(BME280Handle_t *pxBME280);
+/* Returns humidity in pre-[%] as unsigned 32-bit integer 22.10 formate. Divide by 1024.0f for [%] value. */
+uint32_t BME280_ulCompensateHumidityData(BME280Handle_t *pxBME280);
 
-/* Cortex-M4 FPU cannot support double precision operations, so opt for float */
+/* Returns temperature in [C] value.
+ * Cortex-M4 FPU cannot support double precision operations, so opt for float. */
 float BME280_fCompensateTemperatureData(BME280Handle_t *pxBME280);
+/* Returns pressure in [Pa] value. */
 float BME280_fCompensatePressureData(BME280Handle_t *pxBME280);
+/* Returns humidity in [%] value. */
 float BME280_fCompensateHumidityData(BME280Handle_t *pxBME280);
 
 

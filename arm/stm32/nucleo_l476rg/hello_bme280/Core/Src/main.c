@@ -355,12 +355,12 @@ void StartDefaultTask(void *argument)
   	//BME280_vMeasureForced(&xBME280, 1, 0, 1);
 
   	BME280_vReadRawData(&xBME280);
-  	BME280_vPrintRawData(&xBME280);
+  	//BME280_vPrintRawData(&xBME280);
 
   	//BME280_vPrintCalibrationData(&xBME280);
 
-  	//BME280_vPrintfCompensatedData(&xBME280);
-  	BME280_vPrintlCompensatedData(&xBME280);
+  	BME280_vPrintfCompensatedData(&xBME280);
+  	//BME280_vPrintlCompensatedData(&xBME280);
 
 
     osDelay(2000);
