@@ -167,64 +167,64 @@ void BME280_SPI_vReadCalibrationData(BME280Handle_t *pxBME280);
 
 
 /* I2C */
-void BME280_vInit(BME280Handle_t *pxBME280,
+void BME280_I2C_vInit(BME280Handle_t *pxBME280,
 		I2C_HandleTypeDef *pxI2CHandle,
 		uint8_t uI2CSlaveAddress );
 
 
-void BME280_vReadCalibrationData(BME280Handle_t *pxBME280);
+void BME280_I2C_vReadCalibrationData(BME280Handle_t *pxBME280);
 
 /* */
-uint8_t BME280_vReadChipID(BME280Handle_t *pxBME280);
-
-
-/* */
-void BME280_vMeasureAllForced(BME280Handle_t *pxBME280);
+uint8_t BME280_I2C_vReadChipID(BME280Handle_t *pxBME280);
 
 
 /* */
-void BME280_vMeasureForced(BME280Handle_t *pxBME280,
+void BME280_I2C_vMeasureAllForced(BME280Handle_t *pxBME280);
+
+
+/* */
+void BME280_I2C_vMeasureForced(BME280Handle_t *pxBME280,
 		uint8_t uPressureOversample,
 		uint8_t uTemperatureOversample,
 		uint8_t uHumidityOversample);
 
 
 /* Read the raw register data [pressure, temperature, humidity] and cast 20-bit, 20-bit, 16-bit to the respective raw data */
-void BME280_vReadRawData(BME280Handle_t *pxBME280);
+void BME280_I2C_vReadRawData(BME280Handle_t *pxBME280);
 
 
 /* Compensation formals are based on Bosch Sensortec BME280 Datasheet */
 
 /* Calculate t_fine (Temperature Fine Resolution Value) that is used to calculate compensated temperature, pressure, and humidity */
-int32_t BME280_lCalculateTemperatureFine(BME280Handle_t *pxBME280);
+int32_t BME280_I2C_lCalculateTemperatureFine(BME280Handle_t *pxBME280);
 
 /* Returns temperature in [C] value * 100. Divide by 100.0f to get the proper [C] value.
  * Fast compensation due to no floating point calculations. */
-int32_t BME280_lCompensateTemperatureData(BME280Handle_t *pxBME280);
+int32_t BME280_I2C_lCompensateTemperatureData(BME280Handle_t *pxBME280);
 /* Returns pressure in pre-Pascal pre-[Pa] unsigned 32-bit integer 24.8 format. Divide by 256.0f for [Pa] value. */
-uint32_t BME280_ulCompensatePressureData(BME280Handle_t *pxBME280);
+uint32_t BME280_I2C_ulCompensatePressureData(BME280Handle_t *pxBME280);
 /* Returns humidity in pre-[%] as unsigned 32-bit integer 22.10 formate. Divide by 1024.0f for [%] value. */
-uint32_t BME280_ulCompensateHumidityData(BME280Handle_t *pxBME280);
+uint32_t BME280_I2C_ulCompensateHumidityData(BME280Handle_t *pxBME280);
 
 /* Returns temperature in [C] value.
  * Cortex-M4 FPU cannot support double precision operations, so opt for float. */
-float BME280_fCompensateTemperatureData(BME280Handle_t *pxBME280);
+float BME280_I2C_fCompensateTemperatureData(BME280Handle_t *pxBME280);
 /* Returns pressure in [Pa] value. */
-float BME280_fCompensatePressureData(BME280Handle_t *pxBME280);
+float BME280_I2C_fCompensatePressureData(BME280Handle_t *pxBME280);
 /* Returns humidity in [%] value. */
-float BME280_fCompensateHumidityData(BME280Handle_t *pxBME280);
+float BME280_I2C_fCompensateHumidityData(BME280Handle_t *pxBME280);
 
 
 
 
 /* DEBUG */
-void BME280_vPrintRawData(BME280Handle_t *pxBME280);
+void BME280_I2C_vPrintRawData(BME280Handle_t *pxBME280);
 
-void BME280_vPrintCalibrationData(BME280Handle_t *pxBME280);
+void BME280_I2C_vPrintCalibrationData(BME280Handle_t *pxBME280);
 
-void BME280_vPrintlCompensatedData(BME280Handle_t *pxBME280);
+void BME280_I2C_vPrintlCompensatedData(BME280Handle_t *pxBME280);
 
-void BME280_vPrintfCompensatedData(BME280Handle_t *pxBME280);
+void BME280_I2C_vPrintfCompensatedData(BME280Handle_t *pxBME280);
 
 
 #endif /* INC_BME280_H_ */

@@ -119,8 +119,8 @@ int main(void)
   MX_I2C1_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  //BME280_vInit(&xBME280, &hi2c1, BME280_I2C_SLAVE_ADDRESS_A);
-  BME280_SPI_vInit(&xBME280, &hspi1, GPIOB, GPIO_PIN_6);
+  BME280_I2C_vInit(&xBME280, &hi2c1, BME280_I2C_SLAVE_ADDRESS_A);
+  //BME280_SPI_vInit(&xBME280, &hspi1, GPIOB, GPIO_PIN_6);
 
   /* USER CODE END 2 */
 
@@ -409,18 +409,18 @@ void StartDefaultTask(void *argument)
   	//osDelay(200);
 
 
-  	/*
-  	BME280_vMeasureAllForced(&xBME280);
+
+  	BME280_I2C_vMeasureAllForced(&xBME280);
   	//BME280_vMeasureForced(&xBME280, 1, 0, 1);
 
-  	BME280_vReadRawData(&xBME280);
+  	BME280_I2C_vReadRawData(&xBME280);
   	//BME280_vPrintRawData(&xBME280);
 
   	//BME280_vPrintCalibrationData(&xBME280);
 
-  	BME280_vPrintfCompensatedData(&xBME280);
+  	BME280_I2C_vPrintfCompensatedData(&xBME280);
   	//BME280_vPrintlCompensatedData(&xBME280);
-		*/
+
 
 
   	/*
@@ -435,7 +435,7 @@ void StartDefaultTask(void *argument)
   	printf("Chip ID: %d\r\n", (int16_t)ucChipID);
   	*/
 
-  	BME280_SPI_vReadChipID(&xBME280);
+  	//BME280_SPI_vReadChipID(&xBME280);
 
     osDelay(2000);
   }

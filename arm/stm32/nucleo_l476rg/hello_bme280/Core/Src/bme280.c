@@ -80,7 +80,7 @@ void BME280_SPI_vReadCalibrationData(BME280Handle_t *pxBME280)
 
 
 /* I2C */
-void BME280_vInit(BME280Handle_t *pxBME280,
+void BME280_I2C_vInit(BME280Handle_t *pxBME280,
 		I2C_HandleTypeDef *pxI2CHandle,
 		uint8_t uI2CSlaveAddress )
 {
@@ -94,11 +94,11 @@ void BME280_vInit(BME280Handle_t *pxBME280,
 	pxBME280->xMeasureRegData = xDefaultMeasureRegData;
 	pxBME280->xMeasureRawData = xDefaultMeasureRawData;
 
-	BME280_vReadCalibrationData(pxBME280);
+	BME280_I2C_vReadCalibrationData(pxBME280);
 }
 
 
-void BME280_vReadCalibrationData(BME280Handle_t *pxBME280)
+void BME280_I2C_vReadCalibrationData(BME280Handle_t *pxBME280)
 {
 	HAL_I2C_Mem_Read(pxBME280->pxI2CHandle,
 			(uint16_t)(pxBME280->uI2CSlaveAddress << 1),
@@ -125,7 +125,7 @@ void BME280_vReadCalibrationData(BME280Handle_t *pxBME280)
 
 
 
-uint8_t BME280_vReadChipID(BME280Handle_t *pxBME280)
+uint8_t BME280_I2C_vReadChipID(BME280Handle_t *pxBME280)
 {
 	uint8_t uChipID = 0;
 	HAL_I2C_Mem_Read(pxBME280->pxI2CHandle, (uint16_t)(pxBME280->uI2CSlaveAddress << 1), (uint16_t)BME280_CHIP_ADDRESS, 1, &uChipID, 1, 50);
@@ -134,7 +134,7 @@ uint8_t BME280_vReadChipID(BME280Handle_t *pxBME280)
 
 
 
-void BME280_vMeasureAllForced(BME280Handle_t *pxBME280)
+void BME280_I2C_vMeasureAllForced(BME280Handle_t *pxBME280)
 {
 	static const uint8_t uCtrlHum 	= 0b00000001;
 	static const uint8_t uCtrlMeas	=	0b00100110;
@@ -145,7 +145,7 @@ void BME280_vMeasureAllForced(BME280Handle_t *pxBME280)
 
 
 
-void BME280_vMeasureForced(BME280Handle_t *pxBME280,
+void BME280_I2C_vMeasureForced(BME280Handle_t *pxBME280,
 		uint8_t uPressureOversample,
 		uint8_t uTemperatureOversample,
 		uint8_t uHumidityOversample)
@@ -159,7 +159,7 @@ void BME280_vMeasureForced(BME280Handle_t *pxBME280,
 
 
 
-void BME280_vReadRawData(BME280Handle_t *pxBME280)
+void BME280_I2C_vReadRawData(BME280Handle_t *pxBME280)
 {
 	HAL_I2C_Mem_Read(pxBME280->pxI2CHandle, (uint16_t)(pxBME280->uI2CSlaveAddress << 1), (uint16_t)BME280_MEASURE_DATA_ADDRESS, 1, (uint8_t *)&(pxBME280->xMeasureRegData), 8, 50);
 
@@ -180,7 +180,7 @@ void BME280_vReadRawData(BME280Handle_t *pxBME280)
 
 
 
-int32_t BME280_lCalculateTemperatureFine(BME280Handle_t *pxBME280)
+int32_t BME280_I2C_lCalculateTemperatureFine(BME280Handle_t *pxBME280)
 {
 	int32_t lTemperatureRaw = pxBME280->xMeasureRawData.ulTemperatureRawData;
 	int32_t lDigT1 = pxBME280->xCalibrationData.xDigT.usT1;
@@ -201,13 +201,13 @@ int32_t BME280_lCalculateTemperatureFine(BME280Handle_t *pxBME280)
 
 
 
-int32_t BME280_lCompensateTemperatureData(BME280Handle_t *pxBME280)
+int32_t BME280_I2C_lCompensateTemperatureData(BME280Handle_t *pxBME280)
 {
 	static const int32_t lTemperatureMin = -4000;
 	static const int32_t lTemperatureMax = 8500;
 
 	int32_t lTemperature;
-	lTemperature = ((BME280_lCalculateTemperatureFine(pxBME280)) * 5 + 128) >> 8;
+	lTemperature = ((BME280_I2C_lCalculateTemperatureFine(pxBME280)) * 5 + 128) >> 8;
 
 	lTemperature = lTemperature < lTemperatureMin ? lTemperatureMin : lTemperature;
 	lTemperature = lTemperature > lTemperatureMax ? lTemperatureMax : lTemperature;
@@ -217,7 +217,7 @@ int32_t BME280_lCompensateTemperatureData(BME280Handle_t *pxBME280)
 
 
 
-uint32_t BME280_ulCompensatePressureData(BME280Handle_t *pxBME280)
+uint32_t BME280_I2C_ulCompensatePressureData(BME280Handle_t *pxBME280)
 {
 	static const uint32_t ulPressureMin = 30000 * 256;
 	static const uint32_t ulPressureMax = 110000 * 256;
@@ -260,7 +260,7 @@ uint32_t BME280_ulCompensatePressureData(BME280Handle_t *pxBME280)
 
 
 
-uint32_t BME280_ulCompensateHumidityData(BME280Handle_t *pxBME280)
+uint32_t BME280_I2C_ulCompensateHumidityData(BME280Handle_t *pxBME280)
 {
 	static const uint32_t ulHumidityMax = 102400;
 
@@ -290,14 +290,14 @@ uint32_t BME280_ulCompensateHumidityData(BME280Handle_t *pxBME280)
 
 
 
-float BME280_fCompensateTemperatureData(BME280Handle_t *pxBME280)
+float BME280_I2C_fCompensateTemperatureData(BME280Handle_t *pxBME280)
 {
 	static const float fTemperatureMin = -40.0f;
 	static const float fTemperatureMax = 85.0f;
 
 	float fTemperature;
 
-	fTemperature = (float)(BME280_lCalculateTemperatureFine(pxBME280)) / 5120.0f;
+	fTemperature = (float)(BME280_I2C_lCalculateTemperatureFine(pxBME280)) / 5120.0f;
 	fTemperature = fTemperature < fTemperatureMin ? fTemperatureMin : fTemperature;
 	fTemperature = fTemperature > fTemperatureMax ? fTemperatureMax : fTemperature;
 
@@ -306,7 +306,7 @@ float BME280_fCompensateTemperatureData(BME280Handle_t *pxBME280)
 
 
 
-float BME280_fCompensatePressureData(BME280Handle_t *pxBME280)
+float BME280_I2C_fCompensatePressureData(BME280Handle_t *pxBME280)
 {
 	static const float fPressureMin = 30000.0f;
 	static const float fPressureMax = 110000.0f;
@@ -345,7 +345,7 @@ float BME280_fCompensatePressureData(BME280Handle_t *pxBME280)
 }
 
 
-float BME280_fCompensateHumidityData(BME280Handle_t *pxBME280)
+float BME280_I2C_fCompensateHumidityData(BME280Handle_t *pxBME280)
 {
 	static const float fHumidityMin = 0.0f;
 	static const float fHumidityMax = 100.0f;
@@ -376,7 +376,7 @@ float BME280_fCompensateHumidityData(BME280Handle_t *pxBME280)
 
 
 /* DEBUG */
-void BME280_vPrintRawData(BME280Handle_t *pxBME280)
+void BME280_I2C_vPrintRawData(BME280Handle_t *pxBME280)
 {
 	printf("Pressure Raw Data: %lu\r\n", pxBME280->xMeasureRawData.ulPressureRawData);
 	printf("Temperature Raw Data: %lu\r\n", pxBME280->xMeasureRawData.ulTemperatureRawData);
@@ -384,7 +384,7 @@ void BME280_vPrintRawData(BME280Handle_t *pxBME280)
 }
 
 
-void BME280_vPrintCalibrationData(BME280Handle_t *pxBME280)
+void BME280_I2C_vPrintCalibrationData(BME280Handle_t *pxBME280)
 {
 	printf("dig_t1: %u\r\n", pxBME280->xCalibrationData.xDigT.usT1);
 	printf("dig_t2: %hd\r\n", pxBME280->xCalibrationData.xDigT.sT2);
@@ -410,11 +410,11 @@ void BME280_vPrintCalibrationData(BME280Handle_t *pxBME280)
 
 
 
-void BME280_vPrintlCompensatedData(BME280Handle_t *pxBME280)
+void BME280_I2C_vPrintlCompensatedData(BME280Handle_t *pxBME280)
 {
-	int32_t lCompensatedTemperatureData = BME280_lCompensateTemperatureData(pxBME280);
-	uint32_t lCompensatedPressureData = BME280_ulCompensatePressureData(pxBME280);
-	uint32_t lCompensatedHumidityData = BME280_ulCompensateHumidityData(pxBME280);
+	int32_t lCompensatedTemperatureData = BME280_I2C_lCompensateTemperatureData(pxBME280);
+	uint32_t lCompensatedPressureData = BME280_I2C_ulCompensatePressureData(pxBME280);
+	uint32_t lCompensatedHumidityData = BME280_I2C_ulCompensateHumidityData(pxBME280);
 
 	printf("lTemperature Calibrated Data: %d\r\n", lCompensatedTemperatureData);
 	printf("lPressure Calibrated Data: %u\r\n", lCompensatedPressureData);
@@ -423,11 +423,11 @@ void BME280_vPrintlCompensatedData(BME280Handle_t *pxBME280)
 
 
 
-void BME280_vPrintfCompensatedData(BME280Handle_t *pxBME280)
+void BME280_I2C_vPrintfCompensatedData(BME280Handle_t *pxBME280)
 {
-	float fCompensatedTemperatureData = BME280_fCompensateTemperatureData(pxBME280);
-	float fCompensatedPressureData = BME280_fCompensatePressureData(pxBME280);
-	float fCompensatedHumidityData = BME280_fCompensateHumidityData(pxBME280);
+	float fCompensatedTemperatureData = BME280_I2C_fCompensateTemperatureData(pxBME280);
+	float fCompensatedPressureData = BME280_I2C_fCompensatePressureData(pxBME280);
+	float fCompensatedHumidityData = BME280_I2C_fCompensateHumidityData(pxBME280);
 
 	printf("fTemperature Calibrated Data: %.8fC\r\n", fCompensatedTemperatureData);
 	printf("fPressure Calibrated Data: %.8fPa\r\n", fCompensatedPressureData);
