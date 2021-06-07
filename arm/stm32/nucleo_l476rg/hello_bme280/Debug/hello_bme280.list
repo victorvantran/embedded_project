@@ -39,11 +39,11 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY, DEBUGGING, OCTETS
  17 .debug_line   0001f568  00000000  00000000  000785ef  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_str    001037af  00000000  00000000  00097b57  2**0
+ 18 .debug_str    001037b3  00000000  00000000  00097b57  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .comment      00000053  00000000  00000000  0019b306  2**0
+ 19 .comment      00000053  00000000  00000000  0019b30a  2**0
                   CONTENTS, READONLY
- 20 .debug_frame  000091b8  00000000  00000000  0019b35c  2**2
+ 20 .debug_frame  000091b8  00000000  00000000  0019b360  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -2130,7 +2130,7 @@ void StartDefaultTask(void *argument)
 		*/
 
 
-  	uint8_t ucChipIDReg = 0xD0;//0xD0;
+  	uint8_t ucReadChipIDReg = (1 << 7) | (0xD0 & 0x7F);//0xD0;
  8001474:	23d0      	movs	r3, #208	; 0xd0
  8001476:	73fb      	strb	r3, [r7, #15]
   	uint8_t ucChipID;
@@ -2139,7 +2139,7 @@ void StartDefaultTask(void *argument)
  800147a:	2140      	movs	r1, #64	; 0x40
  800147c:	480f      	ldr	r0, [pc, #60]	; (80014bc <StartDefaultTask+0x60>)
  800147e:	f000 fe05 	bl	800208c <HAL_GPIO_WritePin>
-  	HAL_SPI_Transmit(&hspi1, &ucChipIDReg, sizeof(ucChipIDReg), 50);
+  	HAL_SPI_Transmit(&hspi1, &ucReadChipIDReg, sizeof(ucReadChipIDReg), 50);
  8001482:	f107 010f 	add.w	r1, r7, #15
  8001486:	2332      	movs	r3, #50	; 0x32
  8001488:	2201      	movs	r2, #1

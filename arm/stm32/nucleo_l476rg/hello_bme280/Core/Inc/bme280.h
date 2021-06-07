@@ -21,6 +21,11 @@
 #define BME280_I2C_SLAVE_ADDRESS_A 0x76
 #define BME280_I2C_SLAVE_ADDRESS_B 0x77
 
+#define BME280_SPI_FCLK_KHZ 1000
+#define BME280_SPI_CPOL 0
+#define BME280_SPI_CPHA 0
+
+
 #define BME280_CHIP_ADDRESS 0xD0
 #define BME280_MEASURE_DATA_ADDRESS 0xF7
 
@@ -134,7 +139,15 @@ typedef struct
 } BME280Handle_t;
 
 
+void BME280_SPI_vInit(BME280Handle_t *pxBME280,
+		I2C_HandleTypeDef *pxI2CHandle,
+		uint8_t uI2CSlaveAddress );
 
+
+
+
+
+/* I2C */
 void BME280_vInit(BME280Handle_t *pxBME280,
 		I2C_HandleTypeDef *pxI2CHandle,
 		uint8_t uI2CSlaveAddress );

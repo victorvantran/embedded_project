@@ -421,10 +421,11 @@ void StartDefaultTask(void *argument)
 		*/
 
 
-  	uint8_t ucChipIDReg = 0xD0;//0xD0;
+  	uint8_t ucReadChipIDReg = (1 << 7) | (0xD0 & 0x7F);//0xD0;
   	uint8_t ucChipID;
+  	// Should also change/ensure CLK, CPOL, and CPHA are compatible to the peripheral device
   	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
-  	HAL_SPI_Transmit(&hspi1, &ucChipIDReg, sizeof(ucChipIDReg), 50);
+  	HAL_SPI_Transmit(&hspi1, &ucReadChipIDReg, sizeof(ucReadChipIDReg), 50);
   	HAL_SPI_Receive(&hspi1, &ucChipID, sizeof(ucChipID), 50);
   	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
 
