@@ -18,12 +18,78 @@ const BME280MeasureRegData_t xDefaultMeasureRegData = {0};
 const BME280MeasureRawData_t xDefaultMeasureRawData = {0};
 
 
+
+
+/* SPI */
+void BME280_SPI_vInit(BME280Handle_t *pxBME280,
+		SPI_HandleTypeDef *pxSPIHandle,
+		GPIO_TypeDef *pxSPICSGPIO, uint16_t uSPICSGPIOPIN)
+{
+	pxBME280->pxI2CHandle = NULL;
+	pxBME280->uI2CSlaveAddress = 0;
+
+	pxBME280->pxSPIHandle = pxSPIHandle;
+	pxBME280->pxSPICSGPIO = pxSPICSGPIO;
+	pxBME280->uSPICSGPIOPIN = uSPICSGPIOPIN;
+
+	pxBME280->xMeasureRegData = xDefaultMeasureRegData;
+	pxBME280->xMeasureRawData = xDefaultMeasureRawData;
+
+	BME280_SPI_vReadCalibrationData(pxBME280);
+}
+
+
+HAL_StatusTypeDef BME280_SPI_vSetMode(BME280Handle_t *pxBME280)
+{
+	if (pxBME280->pxSPIHandle->Init.CLKPolarity == BME280_SPI_CPOL && pxBME280->pxSPIHandle->Init.CLKPhase == BME280_SPI_CPHA) return HAL_OK;
+
+	/* Reinit SPI with proper spi mode for the peripheral */
+	if (HAL_SPI_DeInit(pxBME280->pxSPIHandle) != HAL_OK) return HAL_ERROR;
+	pxBME280->pxSPIHandle->Init.CLKPolarity = BME280_SPI_CPOL;
+	pxBME280->pxSPIHandle->Init.CLKPhase = BME280_SPI_CPHA;
+	if (HAL_SPI_Init(pxBME280->pxSPIHandle) != HAL_OK) return HAL_ERROR;
+
+	return HAL_OK;
+}
+
+
+void BME280_SPI_vReadChipID(BME280Handle_t *pxBME280)
+{
+	static const uint8_t ucReadChipIDReg = BME280_SPI_READ | (BME280_CHIP_ADDRESS & 0x7F);
+  uint8_t ucChipID;
+
+  BME280_SPI_vSetMode(pxBME280);
+	HAL_GPIO_WritePin(pxBME280->pxSPICSGPIO, pxBME280->uSPICSGPIOPIN, GPIO_PIN_RESET);
+	HAL_SPI_Transmit(pxBME280->pxSPIHandle, &ucReadChipIDReg, sizeof(ucReadChipIDReg), 50);
+	HAL_SPI_Receive(pxBME280->pxSPIHandle, &ucChipID, sizeof(ucChipID), 50);
+	HAL_GPIO_WritePin(pxBME280->pxSPICSGPIO, pxBME280->uSPICSGPIOPIN, GPIO_PIN_SET);
+
+	printf("Chip ID: %d\r\n", (int16_t)ucChipID);
+}
+
+
+void BME280_SPI_vReadCalibrationData(BME280Handle_t *pxBME280)
+{
+
+}
+
+
+
+
+
+
+
+/* I2C */
 void BME280_vInit(BME280Handle_t *pxBME280,
 		I2C_HandleTypeDef *pxI2CHandle,
 		uint8_t uI2CSlaveAddress )
 {
 	pxBME280->pxI2CHandle = pxI2CHandle;
 	pxBME280->uI2CSlaveAddress = uI2CSlaveAddress;
+
+	pxBME280->pxSPIHandle = NULL;
+	pxBME280->pxSPICSGPIO = NULL;
+	pxBME280->uSPICSGPIOPIN = 0;
 
 	pxBME280->xMeasureRegData = xDefaultMeasureRegData;
 	pxBME280->xMeasureRawData = xDefaultMeasureRawData;

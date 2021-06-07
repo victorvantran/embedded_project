@@ -119,7 +119,9 @@ int main(void)
   MX_I2C1_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  BME280_vInit(&xBME280, &hi2c1, BME280_I2C_SLAVE_ADDRESS_A);
+  //BME280_vInit(&xBME280, &hi2c1, BME280_I2C_SLAVE_ADDRESS_A);
+  BME280_SPI_vInit(&xBME280, &hspi1, GPIOB, GPIO_PIN_6);
+
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -421,6 +423,7 @@ void StartDefaultTask(void *argument)
 		*/
 
 
+  	/*
   	uint8_t ucReadChipIDReg = (1 << 7) | (0xD0 & 0x7F);//0xD0;
   	uint8_t ucChipID;
   	// Should also change/ensure CLK, CPOL, and CPHA are compatible to the peripheral device
@@ -429,8 +432,10 @@ void StartDefaultTask(void *argument)
   	HAL_SPI_Receive(&hspi1, &ucChipID, sizeof(ucChipID), 50);
   	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
 
-
   	printf("Chip ID: %d\r\n", (int16_t)ucChipID);
+  	*/
+
+  	BME280_SPI_vReadChipID(&xBME280);
 
     osDelay(2000);
   }

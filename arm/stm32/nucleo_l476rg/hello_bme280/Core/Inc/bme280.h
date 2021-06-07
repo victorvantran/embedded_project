@@ -21,9 +21,16 @@
 #define BME280_I2C_SLAVE_ADDRESS_A 0x76
 #define BME280_I2C_SLAVE_ADDRESS_B 0x77
 
+
+
 #define BME280_SPI_FCLK_KHZ 1000
-#define BME280_SPI_CPOL 0
-#define BME280_SPI_CPHA 0
+/* SPI MODE 0 and 3 works for BME, but we are going with MODE 0 because it is common */
+#define BME280_SPI_CPOL SPI_POLARITY_LOW
+#define BME280_SPI_CPHA SPI_PHASE_1EDGE
+
+#define BME280_SPI_WRITE (0 << 7)
+#define BME280_SPI_READ (1 << 7)
+
 
 
 #define BME280_CHIP_ADDRESS 0xD0
@@ -131,6 +138,10 @@ typedef struct
 	I2C_HandleTypeDef *pxI2CHandle;
 	uint8_t uI2CSlaveAddress;
 
+	SPI_HandleTypeDef *pxSPIHandle;
+	GPIO_TypeDef *pxSPICSGPIO;
+	uint16_t uSPICSGPIOPIN;
+
 	BME280CalibrationData_t xCalibrationData;
 
 	BME280MeasureRegData_t xMeasureRegData;
@@ -139,10 +150,18 @@ typedef struct
 } BME280Handle_t;
 
 
-void BME280_SPI_vInit(BME280Handle_t *pxBME280,
-		I2C_HandleTypeDef *pxI2CHandle,
-		uint8_t uI2CSlaveAddress );
 
+
+/* SPI */
+void BME280_SPI_vInit(BME280Handle_t *pxBME280,
+		SPI_HandleTypeDef *pxSPIHandle,
+		GPIO_TypeDef *pxSPICSGPIO, uint16_t uSPICSGPIOPIN);
+
+HAL_StatusTypeDef BME280_SPI_vSetMode(BME280Handle_t *pxBME280);
+
+void BME280_SPI_vReadChipID(BME280Handle_t *pxBME280);
+
+void BME280_SPI_vReadCalibrationData(BME280Handle_t *pxBME280);
 
 
 
