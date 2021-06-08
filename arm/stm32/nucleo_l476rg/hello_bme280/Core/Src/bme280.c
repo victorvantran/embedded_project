@@ -98,13 +98,16 @@ void BME280_SPI_vReadCalibrationData(BME280Handle_t *pxBME280)
 
 
 
-void BME280_SPI_vMeasureAllForced(BME280Handle_t *pxBME280)
+void BME280_SPI_vMeasureForced(BME280Handle_t *pxBME280,
+		uint8_t uPressureOversample,
+		uint8_t uTemperatureOversample,
+		uint8_t uHumidityOversample)
 {
 	static const uint8_t ucControlWriteCtrlHum = BME280_SPI_WRITE | (BME280_CTRL_HUM_ADDRESS & 0x7F);
-	static const uint8_t uDataWriteCtrlHum 	= 0b00000001;
+	uint8_t uDataWriteCtrlHum 	= (0b00000111 & uHumidityOversample);
 
 	static const uint8_t ucControlWriteCtrlMeas = BME280_SPI_WRITE | (BME280_CTRL_MEAS_ADDRESS & 0x7F);
-	static const uint8_t uDataWriteCtrlMeas	=	0b00100110;
+	uint8_t uDataWriteCtrlMeas	=	(uTemperatureOversample << 5) | (uPressureOversample << 2) | (BME280_FORCED_MODE);
 
 	BME280_SPI_vSetMode(pxBME280);
 	HAL_GPIO_WritePin(pxBME280->pxSPICSGPIO, pxBME280->uSPICSGPIOPIN, GPIO_PIN_RESET);
@@ -120,13 +123,10 @@ void BME280_SPI_vMeasureAllForced(BME280Handle_t *pxBME280)
 }
 
 
-/* */
-void BME280_SPI_vMeasureForced(BME280Handle_t *pxBME280,
-		uint8_t uPressureOversample,
-		uint8_t uTemperatureOversample,
-		uint8_t uHumidityOversample)
-{
 
+void BME280_SPI_vMeasureAllForced(BME280Handle_t *pxBME280)
+{
+	return BME280_SPI_vMeasureForced(pxBME280, 1, 1, 1);
 }
 
 
@@ -155,8 +155,6 @@ void BME280_SPI_vReadRawData(BME280Handle_t *pxBME280)
 			(pxBME280->xMeasureRegData.xHumidityRegData.uMSB << 8) +
 			(pxBME280->xMeasureRegData.xHumidityRegData.uLSB);
 }
-
-
 
 
 
@@ -217,17 +215,6 @@ void BME280_I2C_vReadCalibrationData(BME280Handle_t *pxBME280)
 
 
 
-void BME280_I2C_vMeasureAllForced(BME280Handle_t *pxBME280)
-{
-	static const uint8_t uCtrlHum 	= 0b00000001;
-	static const uint8_t uCtrlMeas	=	0b00100110;
-
-	HAL_I2C_Mem_Write(pxBME280->pxI2CHandle, (uint16_t)(pxBME280->uI2CSlaveAddress << 1), (uint16_t)BME280_CTRL_HUM_ADDRESS, 1, &uCtrlHum, 1, 50);
-	HAL_I2C_Mem_Write(pxBME280->pxI2CHandle, (uint16_t)(pxBME280->uI2CSlaveAddress << 1), (uint16_t)BME280_CTRL_MEAS_ADDRESS, 1, &uCtrlMeas, 1, 50);
-}
-
-
-
 void BME280_I2C_vMeasureForced(BME280Handle_t *pxBME280,
 		uint8_t uPressureOversample,
 		uint8_t uTemperatureOversample,
@@ -238,6 +225,13 @@ void BME280_I2C_vMeasureForced(BME280Handle_t *pxBME280,
 
 	HAL_I2C_Mem_Write(pxBME280->pxI2CHandle, (uint16_t)(pxBME280->uI2CSlaveAddress << 1), (uint16_t)BME280_CTRL_HUM_ADDRESS, 1, &uCtrlHum, 1, 50);
 	HAL_I2C_Mem_Write(pxBME280->pxI2CHandle, (uint16_t)(pxBME280->uI2CSlaveAddress << 1), (uint16_t)BME280_CTRL_MEAS_ADDRESS, 1, &uCtrlMeas, 1, 50);
+}
+
+
+
+void BME280_I2C_vMeasureAllForced(BME280Handle_t *pxBME280)
+{
+	return BME280_I2C_vMeasureForced(pxBME280, 1, 1, 1);
 }
 
 
