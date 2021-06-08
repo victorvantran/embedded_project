@@ -42,7 +42,6 @@
 #else
 	#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
 #endif /* __GNUC__ */
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -158,7 +157,7 @@ int main(void)
 		transmit_uart("The free space could not be determined!\n");
 	}
 
-	for (uint8_t i = 0; i < 10; i++) {
+	for (uint8_t i = 0; i < 3; i++) {
 		f_puts("This text is written in the file.\n", &fil);
 	}
 
@@ -289,7 +288,7 @@ static void MX_SPI1_Init(void)
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
   hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
   hspi1.Init.NSS = SPI_NSS_SOFT;
-  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_64;
   hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
   hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
