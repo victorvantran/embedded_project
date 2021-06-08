@@ -119,8 +119,8 @@ int main(void)
   MX_I2C1_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  BME280_I2C_vInit(&xBME280, &hi2c1, BME280_I2C_SLAVE_ADDRESS_A);
-  //BME280_SPI_vInit(&xBME280, &hspi1, GPIOB, GPIO_PIN_6);
+  //BME280_I2C_vInit(&xBME280, &hi2c1, BME280_I2C_SLAVE_ADDRESS_A);
+  BME280_SPI_vInit(&xBME280, &hspi1, GPIOB, GPIO_PIN_6);
 
   /* USER CODE END 2 */
 
@@ -409,7 +409,7 @@ void StartDefaultTask(void *argument)
   	//osDelay(200);
 
 
-
+  	/*
   	BME280_I2C_vMeasureAllForced(&xBME280);
   	//BME280_vMeasureForced(&xBME280, 1, 0, 1);
 
@@ -420,22 +420,18 @@ void StartDefaultTask(void *argument)
 
   	BME280_I2C_vPrintfCompensatedData(&xBME280);
   	//BME280_vPrintlCompensatedData(&xBME280);
+		*/
 
-
-
-  	/*
-  	uint8_t ucReadChipIDReg = (1 << 7) | (0xD0 & 0x7F);//0xD0;
-  	uint8_t ucChipID;
-  	// Should also change/ensure CLK, CPOL, and CPHA are compatible to the peripheral device
-  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_RESET);
-  	HAL_SPI_Transmit(&hspi1, &ucReadChipIDReg, sizeof(ucReadChipIDReg), 50);
-  	HAL_SPI_Receive(&hspi1, &ucChipID, sizeof(ucChipID), 50);
-  	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_6, GPIO_PIN_SET);
-
-  	printf("Chip ID: %d\r\n", (int16_t)ucChipID);
-  	*/
 
   	//BME280_SPI_vReadChipID(&xBME280);
+  	//BME280_SPI_vReadCalibrationData(&xBME280);
+  	//BME280_Debug_vPrintCalibrationData(&xBME280);
+  	BME280_SPI_vMeasureAllForced(&xBME280);
+  	BME280_SPI_vReadRawData(&xBME280);
+  	//BME280_Debug_vPrintlCompensatedData(&xBME280);
+  	BME280_Debug_vPrintfCompensatedData(&xBME280);
+  	//BME280_Debug_vPrintRawData(&xBME280);
+
 
     osDelay(2000);
   }

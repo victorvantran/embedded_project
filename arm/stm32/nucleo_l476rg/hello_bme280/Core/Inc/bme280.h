@@ -34,13 +34,18 @@
 
 
 #define BME280_CHIP_ADDRESS 0xD0
+
 #define BME280_MEASURE_DATA_ADDRESS 0xF7
+#define BME280_MEASURE_DATA_BYTE_SIZE 8
 
 #define BME280_CTRL_HUM_ADDRESS 0xF2
 #define BME280_CTRL_MEAS_ADDRESS 0xF4
 
 #define BME280_CALIBRATE_ADDRESS_A 0x88
+#define BME280_CALIBRATE_BYTE_SIZE_A 25
+
 #define BME280_CALIBRATE_ADDRESS_B 0xE1
+#define BME280_CALIBRATE_BYTE_SIZE_B 8
 
 #define BME280_SLEEP_MODE 0x00
 #define BME280_FORCED_MODE 0x01
@@ -163,6 +168,15 @@ void BME280_SPI_vReadChipID(BME280Handle_t *pxBME280);
 
 void BME280_SPI_vReadCalibrationData(BME280Handle_t *pxBME280);
 
+void BME280_SPI_vMeasureAllForced(BME280Handle_t *pxBME280);
+
+void BME280_SPI_vMeasureForced(BME280Handle_t *pxBME280,
+		uint8_t uPressureOversample,
+		uint8_t uTemperatureOversample,
+		uint8_t uHumidityOversample);
+
+void BME280_SPI_vReadRawData(BME280Handle_t *pxBME280);
+
 
 
 
@@ -172,11 +186,11 @@ void BME280_I2C_vInit(BME280Handle_t *pxBME280,
 		uint8_t uI2CSlaveAddress );
 
 
-void BME280_I2C_vReadCalibrationData(BME280Handle_t *pxBME280);
-
 /* */
 uint8_t BME280_I2C_vReadChipID(BME280Handle_t *pxBME280);
 
+/* */
+void BME280_I2C_vReadCalibrationData(BME280Handle_t *pxBME280);
 
 /* */
 void BME280_I2C_vMeasureAllForced(BME280Handle_t *pxBME280);
@@ -218,13 +232,13 @@ float BME280_I2C_fCompensateHumidityData(BME280Handle_t *pxBME280);
 
 
 /* DEBUG */
-void BME280_I2C_vPrintRawData(BME280Handle_t *pxBME280);
+void BME280_Debug_vPrintRawData(BME280Handle_t *pxBME280);
 
-void BME280_I2C_vPrintCalibrationData(BME280Handle_t *pxBME280);
+void BME280_Debug_vPrintCalibrationData(BME280Handle_t *pxBME280);
 
-void BME280_I2C_vPrintlCompensatedData(BME280Handle_t *pxBME280);
+void BME280_Debug_vPrintlCompensatedData(BME280Handle_t *pxBME280);
 
-void BME280_I2C_vPrintfCompensatedData(BME280Handle_t *pxBME280);
+void BME280_Debug_vPrintfCompensatedData(BME280Handle_t *pxBME280);
 
 
 #endif /* INC_BME280_H_ */
