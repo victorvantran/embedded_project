@@ -504,7 +504,12 @@ void StartDefaultTask(void *argument)
 
  		Piece_vInit(&xPiece, &fil);
  		Piece_vSetComposition(&xPiece, &fil);
- 		Piece_vParseCommand(&xPiece, &fil);
+
+ 		// Initial Command
+ 		Piece_vParseCommand(&xPiece);
+
+
+
 
 
  		/*

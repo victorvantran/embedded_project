@@ -340,7 +340,7 @@ typedef struct
 {
 	uint32_t ulInstructionCounter;
 	uint8_t usCommand;
-	uint16_t uNote;
+	uint16_t uPlay;
 } PieceInstructionHandle_t;
 
 
@@ -355,6 +355,7 @@ typedef struct
 {
 	uint8_t usMovement;
 	uint16_t uBPM;
+	uint8_t usDynamic;
 } PieceConfigurationHandle_t;
 
 
@@ -381,11 +382,18 @@ typedef struct
 void Piece_vInit(PieceHandle_t *pxPiece, FIL *pFil);
 void Piece_vSetCompositionByteSize(PieceHandle_t *pxPiece, FIL *pFil);
 void Piece_vSetComposition(PieceHandle_t *pxPiece, FIL *pFil);
-void Piece_vParseCommand(PieceHandle_t *pxPiece, FIL *pFil);
-void Piece_vConfigure(PieceHandle_t *pxPiece, FIL *pFil);
 
 
-bool bIsPlayCommand(uint8_t usCommand);
+
+
+void Piece_vParseCommand(PieceHandle_t *pxPiece);
+void Piece_vSetMovement(PieceHandle_t *pxPiece, uint8_t usMovement);
+void Piece_vSetBPM(PieceHandle_t *pxPiece, uint16_t uBPM);
+void Piece_vSetDynamic(PieceHandle_t *pxPiece, uint8_t usDynamic);
+void Piece_vConfigureAll(PieceHandle_t *pxPiece);
+
+
+uint8_t bIsPlayCommand(uint8_t usCommand);
 
 
 void Piece_Debug_vPrintPointer(PieceHandle_t *pxPiece, FIL *pFil);
