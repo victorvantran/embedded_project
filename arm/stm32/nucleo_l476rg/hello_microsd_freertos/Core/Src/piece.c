@@ -36,15 +36,38 @@ void Piece_vSetComposition(PieceHandle_t *pxPiece, FIL *pFil)
 	pxPiece->xPieceInstruction.ulInstructionCounter = 0;
 }
 
+
 void Piece_vParseCommand(PieceHandle_t *pxPiece, FIL *pFil)
 {
 	memcpy(&pxPiece->xPieceInstruction.usCommand, pxPiece->xComposition.pusComposition + pxPiece->xPieceInstruction.ulInstructionCounter, sizeof(pxPiece->xPieceInstruction.usCommand));
-	//f_read(pFil, &(pxPiece->xPieceInstruction.usCommand), sizeof(pxPiece->xPieceInstruction.usCommand), &pxPiece->xPieceInstruction.usNumBytesRead);
-	//printf("Command: %c\r\n", pxPiece->xComposition.pusComposition + pxPiece->xPieceInstruction.ulInstructionCounter);
 	printf("Command: %u\r\n", pxPiece->xPieceInstruction.usCommand);
+
+	switch (pxPiece->xPieceInstruction.usCommand)
+	{
+	case 0b00000000:
+		printf("END OF COMPOSITION\r\n");
+		break;
+	case 0b01111111:
+		printf("CONFIGURE COMPOSITION\r\n");
+		break;
+	default:
+		if (bIsPlayCommand(pxPiece->xPieceInstruction.usCommand))
+		{
+			printf("Play command\r\n");
+		}
+		else
+		{
+			printf("UNKNOWN COMMAND\r\n");
+		}
+	}
 
 	pxPiece->xPieceInstruction.ulInstructionCounter++;
 }
+
+
+
+
+
 
 
 
@@ -55,6 +78,12 @@ void Piece_vConfigure(PieceHandle_t *pxPiece, FIL *pFil)
 }
 
 
+
+
+bool bIsPlayCommand(uint8_t usCommand)
+{
+	return usCommand >= 0b10000000;
+}
 
 
 void Piece_Debug_vPrintPointer(PieceHandle_t *pxPiece, FIL *pFil)
