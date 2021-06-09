@@ -1,0 +1,6 @@
+piece.c:11:6:Piece_vInit	24	static
+piece.c:19:6:Piece_vSetCompositionByteSize	24	static
+piece.c:27:6:Piece_vSetComposition	24	static
+piece.c:39:6:Piece_vParseCommand	16	static
+piece.c:51:6:Piece_vConfigure	16	static
+piece.c:60:6:Piece_Debug_vPrintPointer	16	static

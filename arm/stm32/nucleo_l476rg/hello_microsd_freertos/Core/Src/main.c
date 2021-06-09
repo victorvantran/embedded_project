@@ -473,7 +473,7 @@ void StartDefaultTask(void *argument)
  		}
  		*/
 
- 		fres = f_open(&fil, "piece_test.txt", FA_READ);
+ 		fres = f_open(&fil, "glazunov_violin_concerto.piece", FA_READ);
  		if (fres == FR_OK) {
  			transmit_uart("File opened for reading.\n");
  		} else if (fres != FR_OK) {
@@ -502,10 +502,16 @@ void StartDefaultTask(void *argument)
 		*/
 
 
+ 		Piece_vInit(&xPiece, &fil);
+ 		Piece_vSetComposition(&xPiece, &fil);
+ 		Piece_vParseCommand(&xPiece, &fil);
+
+
+ 		/*
  		uint8_t usNumBytesRead;
  		f_read(&fil, xPiece.xPieceInformation.pusName, sizeof(xPiece.xPieceInformation.pusName), &usNumBytesRead);
  	 	printf("Name: %s\r\n", xPiece.xPieceInformation.pusName);
-
+		*/
 
 
  	 	/*
