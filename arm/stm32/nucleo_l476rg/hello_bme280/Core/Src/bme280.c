@@ -181,9 +181,12 @@ void BME280_I2C_vInit(BME280Handle_t *pxBME280,
 
 uint8_t BME280_I2C_vReadChipID(BME280Handle_t *pxBME280)
 {
-	uint8_t uChipID = 0;
-	HAL_I2C_Mem_Read(pxBME280->pxI2CHandle, (uint16_t)(pxBME280->uI2CSlaveAddress << 1), (uint16_t)BME280_CHIP_ADDRESS, 1, &uChipID, 1, 50);
-	return uChipID;
+	uint8_t ucChipID = 0;
+	HAL_I2C_Mem_Read(pxBME280->pxI2CHandle, (uint16_t)(pxBME280->uI2CSlaveAddress << 1), (uint16_t)BME280_CHIP_ADDRESS, 1, &ucChipID, 1, 50);
+
+	printf("Chip ID: %d\r\n", (int16_t)ucChipID);
+
+	return ucChipID;
 }
 
 

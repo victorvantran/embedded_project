@@ -1,0 +1,16 @@
+mpu6050.h:62:19:MPU6050_I2C_vConfig	40	static
+mpu6050.h:101:19:MPU6050_I2C_vInit	24	static
+mpu6050.h:121:19:MPU6050_I2C_xGetWhoAmI	40	static
+mpu6050.h:130:6:MPU6050_I2C_Debug_vReadWhoAmI	24	static
+mpu6050.h:168:6:MPU6050_I2C_Debug_vReadGyroscope	56	static
+mpu6050.h:198:6:MPU6050_I2C_Debug_vReadAccelerometer	80	static
+mpu6050.h:246:6:MPU6050_I2C_Debug_vReadTemperature	40	static
+main.c:78:1:__io_putchar	16	static
+main.c:89:5:main	8	static
+main.c:176:6:SystemClock_Config	232	static
+main.c:232:13:MX_I2C1_Init	8	static
+main.c:278:13:MX_USART2_UART_Init	8	static
+main.c:313:13:MX_GPIO_Init	24	static
+main.c:335:6:StartDefaultTask	16	static
+main.c:360:6:HAL_TIM_PeriodElapsedCallback	16	static
+main.c:377:6:Error_Handler	4	static,ignoring_inline_asm

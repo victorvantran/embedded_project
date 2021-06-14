@@ -6,7 +6,7 @@ piece.c:77:6:Piece_vSetMovement	16	static
 piece.c:83:6:Piece_vSetBPM	16	static
 piece.c:89:6:Piece_vSetDynamic	16	static
 piece.c:95:6:Piece_vConfigureAll	24	static
-piece.c:118:6:Piece_vPlayNote	16	static
-piece.c:126:6:Piece_vPlayNotes	24	static
-piece.c:138:9:bIsPlayCommand	16	static
-piece.c:145:6:Piece_Debug_vPrintPointer	16	static
+piece.c:118:6:Piece_vPlayNote	24	static
+piece.c:136:6:Piece_vPlayNotes	24	static
+piece.c:148:9:bIsPlayCommand	16	static
+piece.c:155:6:Piece_Debug_vPrintPointer	16	static

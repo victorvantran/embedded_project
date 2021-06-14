@@ -119,8 +119,8 @@ int main(void)
   MX_I2C1_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  //BME280_I2C_vInit(&xBME280, &hi2c1, BME280_I2C_SLAVE_ADDRESS_A);
-  BME280_SPI_vInit(&xBME280, &hspi1, GPIOB, GPIO_PIN_6);
+  BME280_I2C_vInit(&xBME280, &hi2c1, BME280_I2C_SLAVE_ADDRESS_A);
+  //BME280_SPI_vInit(&xBME280, &hspi1, GPIOB, GPIO_PIN_6);
 
   /* USER CODE END 2 */
 
@@ -423,6 +423,15 @@ void StartDefaultTask(void *argument)
 		*/
 
 
+  	BME280_I2C_vReadChipID(&xBME280);
+
+
+
+
+
+
+
+  	/*
   	//BME280_SPI_vReadChipID(&xBME280);
   	//BME280_SPI_vReadCalibrationData(&xBME280);
   	//BME280_Debug_vPrintCalibrationData(&xBME280);
@@ -431,7 +440,7 @@ void StartDefaultTask(void *argument)
   	//BME280_Debug_vPrintlCompensatedData(&xBME280);
   	BME280_Debug_vPrintfCompensatedData(&xBME280);
   	//BME280_Debug_vPrintRawData(&xBME280);
-
+		*/
 
     osDelay(2000);
   }
