@@ -1598,8 +1598,6 @@ void MPU6050_I2C_Debug_vReadAccelerometer(MPU6050Handle_t *pxMPU6050)
  80011a0:	edc7 7a08 	vstr	s15, [r7, #32]
 
 
-
-
 		float fPitch = atan2f(-fAY, fAZ);// - M_PI;
  80011a4:	edd7 7a09 	vldr	s15, [r7, #36]	; 0x24
  80011a8:	eef1 7a67 	vneg.f32	s15, s15
@@ -1607,7 +1605,6 @@ void MPU6050_I2C_Debug_vReadAccelerometer(MPU6050Handle_t *pxMPU6050)
  80011b0:	eeb0 0a67 	vmov.f32	s0, s15
  80011b4:	f009 fa1c 	bl	800a5f0 <atan2f>
  80011b8:	ed87 0a0d 	vstr	s0, [r7, #52]	; 0x34
-		//float fPitch = atan2f(-fAX, sqrt(fAY * fAY + fAZ * fAZ));// - M_PI;
 
 		fPitch = fPitch * 180.0 / M_PI;
  80011bc:	6b78      	ldr	r0, [r7, #52]	; 0x34
@@ -1639,9 +1636,6 @@ void MPU6050_I2C_Debug_vReadAccelerometer(MPU6050Handle_t *pxMPU6050)
  8001204:	ed9f 7a0e 	vldr	s14, [pc, #56]	; 8001240 <MPU6050_I2C_Debug_vReadAccelerometer+0x188>
  8001208:	ee77 7a87 	vadd.f32	s15, s15, s14
  800120c:	edc7 7a0d 	vstr	s15, [r7, #52]	; 0x34
-
-
-
 
 		printf("fPitch Z: %.8f\r\n", fPitch);
  8001210:	6b78      	ldr	r0, [r7, #52]	; 0x34

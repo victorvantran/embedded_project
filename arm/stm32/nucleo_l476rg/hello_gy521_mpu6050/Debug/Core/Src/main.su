@@ -4,7 +4,7 @@ mpu6050.h:121:19:MPU6050_I2C_xGetWhoAmI	40	static
 mpu6050.h:130:6:MPU6050_I2C_Debug_vReadWhoAmI	24	static
 mpu6050.h:168:6:MPU6050_I2C_Debug_vReadGyroscope	56	static
 mpu6050.h:198:6:MPU6050_I2C_Debug_vReadAccelerometer	80	static
-mpu6050.h:246:6:MPU6050_I2C_Debug_vReadTemperature	40	static
+mpu6050.h:240:6:MPU6050_I2C_Debug_vReadTemperature	40	static
 main.c:78:1:__io_putchar	16	static
 main.c:89:5:main	8	static
 main.c:176:6:SystemClock_Config	232	static
