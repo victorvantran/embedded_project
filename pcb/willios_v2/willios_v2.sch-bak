@@ -1601,9 +1601,13 @@ Wire Notes Line
 Wire Notes Line
 	8500 2450 12750 2450
 Wire Notes Line
+	12750 500  12750 4350
+Wire Notes Line
 	8500 8250 16050 8250
 Wire Notes Line
 	16050 4350 16050 8250
+Wire Notes Line
+	11200 4350 11200 6350
 Wire Notes Line
 	14000 4350 14000 6350
 Text Notes 550  600  0    50   ~ 0
@@ -1720,8 +1724,4 @@ F 3 "~" H 1050 1050 50  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 Connection ~ 1050 1050
-Wire Notes Line
-	12750 2450 12750 500 
-Wire Notes Line
-	11200 2450 11200 6350
 $EndSCHEMATC
