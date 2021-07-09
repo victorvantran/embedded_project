@@ -366,7 +366,7 @@
   )
 
   (module Connector_PinSocket_2.54mm:PinSocket_1x03_P2.54mm_Vertical (layer F.Cu) (tedit 5A19A429) (tstamp 60E917F9)
-    (at 77 152)
+    (at 77 153)
     (descr "Through hole straight socket strip, 1x03, 2.54mm pitch, single row (from Kicad 4.0.7), script generated")
     (tags "Through hole socket strip THT 1x03 2.54mm single row")
     (path /60E98F41)
@@ -445,7 +445,7 @@
   )
 
   (module Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Vertical (layer F.Cu) (tedit 5A19A430) (tstamp 60E9178C)
-    (at 125 164 90)
+    (at 129 174 90)
     (descr "Through hole straight socket strip, 1x06, 2.54mm pitch, single row (from Kicad 4.0.7), script generated")
     (tags "Through hole socket strip THT 1x06 2.54mm single row")
     (path /610AC4FE)
@@ -493,7 +493,7 @@
   )
 
   (module Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical (layer F.Cu) (tedit 5A19A429) (tstamp 60E9173A)
-    (at 104 164 90)
+    (at 103 174 90)
     (descr "Through hole straight socket strip, 1x04, 2.54mm pitch, single row (from Kicad 4.0.7), script generated")
     (tags "Through hole socket strip THT 1x04 2.54mm single row")
     (path /61043216)
@@ -537,7 +537,7 @@
   )
 
   (module Connector_PinSocket_2.54mm:PinSocket_1x04_P2.54mm_Vertical (layer F.Cu) (tedit 5A19A429) (tstamp 60E916F6)
-    (at 86.38 164 90)
+    (at 77 174 90)
     (descr "Through hole straight socket strip, 1x04, 2.54mm pitch, single row (from Kicad 4.0.7), script generated")
     (tags "Through hole socket strip THT 1x04 2.54mm single row")
     (path /6108A39A)
@@ -581,7 +581,7 @@
   )
 
   (module Capacitor_SMD:C_0603_1608Metric (layer F.Cu) (tedit 5F68FEEE) (tstamp 60E914B1)
-    (at 139 138 270)
+    (at 160 136 270)
     (descr "Capacitor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags capacitor)
     (path /60F47F4C)
@@ -617,7 +617,7 @@
   )
 
   (module Capacitor_SMD:C_1206_3216Metric (layer F.Cu) (tedit 5F68FEEE) (tstamp 60E914C2)
-    (at 131 136 180)
+    (at 152 134 180)
     (descr "Capacitor SMD 1206 (3216 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags capacitor)
     (path /60F184F8)
@@ -653,7 +653,7 @@
   )
 
   (module Capacitor_SMD:C_1206_3216Metric (layer F.Cu) (tedit 5F68FEEE) (tstamp 60E914D3)
-    (at 138 147)
+    (at 159 145)
     (descr "Capacitor SMD 1206 (3216 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags capacitor)
     (path /60F51FCD)
@@ -689,7 +689,7 @@
   )
 
   (module Capacitor_SMD:C_1206_3216Metric (layer F.Cu) (tedit 5F68FEEE) (tstamp 60E914E4)
-    (at 132 147 180)
+    (at 153 145 180)
     (descr "Capacitor SMD 1206 (3216 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags capacitor)
     (path /60F65338)
@@ -725,7 +725,7 @@
   )
 
   (module Capacitor_SMD:C_0603_1608Metric (layer F.Cu) (tedit 5F68FEEE) (tstamp 60E914F5)
-    (at 135 150 270)
+    (at 156 148 270)
     (descr "Capacitor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 76, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags capacitor)
     (path /60E86958)
@@ -1085,7 +1085,7 @@
   )
 
   (module Diode_SMD:D_SOD-123 (layer F.Cu) (tedit 58645DC7) (tstamp 60E915A7)
-    (at 128 123 90)
+    (at 158 122 90)
     (descr SOD-123)
     (tags SOD-123)
     (path /6117BBC9)
@@ -1129,7 +1129,7 @@
   )
 
   (module Diode_SMD:D_SOD-123 (layer F.Cu) (tedit 58645DC7) (tstamp 60E915C0)
-    (at 129 140 180)
+    (at 150 138 180)
     (descr SOD-123)
     (tags SOD-123)
     (path /60F52CA8)
@@ -1173,7 +1173,7 @@
   )
 
   (module LED_SMD:LED_0603_1608Metric (layer F.Cu) (tedit 5F68FEF1) (tstamp 60E915D3)
-    (at 143 128)
+    (at 123 125)
     (descr "LED SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: http://www.tortai-tech.com/upload/download/2011102023233369053.pdf), generated with kicad-footprint-generator")
     (tags LED)
     (path /615380EF)
@@ -1211,7 +1211,7 @@
   )
 
   (module LED_SMD:LED_0603_1608Metric (layer F.Cu) (tedit 5F68FEF1) (tstamp 60E915E6)
-    (at 101 124)
+    (at 128 120)
     (descr "LED SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: http://www.tortai-tech.com/upload/download/2011102023233369053.pdf), generated with kicad-footprint-generator")
     (tags LED)
     (path /60F30DEC)
@@ -1249,7 +1249,7 @@
   )
 
   (module Fuse:Fuse_1206_3216Metric (layer F.Cu) (tedit 5F68FEF1) (tstamp 60E915F7)
-    (at 132 126.6 90)
+    (at 153 124.6 90)
     (descr "Fuse SMD 1206 (3216 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: http://www.tortai-tech.com/upload/download/2011102023233369053.pdf), generated with kicad-footprint-generator")
     (tags fuse)
     (path /60F01E30)
@@ -1285,7 +1285,7 @@
   )
 
   (module Inductor_SMD:L_0805_2012Metric (layer F.Cu) (tedit 5F68FEF0) (tstamp 60E91608)
-    (at 132 132 90)
+    (at 153 130 90)
     (descr "Inductor SMD 0805 (2012 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 80, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags inductor)
     (path /60F1185E)
@@ -1321,7 +1321,7 @@
   )
 
   (module MountingHole:MountingHole_3.2mm_M3_Pad_Via (layer F.Cu) (tedit 56DDBCCA) (tstamp 60E91618)
-    (at 76 115)
+    (at 60 88)
     (descr "Mounting Hole 3.2mm, M3")
     (tags "mounting hole 3.2mm m3")
     (path /615BEB36)
@@ -1358,7 +1358,7 @@
   )
 
   (module MountingHole:MountingHole_3.2mm_M3_Pad_Via (layer F.Cu) (tedit 56DDBCCA) (tstamp 60E91628)
-    (at 147 114.6)
+    (at 169 87)
     (descr "Mounting Hole 3.2mm, M3")
     (tags "mounting hole 3.2mm m3")
     (path /615BF0AF)
@@ -1395,7 +1395,7 @@
   )
 
   (module MountingHole:MountingHole_3.2mm_M3_Pad_Via (layer F.Cu) (tedit 56DDBCCA) (tstamp 60E91638)
-    (at 76 165)
+    (at 55 182)
     (descr "Mounting Hole 3.2mm, M3")
     (tags "mounting hole 3.2mm m3")
     (path /615C1465)
@@ -1432,7 +1432,7 @@
   )
 
   (module MountingHole:MountingHole_3.2mm_M3_Pad_Via (layer F.Cu) (tedit 56DDBCCA) (tstamp 60E91648)
-    (at 146 164)
+    (at 173 182)
     (descr "Mounting Hole 3.2mm, M3")
     (tags "mounting hole 3.2mm m3")
     (path /615C1959)
@@ -1469,7 +1469,7 @@
   )
 
   (module TerminalBlock_Phoenix:TerminalBlock_Phoenix_PT-1,5-2-3.5-H_1x02_P3.50mm_Horizontal (layer F.Cu) (tedit 5B294F3F) (tstamp 60E91672)
-    (at 134 114)
+    (at 144 114)
     (descr "Terminal Block Phoenix PT-1,5-2-3.5-H, 2 pins, pitch 3.5mm, size 7x7.6mm^2, drill diamater 1.2mm, pad diameter 2.4mm, see , script-generated using https://github.com/pointhi/kicad-footprint-generator/scripts/TerminalBlock_Phoenix")
     (tags "THT Terminal Block Phoenix PT-1,5-2-3.5-H pitch 3.5mm size 7x7.6mm^2 drill 1.2mm pad 2.4mm")
     (path /60FDCD5F)
@@ -1529,7 +1529,7 @@
   )
 
   (module Connector_USB:USB_Micro-B_Molex_47346-0001 (layer F.Cu) (tedit 5D8620A7) (tstamp 60E91692)
-    (at 126 116 180)
+    (at 136 116 180)
     (descr "Micro USB B receptable with flange, bottom-mount, SMD, right-angle (http://www.molex.com/pdm_docs/sd/473460001_sd.pdf)")
     (tags "Micro B USB SMD")
     (path /61155183)
@@ -1591,7 +1591,7 @@
   )
 
   (module Connector_PinSocket_2.54mm:PinSocket_2x05_P2.54mm_Vertical (layer F.Cu) (tedit 5A19A42B) (tstamp 60E916B2)
-    (at 115 114)
+    (at 116 115.46)
     (descr "Through hole straight socket strip, 2x05, 2.54mm pitch, double cols (from Kicad 4.0.7), script generated")
     (tags "Through hole socket strip THT 2x05 2.54mm double row")
     (path /60FF322C)
@@ -1695,7 +1695,7 @@
   )
 
   (module Inductor_SMD:L_Sunlord_MWSA0518_5.4x5.2mm (layer F.Cu) (tedit 5DB5FB51) (tstamp 60E918B7)
-    (at 135 142 270)
+    (at 156 140 270)
     (descr "Inductor, Sunlord, MWSA0518, 5.4mmx5.2mm")
     (tags "inductor Sunlord smd")
     (path /60F613E8)
@@ -1769,7 +1769,7 @@
   )
 
   (module Package_TO_SOT_SMD:SOT-23 (layer F.Cu) (tedit 5A02FF57) (tstamp 60E918DB)
-    (at 136 122 90)
+    (at 148 123 90)
     (descr "SOT-23, Standard")
     (tags SOT-23)
     (path /60F0B319)
@@ -1810,7 +1810,7 @@
   )
 
   (module Resistor_SMD:R_0603_1608Metric (layer F.Cu) (tedit 5F68FEEE) (tstamp 60E918EC)
-    (at 136 131 180)
+    (at 157 129 180)
     (descr "Resistor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags resistor)
     (path /60F276F1)
@@ -1846,7 +1846,7 @@
   )
 
   (module Resistor_SMD:R_0603_1608Metric (layer F.Cu) (tedit 5F68FEEE) (tstamp 60E918FD)
-    (at 136 133)
+    (at 157 131)
     (descr "Resistor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags resistor)
     (path /60F2899C)
@@ -1882,7 +1882,7 @@
   )
 
   (module Resistor_SMD:R_0603_1608Metric (layer F.Cu) (tedit 5F68FEEE) (tstamp 60E9190E)
-    (at 140 134 270)
+    (at 161 132 270)
     (descr "Resistor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags resistor)
     (path /60F7B9A6)
@@ -1918,7 +1918,7 @@
   )
 
   (module Resistor_SMD:R_0603_1608Metric (layer F.Cu) (tedit 5F68FEEE) (tstamp 60E9191F)
-    (at 142 134 90)
+    (at 163 132 90)
     (descr "Resistor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags resistor)
     (path /60F7BF47)
@@ -1954,7 +1954,7 @@
   )
 
   (module Resistor_SMD:R_0603_1608Metric (layer F.Cu) (tedit 5F68FEEE) (tstamp 60E91930)
-    (at 144 134 270)
+    (at 165 132 270)
     (descr "Resistor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags resistor)
     (path /60F88701)
@@ -1990,7 +1990,7 @@
   )
 
   (module Resistor_SMD:R_0603_1608Metric (layer F.Cu) (tedit 5F68FEEE) (tstamp 60E91941)
-    (at 143 123)
+    (at 123 120)
     (descr "Resistor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags resistor)
     (path /615380F5)
@@ -2026,7 +2026,7 @@
   )
 
   (module Resistor_SMD:R_0603_1608Metric (layer F.Cu) (tedit 5F68FEEE) (tstamp 60E91952)
-    (at 110.825 158)
+    (at 109.825 166)
     (descr "Resistor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags resistor)
     (path /6102405D)
@@ -2062,7 +2062,7 @@
   )
 
   (module Resistor_SMD:R_0603_1608Metric (layer F.Cu) (tedit 5F68FEEE) (tstamp 60E91963)
-    (at 106 158)
+    (at 105 166)
     (descr "Resistor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags resistor)
     (path /6102E871)
@@ -2170,7 +2170,7 @@
   )
 
   (module Resistor_SMD:R_0603_1608Metric (layer F.Cu) (tedit 5F68FEEE) (tstamp 60E91996)
-    (at 101 129)
+    (at 128 125)
     (descr "Resistor SMD 0603 (1608 Metric), square (rectangular) end terminal, IPC_7351 nominal, (Body size source: IPC-SM-782 page 72, https://www.pcb-3d.com/wordpress/wp-content/uploads/ipc-sm-782a_amendment_1_and_2.pdf), generated with kicad-footprint-generator")
     (tags resistor)
     (path /60F361E0)
@@ -2267,7 +2267,7 @@
   )
 
   (module Package_TO_SOT_SMD:SOT-23-6 (layer F.Cu) (tedit 5A02FF57) (tstamp 60E919D6)
-    (at 136 136 180)
+    (at 157 134 180)
     (descr "6-pin SOT-23 package")
     (tags SOT-23-6)
     (path /60EF70B6)
@@ -2312,7 +2312,7 @@
   )
 
   (module Package_TO_SOT_SMD:SOT-23-6 (layer F.Cu) (tedit 5A02FF57) (tstamp 60E919EC)
-    (at 123 122 270)
+    (at 127.05 135.1 270)
     (descr "6-pin SOT-23 package")
     (tags SOT-23-6)
     (path /61172115)
