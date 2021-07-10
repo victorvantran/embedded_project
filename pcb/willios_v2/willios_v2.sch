@@ -713,17 +713,6 @@ F 3 "" H 6300 2200 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L Device:L_Small L1
-U 1 1 60F613E8
-P 6750 1900
-F 0 "L1" V 6935 1900 50  0000 C CNN
-F 1 "10u" V 6844 1900 50  0000 C CNN
-F 2 "Inductor_SMD:L_Sunlord_MWSA0518_5.4x5.2mm" H 6750 1900 50  0001 C CNN
-F 3 "~" H 6750 1900 50  0001 C CNN
-	1    6750 1900
-	0    -1   -1   0   
-$EndComp
-$Comp
 L power:GND #PWR011
 U 1 1 60F65751
 P 7250 2200
@@ -750,15 +739,12 @@ Wire Wire Line
 Wire Wire Line
 	7600 1900 7600 1800
 Wire Wire Line
-	6850 1900 7250 1900
-Wire Wire Line
 	6300 1900 6300 2000
 Connection ~ 6300 1900
 Wire Wire Line
 	6300 1900 6650 1900
 Wire Wire Line
 	7250 1900 7250 2000
-Connection ~ 7250 1900
 Wire Wire Line
 	7250 1900 7600 1900
 Wire Wire Line
@@ -1778,4 +1764,18 @@ Wire Wire Line
 	9800 7300 9400 7300
 Wire Wire Line
 	9400 7300 9400 7500
+Connection ~ 7250 1900
+Wire Wire Line
+	6850 1900 7250 1900
+$Comp
+L Device:L_Small L1
+U 1 1 60F613E8
+P 6750 1900
+F 0 "L1" V 6935 1900 50  0000 C CNN
+F 1 "10u" V 6844 1900 50  0000 C CNN
+F 2 "Inductor_SMD:L_Sunlord_MWSA0518_5.4x5.2mm" V 6843 1900 50  0001 C CNN
+F 3 "~" H 6750 1900 50  0001 C CNN
+	1    6750 1900
+	0    -1   -1   0   
+$EndComp
 $EndSCHEMATC
