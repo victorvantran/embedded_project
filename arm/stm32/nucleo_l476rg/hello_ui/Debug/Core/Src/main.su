@@ -1,0 +1,10 @@
+main.cpp:76:5:int main()	8	static
+main.cpp:155:6:void SystemClock_Config()	232	static
+main.cpp:209:13:void MX_USART2_UART_Init()	8	static
+main.cpp:244:13:void MX_GPIO_Init()	48	static
+main.cpp:277:6:void StartDefaultTask(void*)	16	static
+main.cpp:298:6:void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef*)	16	static
+main.cpp:315:6:void Error_Handler()	4	static,ignoring_inline_asm
+main.cpp:324:1:void __static_initialization_and_destruction_0(int, int)	16	static
+main.cpp:324:1:cpp)	8	static
+main.cpp:324:1:cpp)	8	static

@@ -1,0 +1,3 @@
+ui.cpp:10:1:UI::UI()	16	static
+ui.cpp:13:1:UI::~UI()	16	static
+ui.cpp:16:6:void UI::test()	16	static
