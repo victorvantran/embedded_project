@@ -11,17 +11,25 @@
 
 // UI State
 UIState::UIState(EnumState eState) : _eState(eState) {}
-
-
 UIState::~UIState() {}
+
+
+MainMenuState::MainMenuState() : UIState(EnumState::MAIN_MENU) {}
+MainMenuState::~MainMenuState() {}
+
+MusicState::MusicState() : UIState(EnumState::MUSIC) {}
+MusicState::~MusicState() {}
+
+SettingsState::SettingsState() : UIState(EnumState::SETTINGS) {}
+SettingsState::~SettingsState() {}
 
 
 
 // UI
-UI::UI() : _xMainMenu(EnumState::MAIN_MENU), _xMusic(EnumState::MUSIC), _xSettings(EnumState::SETTINGS), _pxUART(nullptr) {}
+UI::UI() : _xMainMenu(), _xMusic(), _xSettings(), _pxUART(nullptr) {}
 
 
-UI::UI(UART_HandleTypeDef *pxUART) : _xMainMenu(EnumState::MAIN_MENU), _xMusic(EnumState::MUSIC), _xSettings(EnumState::SETTINGS), _pxUART(pxUART) {}
+UI::UI(UART_HandleTypeDef *pxUART) : _xMainMenu(), _xMusic(), _xSettings(), _pxUART(pxUART) {}
 
 
 UI::~UI() {}

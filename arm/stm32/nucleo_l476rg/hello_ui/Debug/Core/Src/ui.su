@@ -1,6 +1,12 @@
 ui.cpp:13:1:UIState::UIState(EnumState)	16	static
-ui.cpp:16:1:UIState::~UIState()	16	static
-ui.cpp:21:1:UI::UI()	16	static
-ui.cpp:24:1:UI::UI(UART_HandleTypeDef*)	16	static
-ui.cpp:27:1:UI::~UI()	16	static
-ui.cpp:30:6:void UI::test()	16	static
+ui.cpp:14:1:UIState::~UIState()	16	static
+ui.cpp:17:1:MainMenuState::MainMenuState()	16	static
+ui.cpp:18:1:MainMenuState::~MainMenuState()	16	static
+ui.cpp:20:1:MusicState::MusicState()	16	static
+ui.cpp:21:1:MusicState::~MusicState()	16	static
+ui.cpp:23:1:SettingsState::SettingsState()	16	static
+ui.cpp:24:1:SettingsState::~SettingsState()	16	static
+ui.cpp:29:1:UI::UI()	16	static
+ui.cpp:32:1:UI::UI(UART_HandleTypeDef*)	16	static
+ui.cpp:35:1:UI::~UI()	16	static
+ui.cpp:38:6:void UI::test()	16	static

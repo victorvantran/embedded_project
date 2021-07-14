@@ -27,6 +27,50 @@ private:
 public:
 	UIState(EnumState eState);
 	~UIState();
+};
+
+
+
+class MainMenuState : public UIState
+{
+private:
+public:
+	MainMenuState();
+	~MainMenuState();
+
+	void enter(void);
+	void exit(void);
+
+	void eventUp(void);
+	void eventDown(void);
+	void eventLeft(void);
+	void eventRight(void);
+};
+
+
+class MusicState : public UIState
+{
+private:
+public:
+	MusicState();
+	~MusicState();
+
+	void enter(void);
+	void exit(void);
+
+	void eventUp(void);
+	void eventDown(void);
+	void eventLeft(void);
+	void eventRight(void);
+};
+
+
+class SettingsState : public UIState
+{
+private:
+public:
+	SettingsState();
+	~SettingsState();
 
 	void enter(void);
 	void exit(void);
@@ -39,21 +83,12 @@ public:
 
 
 
-class MainMenuState : public UIState
-{
-private:
-public:
-	MainMenuState();
-	~MainMenuState();
-};
-
-
 class UI
 {
 private:
-	UIState _xMainMenu;
-	UIState _xMusic;
-	UIState _xSettings;
+	MainMenuState _xMainMenu;
+	MusicState _xMusic;
+	SettingsState _xSettings;
 
 	UART_HandleTypeDef* _pxUART;
 public:
