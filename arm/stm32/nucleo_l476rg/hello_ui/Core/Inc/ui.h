@@ -21,6 +21,10 @@ enum class EnumState
 };
 
 
+// Forward declaration to resolve circular dependencies
+class UI;
+
+
 
 class UIState
 {
@@ -30,13 +34,13 @@ public:
 	UIState(EnumState eState);
 	virtual ~UIState();
 
-	virtual void vEnter(void) = 0;
-	virtual void vExit(void) = 0;
+	virtual void vEnter(UI* pxUI) const = 0;
+	virtual void vExit(UI* pxUI) const = 0;
 
-	virtual void vEventUp(void) = 0;
-	virtual void vEventDown(void) = 0;
-	virtual void vEventLeft(void) = 0;
-	virtual void vEventRight(void) = 0;
+	virtual void vEventUp(UI* pxUI) const = 0;
+	virtual void vEventDown(UI* pxUI) const = 0;
+	virtual void vEventLeft(UI* pxUI) const = 0;
+	virtual void vEventRight(UI* pxUI) const = 0;
 };
 
 
@@ -48,13 +52,15 @@ public:
 	MainMenuState();
 	virtual ~MainMenuState();
 
-	virtual void vEnter(void);
-	virtual void vExit(void);
+	virtual void vEnter(UI* pxUI) const;
+	virtual void vExit(UI* pxUI) const;
 
-	virtual void vEventUp(void);
-	virtual void vEventDown(void);
-	virtual void vEventLeft(void);
-	virtual void vEventRight(void);
+	virtual void vEventUp(UI* pxUI) const;
+	virtual void vEventDown(UI* pxUI) const;
+	virtual void vEventLeft(UI* pxUI) const;
+	virtual void vEventRight(UI* pxUI) const;
+
+	static const UIState& getInstance(void);
 };
 
 
@@ -65,13 +71,13 @@ public:
 	MusicState();
 	virtual ~MusicState();
 
-	virtual void vEnter(void);
-	virtual void vExit(void);
+	virtual void vEnter(UI* pxUI) const;
+	virtual void vExit(UI* pxUI) const;
 
-	virtual void vEventUp(void);
-	virtual void vEventDown(void);
-	virtual void vEventLeft(void);
-	virtual void vEventRight(void);
+	virtual void vEventUp(UI* pxUI) const;
+	virtual void vEventDown(UI* pxUI) const;
+	virtual void vEventLeft(UI* pxUI) const;
+	virtual void vEventRight(UI* pxUI) const;
 };
 
 
@@ -82,13 +88,13 @@ public:
 	ProfileState();
 	virtual ~ProfileState();
 
-	virtual void vEnter(void);
-	virtual void vExit(void);
+	virtual void vEnter(UI* pxUI) const;
+	virtual void vExit(UI* pxUI) const;
 
-	virtual void vEventUp(void);
-	virtual void vEventDown(void);
-	virtual void vEventLeft(void);
-	virtual void vEventRight(void);
+	virtual void vEventUp(UI* pxUI) const;
+	virtual void vEventDown(UI* pxUI) const;
+	virtual void vEventLeft(UI* pxUI) const;
+	virtual void vEventRight(UI* pxUI) const;
 };
 
 
@@ -100,13 +106,13 @@ public:
 	SettingsState();
 	virtual ~SettingsState();
 
-	virtual void vEnter(void);
-	virtual void vExit(void);
+	virtual void vEnter(UI* pxUI) const;
+	virtual void vExit(UI* pxUI) const;
 
-	virtual void vEventUp(void);
-	virtual void vEventDown(void);
-	virtual void vEventLeft(void);
-	virtual void vEventRight(void);
+	virtual void vEventUp(UI* pxUI) const;
+	virtual void vEventDown(UI* pxUI) const;
+	virtual void vEventLeft(UI* pxUI) const;
+	virtual void vEventRight(UI* pxUI) const;
 };
 
 
@@ -114,11 +120,14 @@ public:
 class UI
 {
 private:
-	MainMenuState _xMainMenu;
-	MusicState _xMusic;
-	ProfileState _xProfile;
-	SettingsState _xSettings;
-	UIState *_pxCurrState;
+	/*
+	 * Non-singleton pattern
+	const MainMenuState _xMainMenu;
+	const MusicState _xMusic;
+	const ProfileState _xProfile;
+	const SettingsState _xSettings;
+	*/
+	const UIState* _pxCurrentState;
 
 	UART_HandleTypeDef* _pxUART;
 public:
@@ -127,7 +136,16 @@ public:
 
 	~UI();
 
-	void test(void);
+	void test(void) const;
+
+	inline const UIState* pxGetCurrentState(void) const;
+
+	void vTransitionState(const UIState& xNextState);
+
+	void vPressUpButton(void);
+	void vPressDownButton(void);
+	void vPressLeftButton(void);
+	void vPressRightButton(void);
 };
 
 

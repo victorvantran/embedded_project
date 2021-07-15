@@ -20,40 +20,47 @@ UIState::~UIState() {}
 MainMenuState::MainMenuState() : UIState(EnumState::MAIN_MENU) {}
 MainMenuState::~MainMenuState() {}
 
-void MainMenuState::vEnter(void)
+void MainMenuState::vEnter(UI* pxUI) const
 {
 
 }
 
 
-void MainMenuState::vExit(void)
+void MainMenuState::vExit(UI* pxUI) const
 {
 
 }
 
 
-void MainMenuState::vEventUp(void)
+void MainMenuState::vEventUp(UI* pxUI) const
 {
 
 }
 
 
-void MainMenuState::vEventDown(void)
+void MainMenuState::vEventDown(UI* pxUI) const
 {
 
 }
 
 
-void MainMenuState::vEventLeft(void)
+void MainMenuState::vEventLeft(UI* pxUI) const
 {
+	pxUI->vTransitionState(MainMenuState::getInstance());
+}
+
+
+void MainMenuState::vEventRight(UI* pxUI) const
+{
+
 
 }
 
 
-void MainMenuState::vEventRight(void)
+const UIState& MainMenuState::getInstance(void)
 {
-
-
+	static const MainMenuState xSingleton;
+	return xSingleton;
 }
 
 
@@ -61,37 +68,37 @@ void MainMenuState::vEventRight(void)
 MusicState::MusicState() : UIState(EnumState::MUSIC) {}
 MusicState::~MusicState() {}
 
-void MusicState::vEnter(void)
+void MusicState::vEnter(UI* pxUI) const
 {
 
 }
 
 
-void MusicState::vExit(void)
+void MusicState::vExit(UI* pxUI) const
 {
 
 }
 
 
-void MusicState::vEventUp(void)
+void MusicState::vEventUp(UI* pxUI) const
 {
 
 }
 
 
-void MusicState::vEventDown(void)
+void MusicState::vEventDown(UI* pxUI) const
 {
 
 }
 
 
-void MusicState::vEventLeft(void)
+void MusicState::vEventLeft(UI* pxUI) const
 {
 
 }
 
 
-void MusicState::vEventRight(void)
+void MusicState::vEventRight(UI* pxUI) const
 {
 
 
@@ -105,37 +112,37 @@ void MusicState::vEventRight(void)
 ProfileState::ProfileState() : UIState(EnumState::PROFILE) {}
 ProfileState::~ProfileState() {}
 
-void ProfileState::vEnter(void)
+void ProfileState::vEnter(UI* pxUI) const
 {
 
 }
 
 
-void ProfileState::vExit(void)
+void ProfileState::vExit(UI* pxUI) const
 {
 
 }
 
 
-void ProfileState::vEventUp(void)
+void ProfileState::vEventUp(UI* pxUI) const
 {
 
 }
 
 
-void ProfileState::vEventDown(void)
+void ProfileState::vEventDown(UI* pxUI) const
 {
 
 }
 
 
-void ProfileState::vEventLeft(void)
+void ProfileState::vEventLeft(UI* pxUI) const
 {
 
 }
 
 
-void ProfileState::vEventRight(void)
+void ProfileState::vEventRight(UI* pxUI) const
 {
 
 
@@ -147,37 +154,37 @@ void ProfileState::vEventRight(void)
 SettingsState::SettingsState() : UIState(EnumState::SETTINGS) {}
 SettingsState::~SettingsState() {}
 
-void SettingsState::vEnter(void)
+void SettingsState::vEnter(UI* pxUI) const
 {
 
 }
 
 
-void SettingsState::vExit(void)
+void SettingsState::vExit(UI* pxUI) const
 {
 
 }
 
 
-void SettingsState::vEventUp(void)
+void SettingsState::vEventUp(UI* pxUI) const
 {
 
 }
 
 
-void SettingsState::vEventDown(void)
+void SettingsState::vEventDown(UI* pxUI) const
 {
 
 }
 
 
-void SettingsState::vEventLeft(void)
+void SettingsState::vEventLeft(UI* pxUI) const
 {
 
 }
 
 
-void SettingsState::vEventRight(void)
+void SettingsState::vEventRight(UI* pxUI) const
 {
 
 
@@ -186,24 +193,35 @@ void SettingsState::vEventRight(void)
 
 
 // UI
-UI::UI() : _xMainMenu(), _xMusic(), _xProfile(), _xSettings(), _pxCurrState(&_xMainMenu),
+/*
+ * Singleton pattern
+UI::UI() : _xMainMenu(), _xMusic(), _xProfile(), _xSettings(), _pxCurrentState(&_xMainMenu),
 		_pxUART(nullptr) {}
 
 
-UI::UI(UART_HandleTypeDef *pxUART) : _xMainMenu(), _xMusic(), _xProfile(), _xSettings(), _pxCurrState(&_xMainMenu),
+UI::UI(UART_HandleTypeDef *pxUART) : _xMainMenu(), _xMusic(), _xProfile(), _xSettings(), _pxCurrentState(&_xMainMenu),
 		_pxUART(pxUART)
 {
-	this->_pxCurrState->vEnter();
+	this->_pxCurrentState->vEnter(this);
+}
+*/
+
+UI::UI() : _pxCurrentState(&MainMenuState::getInstance()), _pxUART(nullptr) {}
+
+
+UI::UI(UART_HandleTypeDef *pxUART) : _pxCurrentState(&MainMenuState::getInstance()), _pxUART(pxUART)
+{
+	this->_pxCurrentState->vEnter(this);
 }
 
 
 UI::~UI()
 {
-	this->_pxCurrState->vExit();
+	this->_pxCurrentState->vExit(this);
 }
 
 
-void UI::test(void)
+void UI::test(void) const
 {
 	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_8);
 	//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);
@@ -211,7 +229,42 @@ void UI::test(void)
 }
 
 
+const UIState* UI::pxGetCurrentState(void) const
+{
+	return this->_pxCurrentState;
+}
 
+
+void UI::vTransitionState(const UIState& xNextState)
+{
+	this->_pxCurrentState->vExit(this);
+	this->_pxCurrentState = &xNextState;
+	this->_pxCurrentState->vEnter(this);
+}
+
+
+void UI::vPressUpButton(void)
+{
+	this->_pxCurrentState->vEventUp(this);
+}
+
+
+void UI::vPressDownButton(void)
+{
+	this->_pxCurrentState->vEventDown(this);
+}
+
+
+void UI::vPressLeftButton(void)
+{
+	this->_pxCurrentState->vEventLeft(this);
+}
+
+
+void UI::vPressRightButton(void)
+{
+	this->_pxCurrentState->vEventRight(this);
+}
 
 
 
