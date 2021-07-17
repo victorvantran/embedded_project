@@ -34,7 +34,7 @@ void MainMenuState::vExit(UI* pxUI) const
 
 void MainMenuState::vEventUp(UI* pxUI) const
 {
-
+	// main menu modify
 }
 
 
@@ -194,7 +194,6 @@ void SettingsState::vEventRight(UI* pxUI) const
 
 // UI
 /*
- * Singleton pattern
 UI::UI() : _xMainMenu(), _xMusic(), _xProfile(), _xSettings(), _pxCurrentState(&_xMainMenu),
 		_pxUART(nullptr) {}
 
@@ -209,7 +208,7 @@ UI::UI(UART_HandleTypeDef *pxUART) : _xMainMenu(), _xMusic(), _xProfile(), _xSet
 UI::UI() : _pxCurrentState(&MainMenuState::getInstance()), _pxUART(nullptr) {}
 
 
-UI::UI(UART_HandleTypeDef *pxUART) : _pxCurrentState(&MainMenuState::getInstance()), _pxUART(pxUART)
+UI::UI(UART_HandleTypeDef *pxUART) : _pxCurrentState(&MainMenuState::getInstance()),_pxUART(pxUART)
 {
 	this->_pxCurrentState->vEnter(this);
 }

@@ -1775,7 +1775,7 @@ const UIState& MainMenuState::getInstance(void)
 UI::UI() : _pxCurrentState(&MainMenuState::getInstance()), _pxUART(nullptr) {}
 
 
-UI::UI(UART_HandleTypeDef *pxUART) : _pxCurrentState(&MainMenuState::getInstance()), _pxUART(pxUART)
+UI::UI(UART_HandleTypeDef *pxUART) : _pxCurrentState(&MainMenuState::getInstance()),_pxUART(pxUART)
  8000c74:	b580      	push	{r7, lr}
  8000c76:	b082      	sub	sp, #8
  8000c78:	af00      	add	r7, sp, #0

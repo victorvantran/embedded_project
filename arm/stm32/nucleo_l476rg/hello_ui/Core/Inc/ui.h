@@ -21,9 +21,8 @@ enum class EnumState
 };
 
 
-// Forward declaration to resolve circular dependencies
+// Forward declaration to appease circular dependency
 class UI;
-
 
 
 class UIState
