@@ -780,12 +780,11 @@ void StartDefaultTask(void *argument)
   	xUI.test();
  800073c:	4805      	ldr	r0, [pc, #20]	; (8000754 <_Z16StartDefaultTaskPv+0x2c>)
  800073e:	f000 fac9 	bl	8000cd4 <_ZNK2UI4testEv>
-    osDelay(250);
- 8000742:	20fa      	movs	r0, #250	; 0xfa
- 8000744:	f003 fa28 	bl	8003b98 <osDelay>
+    osDelay(2500);
+ 8000742:	f640 10c4 	movw	r0, #2500	; 0x9c4
+ 8000746:	f003 fa27 	bl	8003b98 <osDelay>
   	HAL_UART_Transmit(&huart2, (uint8_t *)("hello\r\n"), sizeof("hello\r\n"), 100);
- 8000748:	e7f2      	b.n	8000730 <_Z16StartDefaultTaskPv+0x8>
- 800074a:	bf00      	nop
+ 800074a:	e7f1      	b.n	8000730 <_Z16StartDefaultTaskPv+0x8>
  800074c:	08006888 	.word	0x08006888
  8000750:	20000098 	.word	0x20000098
  8000754:	20000120 	.word	0x20000120
@@ -1645,7 +1644,7 @@ void MainMenuState::vEventUp(UI* pxUI) const
  8000ba8:	af00      	add	r7, sp, #0
  8000baa:	6078      	str	r0, [r7, #4]
  8000bac:	6039      	str	r1, [r7, #0]
-
+	// main menu modify
 }
  8000bae:	bf00      	nop
  8000bb0:	370c      	adds	r7, #12

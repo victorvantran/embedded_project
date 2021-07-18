@@ -281,7 +281,7 @@ void StartDefaultTask(void *argument)
   {
   	HAL_UART_Transmit(&huart2, (uint8_t *)("hello\r\n"), sizeof("hello\r\n"), 100);
   	xUI.test();
-    osDelay(250);
+    osDelay(2500);
   }
   /* USER CODE END 5 */
 }
