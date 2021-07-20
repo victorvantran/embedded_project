@@ -22,13 +22,13 @@ MainMenuState::~MainMenuState() {}
 
 void MainMenuState::vEnter(UI* pxUI) const
 {
-
+  //HAL_UART_Transmit(pxUI->getPXUART(), (uint8_t *)("enter: main menu\r\n"), sizeof("enter: main menu\r\n"), 100);
 }
 
 
 void MainMenuState::vExit(UI* pxUI) const
 {
-
+  //HAL_UART_Transmit(pxUI->getPXUART(), (uint8_t *)("exit: main menu\r\n"), sizeof("exit: main menu\r\n"), 100);
 }
 
 
@@ -52,8 +52,6 @@ void MainMenuState::vEventLeft(UI* pxUI) const
 
 void MainMenuState::vEventRight(UI* pxUI) const
 {
-
-
 }
 
 
@@ -263,6 +261,13 @@ void UI::vPressLeftButton(void)
 void UI::vPressRightButton(void)
 {
 	this->_pxCurrentState->vEventRight(this);
+}
+
+
+
+inline UART_HandleTypeDef* UI::getPXUART(void)
+{
+	return this->_pxUART;
 }
 
 

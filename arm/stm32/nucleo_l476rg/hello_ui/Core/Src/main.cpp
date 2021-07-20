@@ -1,7 +1,7 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file           : main.c
+  * @file           : main.cpp
   * @brief          : Main program body
   ******************************************************************************
   * @attention
@@ -253,6 +253,12 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_RESET);
 
+  /*Configure GPIO pins : PB12 PB13 PB14 PB15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_12|GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
   /*Configure GPIO pin : PC8 */
   GPIO_InitStruct.Pin = GPIO_PIN_8;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -260,10 +266,40 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
+  /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 5, 0);
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
+
 }
 
 /* USER CODE BEGIN 4 */
 
+#define GPIO_PIN_15 UP_BUTTON
+#define GPIO_PIN_14 DOWN_BUTTON
+#define GPIO_PIN_13 LEFT_BUTTON
+#define GPIO_PIN_12 RIGHT_BUTTON
+
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	switch (GPIO_Pin)
+	{
+	case UP_BUTTON:
+	  HAL_UART_Transmit(&huart2, (uint8_t *)("up\r\n"), sizeof("up\r\n"), 100);
+		break;
+	case DOWN_BUTTON:
+	  HAL_UART_Transmit(&huart2, (uint8_t *)("down\r\n"), sizeof("down\r\n"), 100);
+		break;
+	case LEFT_BUTTON:
+	  HAL_UART_Transmit(&huart2, (uint8_t *)("left\r\n"), sizeof("left\r\n"), 100);
+		break;
+	case RIGHT_BUTTON:
+	  HAL_UART_Transmit(&huart2, (uint8_t *)("right\r\n"), sizeof("right\r\n"), 100);
+		break;
+	default:
+		break;
+	}
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -281,7 +317,7 @@ void StartDefaultTask(void *argument)
   {
   	HAL_UART_Transmit(&huart2, (uint8_t *)("hello\r\n"), sizeof("hello\r\n"), 100);
   	xUI.test();
-    osDelay(2500);
+    osDelay(250);
   }
   /* USER CODE END 5 */
 }

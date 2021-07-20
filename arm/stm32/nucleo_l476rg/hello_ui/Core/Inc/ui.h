@@ -11,6 +11,8 @@
 #include "stm32l4xx_hal.h"
 
 
+
+
 enum class EnumState
 {
 	MAIN_MENU,
@@ -127,7 +129,6 @@ private:
 	const SettingsState _xSettings;
 	*/
 	const UIState* _pxCurrentState;
-
 	UART_HandleTypeDef* _pxUART;
 public:
 	UI();
@@ -145,6 +146,11 @@ public:
 	void vPressDownButton(void);
 	void vPressLeftButton(void);
 	void vPressRightButton(void);
+
+
+
+	// Getters
+	inline UART_HandleTypeDef* getPXUART(void);
 };
 
 
