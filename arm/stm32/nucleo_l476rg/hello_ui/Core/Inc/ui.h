@@ -12,10 +12,14 @@
 
 
 
+#define UP_BUTTON			GPIO_PIN_15
+#define DOWN_BUTTON 	GPIO_PIN_14
+#define LEFT_BUTTON 	GPIO_PIN_13
+#define RIGHT_BUTTON 	GPIO_PIN_12
 
-enum class EnumState
+
+enum class StateOption
 {
-	MAIN_MENU,
 	MUSIC,
 	PROFILE,
 	SETTINGS,
@@ -30,9 +34,8 @@ class UI;
 class UIState
 {
 private:
-	EnumState _eState;
 public:
-	UIState(EnumState eState);
+	UIState();
 	virtual ~UIState();
 
 	virtual void vEnter(UI* pxUI) const = 0;
@@ -79,6 +82,8 @@ public:
 	virtual void vEventDown(UI* pxUI) const;
 	virtual void vEventLeft(UI* pxUI) const;
 	virtual void vEventRight(UI* pxUI) const;
+
+	static const UIState& getInstance(void);
 };
 
 
@@ -96,6 +101,8 @@ public:
 	virtual void vEventDown(UI* pxUI) const;
 	virtual void vEventLeft(UI* pxUI) const;
 	virtual void vEventRight(UI* pxUI) const;
+
+	static const UIState& getInstance(void);
 };
 
 
@@ -114,6 +121,8 @@ public:
 	virtual void vEventDown(UI* pxUI) const;
 	virtual void vEventLeft(UI* pxUI) const;
 	virtual void vEventRight(UI* pxUI) const;
+
+	static const UIState& getInstance(void);
 };
 
 
@@ -130,15 +139,102 @@ private:
 	*/
 	const UIState* _pxCurrentState;
 	UART_HandleTypeDef* _pxUART;
+
+
 public:
 	UI();
 	UI(UART_HandleTypeDef* pxUART);
 
 	~UI();
 
-	void test(void) const;
 
-	inline const UIState* pxGetCurrentState(void) const;
+
+	void DEBUG_PRINT_STATE(void)
+	{
+
+		if (this->_pxCurrentState == &MainMenuState::getInstance())
+		{
+		  HAL_UART_Transmit(this->_pxUART, (uint8_t *)("MAIN_MENU\r\n"), sizeof("MAIN_MENU\r\n"), 100);
+		}
+		else if (this->_pxCurrentState == &MusicState::getInstance())
+		{
+		  HAL_UART_Transmit(this->_pxUART, (uint8_t *)("MUSIC\r\n"), sizeof("MUSIC\r\n"), 100);
+		}
+		else if (this->_pxCurrentState == &ProfileState::getInstance())
+		{
+		  HAL_UART_Transmit(this->_pxUART, (uint8_t *)("PROFILE\r\n"), sizeof("PROFILE\r\n"), 100);
+		}
+		else if (this->_pxCurrentState == &SettingsState::getInstance())
+		{
+		  HAL_UART_Transmit(this->_pxUART, (uint8_t *)("SETTINGS\r\n"), sizeof("SETTINGS\r\n"), 100);
+		}
+		else
+		{
+
+		}
+
+	}
+
+
+	// Main menu
+	struct MainMenu
+	{
+		StateOption eStateOption = StateOption::MUSIC;
+
+		void vMoveUpStateOption(void);
+		void vMoveDownStateOption(void);
+	} xMainMenu;
+
+	void DEBUG_PRINT_STATE_OPTION(void)
+	{
+		switch (this->xMainMenu.eStateOption)
+		{
+		case StateOption::MUSIC:
+		  HAL_UART_Transmit(this->_pxUART, (uint8_t *)("-> music\r\n"), sizeof("-> music\r\n"), 100);
+			break;
+		case StateOption::PROFILE:
+		  HAL_UART_Transmit(this->_pxUART, (uint8_t *)("-> profile\r\n"), sizeof("-> profile\r\n"), 100);
+			break;
+		case StateOption::SETTINGS:
+		  HAL_UART_Transmit(this->_pxUART, (uint8_t *)("-> settings\r\n"), sizeof("-> settings\r\n"), 100);
+			break;
+		default:
+		  HAL_UART_Transmit(this->_pxUART, (uint8_t *)("idk\r\n"), sizeof("idk\r\n"), 100);
+			break;
+		}
+	}
+
+
+	// Music
+	struct Music
+	{
+
+	} xMusic;
+
+
+
+	// Profile
+	struct Profile
+	{
+
+
+
+	} xProfile;
+
+
+
+	// Settings
+	struct Settings
+	{
+
+	} xSettings;
+
+
+
+
+	void vUpdate(void);
+
+	const UIState* pxGetCurrentState(void) const;
 
 	void vTransitionState(const UIState& xNextState);
 
@@ -148,10 +244,16 @@ public:
 	void vPressRightButton(void);
 
 
+	void vEXTI(uint16_t GPIO_Pin);
 
 	// Getters
-	inline UART_HandleTypeDef* getPXUART(void);
+	UART_HandleTypeDef* pxGetUART(void);
 };
+
+
+
+
+
 
 
 #endif /* INC_UI_H_ */

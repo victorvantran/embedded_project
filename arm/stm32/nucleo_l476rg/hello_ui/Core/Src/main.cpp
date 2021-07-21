@@ -274,31 +274,15 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
-#define GPIO_PIN_15 UP_BUTTON
-#define GPIO_PIN_14 DOWN_BUTTON
-#define GPIO_PIN_13 LEFT_BUTTON
-#define GPIO_PIN_12 RIGHT_BUTTON
+#define UP_BUTTON			GPIO_PIN_15
+#define DOWN_BUTTON 	GPIO_PIN_14
+#define LEFT_BUTTON 	GPIO_PIN_13
+#define RIGHT_BUTTON 	GPIO_PIN_12
 
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-	switch (GPIO_Pin)
-	{
-	case UP_BUTTON:
-	  HAL_UART_Transmit(&huart2, (uint8_t *)("up\r\n"), sizeof("up\r\n"), 100);
-		break;
-	case DOWN_BUTTON:
-	  HAL_UART_Transmit(&huart2, (uint8_t *)("down\r\n"), sizeof("down\r\n"), 100);
-		break;
-	case LEFT_BUTTON:
-	  HAL_UART_Transmit(&huart2, (uint8_t *)("left\r\n"), sizeof("left\r\n"), 100);
-		break;
-	case RIGHT_BUTTON:
-	  HAL_UART_Transmit(&huart2, (uint8_t *)("right\r\n"), sizeof("right\r\n"), 100);
-		break;
-	default:
-		break;
-	}
+	xUI.vEXTI(GPIO_Pin);
 }
 /* USER CODE END 4 */
 
@@ -315,8 +299,8 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-  	HAL_UART_Transmit(&huart2, (uint8_t *)("hello\r\n"), sizeof("hello\r\n"), 100);
-  	xUI.test();
+  	//HAL_UART_Transmit(&huart2, (uint8_t *)("hello\r\n"), sizeof("hello\r\n"), 100);
+  	xUI.vUpdate();
     osDelay(250);
   }
   /* USER CODE END 5 */
