@@ -22,7 +22,7 @@ MainMenuState::~MainMenuState() {}
 
 void MainMenuState::vUpdate(UI* pxUI)
 {
-	this->DEBUG_PRINT_STATE_OPTION(pxUI);
+	this->DEBUG_PRINT(pxUI);
 }
 
 
@@ -60,13 +60,13 @@ void MainMenuState::vEventRight(UI* pxUI)
 {
 	switch (this->_eStateOption)
 	{
-	case StateOption::MUSIC:
-		pxUI->vTransitionState(pxUI->xGetMusicState());
+	case MainMenuState::StateOption::MUSIC_LIST:
+		pxUI->vTransitionState(pxUI->xGetMusicListState());
 	break;
-	case StateOption::PROFILE:
+	case MainMenuState::StateOption::PROFILE:
 		pxUI->vTransitionState(pxUI->xGetProfileState());
 	break;
-	case StateOption::SETTINGS:
+	case MainMenuState::StateOption::SETTINGS:
 		pxUI->vTransitionState(pxUI->xGetSettingsState());
 	break;
 	default:
@@ -77,33 +77,35 @@ void MainMenuState::vEventRight(UI* pxUI)
 
 void MainMenuState::vMoveUpStateOption(void)
 {
-	this->_eStateOption = (StateOption)(((int32_t)this->_eStateOption + ((int32_t)StateOption::COUNT - 1)) % (int32_t)StateOption::COUNT);
+	this->_eStateOption = (MainMenuState::StateOption)(((int32_t)this->_eStateOption + ((int32_t)MainMenuState::StateOption::COUNT - 1)) % (int32_t)MainMenuState::StateOption::COUNT);
 }
 
 
 void MainMenuState::vMoveDownStateOption(void)
 {
-	this->_eStateOption = (StateOption)(((int32_t)this->_eStateOption + 1) % (int32_t)StateOption::COUNT);
+	this->_eStateOption = (MainMenuState::StateOption)(((int32_t)this->_eStateOption + 1) % (int32_t)MainMenuState::StateOption::COUNT);
 }
 
 
 
 
-void MainMenuState::DEBUG_PRINT_STATE_OPTION(UI* pxUI)
+void MainMenuState::DEBUG_PRINT(UI* pxUI)
 {
+  HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("[Main Menu]\r\n"), sizeof("[Main Menu]\r\n"), 100);
+
 	switch (this->_eStateOption)
 	{
-	case StateOption::MUSIC:
+	case MainMenuState::StateOption::MUSIC_LIST:
 		HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("-> music\r\n"), 	 	sizeof("-> music\r\n"), 		100);
 		HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("   profile\r\n"), 	sizeof("   profile\r\n"), 	100);
 		HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("   settings\r\n"),	sizeof("   settings\r\n"), 100);
 		break;
-	case StateOption::PROFILE:
+	case MainMenuState::StateOption::PROFILE:
 		HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("   music\r\n"), 	 	sizeof("   music\r\n"), 		100);
 		HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("-> profile\r\n"), 	sizeof("-> profile\r\n"), 	100);
 		HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("   settings\r\n"),	sizeof("   settings\r\n"), 100);
 		break;
-	case StateOption::SETTINGS:
+	case MainMenuState::StateOption::SETTINGS:
 		HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("   music\r\n"), 	 	sizeof("   music\r\n"), 		100);
 		HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("   profile\r\n"), 	sizeof("   profile\r\n"), 	100);
 		HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("-> settings\r\n"),	sizeof("-> settings\r\n"), 100);
@@ -117,49 +119,56 @@ void MainMenuState::DEBUG_PRINT_STATE_OPTION(UI* pxUI)
 
 
 
-// MusicState
-MusicState::MusicState() {}
-MusicState::~MusicState() {}
+// MusicListState
+MusicListState::MusicListState() {}
+MusicListState::~MusicListState() {}
 
-void MusicState::vUpdate(UI* pxUI)
+void MusicListState::vUpdate(UI* pxUI)
 {
-
+	this->DEBUG_PRINT(pxUI);
 }
 
-void MusicState::vEnter(UI* pxUI)
+
+void MusicListState::vEnter(UI* pxUI)
 {
   HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("enter: music\r\n"), sizeof("enter: music\r\n"), 100);
 }
 
 
-void MusicState::vExit(UI* pxUI)
+void MusicListState::vExit(UI* pxUI)
 {
   HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("exit: music\r\n"), sizeof("exit: music\r\n"), 100);
 }
 
 
-void MusicState::vEventUp(UI* pxUI)
+void MusicListState::vEventUp(UI* pxUI)
 {
 
 }
 
 
-void MusicState::vEventDown(UI* pxUI)
+void MusicListState::vEventDown(UI* pxUI)
 {
 
 }
 
 
-void MusicState::vEventLeft(UI* pxUI)
+void MusicListState::vEventLeft(UI* pxUI)
 {
 	pxUI->vTransitionState(pxUI->xGetMainMenuState());
 }
 
 
-void MusicState::vEventRight(UI* pxUI)
+void MusicListState::vEventRight(UI* pxUI)
 {
 
 
+}
+
+
+void MusicListState::DEBUG_PRINT(UI* pxUI)
+{
+  HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("[MusicList]\r\n"), sizeof("[MusicList]\r\n"), 100);
 }
 
 
@@ -170,8 +179,9 @@ ProfileState::~ProfileState() {}
 
 void ProfileState::vUpdate(UI* pxUI)
 {
-
+	this->DEBUG_PRINT(pxUI);
 }
+
 
 void ProfileState::vEnter(UI* pxUI)
 {
@@ -210,6 +220,12 @@ void ProfileState::vEventRight(UI* pxUI)
 }
 
 
+void ProfileState::DEBUG_PRINT(UI* pxUI)
+{
+  HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("[Profile]\r\n"), sizeof("[Profile]\r\n"), 100);
+}
+
+
 
 // SettingsState
 SettingsState::SettingsState() {}
@@ -217,7 +233,7 @@ SettingsState::~SettingsState() {}
 
 void SettingsState::vUpdate(UI* pxUI)
 {
-
+	this->DEBUG_PRINT(pxUI);
 }
 
 void SettingsState::vEnter(UI* pxUI)
@@ -257,13 +273,18 @@ void SettingsState::vEventRight(UI* pxUI)
 }
 
 
+void SettingsState::DEBUG_PRINT(UI* pxUI)
+{
+  HAL_UART_Transmit(pxUI->pxGetUART(), (uint8_t *)("[Settings]\r\n"), sizeof("[Settings]\r\n"), 100);
+}
+
 
 // UI
-UI::UI() : _xMainMenu(), _xMusic(), _xProfile(), _xSettings(), _pxCurrentState(&this->_xMainMenu),
+UI::UI() : _xMainMenu(), _xMusicList(), _xProfile(), _xSettings(), _pxCurrentState(&this->_xMainMenu),
 		_pxUART(nullptr) {}
 
 
-UI::UI(UART_HandleTypeDef *pxUART) : _xMainMenu(), _xMusic(), _xProfile(), _xSettings(), _pxCurrentState(&this->_xMainMenu),
+UI::UI(UART_HandleTypeDef *pxUART) : _xMainMenu(), _xMusicList(), _xProfile(), _xSettings(), _pxCurrentState(&this->_xMainMenu),
 		_pxUART(pxUART)
 {
 	this->_pxCurrentState->vEnter(this);
@@ -287,7 +308,6 @@ void UI::vUpdate(void)
 	//HAL_GPIO_WritePin(GPIOC, GPIO_PIN_8, GPIO_PIN_SET);
   //HAL_UART_Transmit(this->_pxUART, (uint8_t *)("update ui\r\n"), sizeof("update ui\r\n"), 100);
 	this->_pxCurrentState->vUpdate(this);
-	DEBUG_PRINT_STATE();
 }
 
 
@@ -362,9 +382,9 @@ MainMenuState& UI::xGetMainMenuState(void)
 	return this->_xMainMenu;
 }
 
-MusicState& UI::xGetMusicState(void)
+MusicListState& UI::xGetMusicListState(void)
 {
-	return this->_xMusic;
+	return this->_xMusicList;
 }
 
 ProfileState& UI::xGetProfileState(void)

@@ -18,13 +18,6 @@
 #define RIGHT_BUTTON 	GPIO_PIN_12
 
 
-enum class StateOption
-{
-	MUSIC,
-	PROFILE,
-	SETTINGS,
-	COUNT
-};
 
 
 // Forward declaration to appease circular dependency
@@ -54,7 +47,15 @@ public:
 class MainMenuState : public UIState
 {
 private:
-	StateOption _eStateOption = StateOption::MUSIC;
+	enum class StateOption
+	{
+		MUSIC_LIST,
+		PROFILE,
+		SETTINGS,
+		COUNT
+	};
+
+	MainMenuState::StateOption _eStateOption = MainMenuState::StateOption::MUSIC_LIST;
 public:
 	MainMenuState();
 	virtual ~MainMenuState();
@@ -74,16 +75,17 @@ public:
 
 
 	// Debug
-	void DEBUG_PRINT_STATE_OPTION(UI* pxUI);
+	void DEBUG_PRINT(UI* pxUI);
 };
 
 
-class MusicState : public UIState
+class MusicListState : public UIState
 {
 private:
+
 public:
-	MusicState();
-	virtual ~MusicState();
+	MusicListState();
+	virtual ~MusicListState();
 
 	virtual void vUpdate(UI* pxUI);
 
@@ -94,6 +96,9 @@ public:
 	virtual void vEventDown(UI* pxUI);
 	virtual void vEventLeft(UI* pxUI);
 	virtual void vEventRight(UI* pxUI);
+
+	// Debug
+	void DEBUG_PRINT(UI* pxUI);
 };
 
 
@@ -113,6 +118,9 @@ public:
 	virtual void vEventDown(UI* pxUI);
 	virtual void vEventLeft(UI* pxUI);
 	virtual void vEventRight(UI* pxUI);
+
+	// Debug
+	void DEBUG_PRINT(UI* pxUI);
 };
 
 
@@ -133,7 +141,36 @@ public:
 	virtual void vEventDown(UI* pxUI);
 	virtual void vEventLeft(UI* pxUI);
 	virtual void vEventRight(UI* pxUI);
+
+	// Debug
+	void DEBUG_PRINT(UI* pxUI);
 };
+
+
+
+
+class ModeState : public UIState
+{
+private:
+
+public:
+	ModeState();
+	virtual ~ModeState();
+
+	virtual void vUpdate(UI* pxUI);
+
+	virtual void vEnter(UI* pxUI);
+	virtual void vExit(UI* pxUI);
+
+	virtual void vEventUp(UI* pxUI);
+	virtual void vEventDown(UI* pxUI);
+	virtual void vEventLeft(UI* pxUI);
+	virtual void vEventRight(UI* pxUI);
+
+	// Debug
+	void DEBUG_PRINT(UI* pxUI);
+};
+
 
 
 
@@ -141,7 +178,7 @@ class UI
 {
 private:
 	MainMenuState _xMainMenu;
-	MusicState _xMusic;
+	MusicListState _xMusicList;
 	ProfileState _xProfile;
 	SettingsState _xSettings;
 
@@ -158,7 +195,7 @@ public:
 
 	// Getters
   MainMenuState& xGetMainMenuState(void);
-  MusicState& xGetMusicState(void);
+  MusicListState& xGetMusicListState(void);
 	ProfileState& xGetProfileState(void);
 	SettingsState& xGetSettingsState(void);
 
@@ -172,9 +209,9 @@ public:
 		{
 		  HAL_UART_Transmit(this->_pxUART, (uint8_t *)("MAIN_MENU\r\n"), sizeof("MAIN_MENU\r\n"), 100);
 		}
-		else if (this->_pxCurrentState == &this->_xMusic)
+		else if (this->_pxCurrentState == &this->_xMusicList)
 		{
-		  HAL_UART_Transmit(this->_pxUART, (uint8_t *)("MUSIC\r\n"), sizeof("MUSIC\r\n"), 100);
+		  HAL_UART_Transmit(this->_pxUART, (uint8_t *)("MUSIC_LIST\r\n"), sizeof("MUSIC_LIST\r\n"), 100);
 		}
 		else if (this->_pxCurrentState == &this->_xProfile)
 		{
