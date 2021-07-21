@@ -1,64 +1,63 @@
-ui.h:152:7:void UI::DEBUG_PRINT_STATE()	24	static
-ui.h:191:7:void UI::DEBUG_PRINT_STATE_OPTION()	16	static
+ui.h:169:7:void UI::DEBUG_PRINT_STATE()	16	static
 ui.cpp:13:1:UIState::UIState()	16	static
 ui.cpp:14:1:UIState::~UIState()	16	static
 ui.cpp:14:1:virtual UIState::~UIState()	16	static
 ui.cpp:20:1:MainMenuState::MainMenuState()	16	static
 ui.cpp:21:1:MainMenuState::~MainMenuState()	16	static
 ui.cpp:21:1:virtual MainMenuState::~MainMenuState()	16	static
-ui.cpp:23:6:virtual void MainMenuState::vEnter(UI*) const	16	static
-ui.cpp:29:6:virtual void MainMenuState::vExit(UI*) const	16	static
-ui.cpp:35:6:virtual void MainMenuState::vEventUp(UI*) const	16	static
-ui.cpp:41:6:virtual void MainMenuState::vEventDown(UI*) const	16	static
-ui.cpp:47:6:virtual void MainMenuState::vEventLeft(UI*) const	16	static
-ui.cpp:54:6:virtual void MainMenuState::vEventRight(UI*) const	16	static
-ui.cpp:75:29:void __tcf_0()	8	static
-ui.cpp:73:16:static const UIState& MainMenuState::getInstance()	8	static
-ui.cpp:81:1:MusicState::MusicState()	16	static
-ui.cpp:82:1:MusicState::~MusicState()	16	static
-ui.cpp:82:1:virtual MusicState::~MusicState()	16	static
-ui.cpp:84:6:virtual void MusicState::vEnter(UI*) const	16	static
-ui.cpp:90:6:virtual void MusicState::vExit(UI*) const	16	static
-ui.cpp:96:6:virtual void MusicState::vEventUp(UI*) const	16	static
-ui.cpp:102:6:virtual void MusicState::vEventDown(UI*) const	16	static
-ui.cpp:108:6:virtual void MusicState::vEventLeft(UI*) const	16	static
-ui.cpp:114:6:virtual void MusicState::vEventRight(UI*) const	16	static
-ui.cpp:122:26:void __tcf_1()	8	static
-ui.cpp:120:16:static const UIState& MusicState::getInstance()	8	static
-ui.cpp:131:1:ProfileState::ProfileState()	16	static
-ui.cpp:132:1:ProfileState::~ProfileState()	16	static
-ui.cpp:132:1:virtual ProfileState::~ProfileState()	16	static
-ui.cpp:134:6:virtual void ProfileState::vEnter(UI*) const	16	static
-ui.cpp:140:6:virtual void ProfileState::vExit(UI*) const	16	static
-ui.cpp:146:6:virtual void ProfileState::vEventUp(UI*) const	16	static
-ui.cpp:152:6:virtual void ProfileState::vEventDown(UI*) const	16	static
-ui.cpp:158:6:virtual void ProfileState::vEventLeft(UI*) const	16	static
-ui.cpp:164:6:virtual void ProfileState::vEventRight(UI*) const	16	static
-ui.cpp:173:28:void __tcf_2()	8	static
-ui.cpp:171:16:static const UIState& ProfileState::getInstance()	8	static
-ui.cpp:180:1:SettingsState::SettingsState()	16	static
-ui.cpp:181:1:SettingsState::~SettingsState()	16	static
-ui.cpp:181:1:virtual SettingsState::~SettingsState()	16	static
-ui.cpp:183:6:virtual void SettingsState::vEnter(UI*) const	16	static
-ui.cpp:189:6:virtual void SettingsState::vExit(UI*) const	16	static
-ui.cpp:195:6:virtual void SettingsState::vEventUp(UI*) const	16	static
-ui.cpp:201:6:virtual void SettingsState::vEventDown(UI*) const	16	static
-ui.cpp:207:6:virtual void SettingsState::vEventLeft(UI*) const	16	static
-ui.cpp:213:6:virtual void SettingsState::vEventRight(UI*) const	16	static
-ui.cpp:222:29:void __tcf_3()	8	static
-ui.cpp:220:16:static const UIState& SettingsState::getInstance()	8	static
-ui.h:180:9:constexpr UI::MainMenu::MainMenu()	16	static
-ui.cpp:240:1:UI::UI()	16	static
-ui.cpp:243:1:UI::UI(UART_HandleTypeDef*)	16	static
-ui.cpp:249:1:UI::~UI()	16	static
-ui.cpp:257:6:void UI::MainMenu::vMoveUpStateOption()	16	static
-ui.cpp:263:6:void UI::MainMenu::vMoveDownStateOption()	16	static
-ui.cpp:270:6:void UI::vUpdate()	16	static
-ui.cpp:280:16:const UIState* UI::pxGetCurrentState() const	16	static
-ui.cpp:286:6:void UI::vTransitionState(const UIState&)	16	static
-ui.cpp:294:6:void UI::vPressUpButton()	16	static
-ui.cpp:300:6:void UI::vPressDownButton()	16	static
-ui.cpp:306:6:void UI::vPressLeftButton()	16	static
-ui.cpp:312:6:void UI::vPressRightButton()	16	static
-ui.cpp:319:6:void UI::vEXTI(uint16_t)	16	static
-ui.cpp:346:21:UART_HandleTypeDef* UI::pxGetUART()	16	static
+ui.cpp:23:6:virtual void MainMenuState::vUpdate(UI*)	16	static
+ui.cpp:29:6:virtual void MainMenuState::vEnter(UI*)	16	static
+ui.cpp:35:6:virtual void MainMenuState::vExit(UI*)	16	static
+ui.cpp:41:6:virtual void MainMenuState::vEventUp(UI*)	16	static
+ui.cpp:47:6:virtual void MainMenuState::vEventDown(UI*)	16	static
+ui.cpp:53:6:virtual void MainMenuState::vEventLeft(UI*)	16	static
+ui.cpp:59:6:virtual void MainMenuState::vEventRight(UI*)	16	static
+ui.cpp:78:6:void MainMenuState::vMoveUpStateOption()	16	static
+ui.cpp:84:6:void MainMenuState::vMoveDownStateOption()	16	static
+ui.cpp:92:6:void MainMenuState::DEBUG_PRINT_STATE_OPTION(UI*)	16	static
+ui.cpp:121:1:MusicState::MusicState()	16	static
+ui.cpp:122:1:MusicState::~MusicState()	16	static
+ui.cpp:122:1:virtual MusicState::~MusicState()	16	static
+ui.cpp:124:6:virtual void MusicState::vUpdate(UI*)	16	static
+ui.cpp:129:6:virtual void MusicState::vEnter(UI*)	16	static
+ui.cpp:135:6:virtual void MusicState::vExit(UI*)	16	static
+ui.cpp:141:6:virtual void MusicState::vEventUp(UI*)	16	static
+ui.cpp:147:6:virtual void MusicState::vEventDown(UI*)	16	static
+ui.cpp:153:6:virtual void MusicState::vEventLeft(UI*)	16	static
+ui.cpp:159:6:virtual void MusicState::vEventRight(UI*)	16	static
+ui.cpp:168:1:ProfileState::ProfileState()	16	static
+ui.cpp:169:1:ProfileState::~ProfileState()	16	static
+ui.cpp:169:1:virtual ProfileState::~ProfileState()	16	static
+ui.cpp:171:6:virtual void ProfileState::vUpdate(UI*)	16	static
+ui.cpp:176:6:virtual void ProfileState::vEnter(UI*)	16	static
+ui.cpp:182:6:virtual void ProfileState::vExit(UI*)	16	static
+ui.cpp:188:6:virtual void ProfileState::vEventUp(UI*)	16	static
+ui.cpp:194:6:virtual void ProfileState::vEventDown(UI*)	16	static
+ui.cpp:200:6:virtual void ProfileState::vEventLeft(UI*)	16	static
+ui.cpp:206:6:virtual void ProfileState::vEventRight(UI*)	16	static
+ui.cpp:215:1:SettingsState::SettingsState()	16	static
+ui.cpp:216:1:SettingsState::~SettingsState()	16	static
+ui.cpp:216:1:virtual SettingsState::~SettingsState()	16	static
+ui.cpp:218:6:virtual void SettingsState::vUpdate(UI*)	16	static
+ui.cpp:223:6:virtual void SettingsState::vEnter(UI*)	16	static
+ui.cpp:229:6:virtual void SettingsState::vExit(UI*)	16	static
+ui.cpp:235:6:virtual void SettingsState::vEventUp(UI*)	16	static
+ui.cpp:241:6:virtual void SettingsState::vEventDown(UI*)	16	static
+ui.cpp:247:6:virtual void SettingsState::vEventLeft(UI*)	16	static
+ui.cpp:253:6:virtual void SettingsState::vEventRight(UI*)	16	static
+ui.cpp:262:1:UI::UI()	16	static
+ui.cpp:266:1:UI::UI(UART_HandleTypeDef*)	16	static
+ui.cpp:275:1:UI::~UI()	16	static
+ui.cpp:284:6:void UI::vUpdate()	16	static
+ui.cpp:294:10:UIState* UI::pxGetCurrentState()	16	static
+ui.cpp:300:6:void UI::vTransitionState(UIState&)	16	static
+ui.cpp:308:6:void UI::vPressUpButton()	16	static
+ui.cpp:314:6:void UI::vPressDownButton()	16	static
+ui.cpp:320:6:void UI::vPressLeftButton()	16	static
+ui.cpp:326:6:void UI::vPressRightButton()	16	static
+ui.cpp:333:6:void UI::vEXTI(uint16_t)	16	static
+ui.cpp:360:16:MainMenuState& UI::xGetMainMenuState()	16	static
+ui.cpp:365:13:MusicState& UI::xGetMusicState()	16	static
+ui.cpp:370:15:ProfileState& UI::xGetProfileState()	16	static
+ui.cpp:375:16:SettingsState& UI::xGetSettingsState()	16	static
+ui.cpp:380:21:UART_HandleTypeDef* UI::pxGetUART()	16	static
