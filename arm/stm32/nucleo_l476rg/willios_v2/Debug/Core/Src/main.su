@@ -1,14 +1,19 @@
-ws2812b.h:61:2:WS2812B::WS2812B(uint32_t, uint32_t, TIM_HandleTypeDef*)	24	static
-ws2812b.h:62:2:WS2812B::~WS2812B()	16	static
-ws2812b.h:64:7:void WS2812B::send(uint32_t, uint32_t, uint32_t)	32	static
-main.cpp:74:5:int main()	8	static
-main.cpp:130:6:void SystemClock_Config()	232	static
-main.cpp:184:13:void MX_TIM3_Init()	48	static
-main.cpp:233:13:void MX_TIM4_Init()	48	static
-main.cpp:282:13:void MX_USART3_UART_Init()	8	static
-main.cpp:315:13:void MX_DMA_Init()	16	static
-main.cpp:336:13:void MX_GPIO_Init()	48	static
-main.cpp:376:6:void Error_Handler()	4	static,ignoring_inline_asm
-main.cpp:385:1:void __static_initialization_and_destruction_0(int, int)	16	static
-main.cpp:385:1:cpp)	8	static
-main.cpp:385:1:cpp)	8	static
+cmath:482:3:constexpr float std::tan(float)	16	static
+ws2812b.h:77:2:WS2812B::WS2812B(uint32_t, uint32_t, TIM_HandleTypeDef*)	24	static
+ws2812b.h:78:2:WS2812B::~WS2812B()	16	static
+ws2812b.h:111:7:void WS2812B::setColor(uint8_t, uint8_t, uint8_t, uint8_t)	16	static
+ws2812b.h:120:7:void WS2812B::setBrightness(uint8_t)	40	static
+ws2812b.h:147:7:void WS2812B::resetColor(uint8_t)	16	static
+ws2812b.h:154:7:void WS2812B::resetColors()	24	static
+ws2812b.h:162:7:void WS2812B::update()	40	static
+main.cpp:74:5:int main()	16	static
+main.cpp:138:6:void SystemClock_Config()	232	static
+main.cpp:192:13:void MX_TIM3_Init()	48	static
+main.cpp:241:13:void MX_TIM4_Init()	48	static
+main.cpp:290:13:void MX_USART3_UART_Init()	8	static
+main.cpp:323:13:void MX_DMA_Init()	16	static
+main.cpp:344:13:void MX_GPIO_Init()	48	static
+main.cpp:384:6:void Error_Handler()	4	static,ignoring_inline_asm
+main.cpp:393:1:void __static_initialization_and_destruction_0(int, int)	16	static
+main.cpp:393:1:cpp)	8	static
+main.cpp:393:1:cpp)	8	static

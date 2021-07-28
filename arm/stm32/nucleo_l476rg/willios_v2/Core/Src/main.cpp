@@ -116,7 +116,15 @@ int main(void)
   	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_7);
   	HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_6);
   	HAL_Delay(500);
-  	ws2812b.send(255, 255, 0);
+
+
+
+  	ws2812b.setColor(0, 0, 255, 0);
+  	ws2812b.setColor(1, 255, 255, 0);
+  	ws2812b.setColor(2, 255, 0, 0);
+
+  	ws2812b.setBrightness(1);
+  	ws2812b.update();
 
 
   }
