@@ -1,0 +1,14 @@
+ws2812b.h:61:2:WS2812B::WS2812B(uint32_t, uint32_t, TIM_HandleTypeDef*)	24	static
+ws2812b.h:62:2:WS2812B::~WS2812B()	16	static
+ws2812b.h:64:7:void WS2812B::send(uint32_t, uint32_t, uint32_t)	32	static
+main.cpp:74:5:int main()	8	static
+main.cpp:130:6:void SystemClock_Config()	232	static
+main.cpp:184:13:void MX_TIM3_Init()	48	static
+main.cpp:233:13:void MX_TIM4_Init()	48	static
+main.cpp:282:13:void MX_USART3_UART_Init()	8	static
+main.cpp:315:13:void MX_DMA_Init()	16	static
+main.cpp:336:13:void MX_GPIO_Init()	48	static
+main.cpp:376:6:void Error_Handler()	4	static,ignoring_inline_asm
+main.cpp:385:1:void __static_initialization_and_destruction_0(int, int)	16	static
+main.cpp:385:1:cpp)	8	static
+main.cpp:385:1:cpp)	8	static
